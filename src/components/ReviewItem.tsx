@@ -26,9 +26,11 @@ const ReviewItem = ({ review }: ReviewItemProps) => {
       <p className="text-xs text-muted-foreground uppercase font-display mb-2">
         {review.serviceDescription} — {new Date(review.date).toLocaleDateString("pt-BR")}
       </p>
-      <p className="text-sm text-foreground leading-relaxed">
-        {review.comment}
-      </p>
+      {review.rating === 5 && review.comment && (
+        <p className="text-sm text-foreground leading-relaxed">
+          {review.comment}
+        </p>
+      )}
     </div>
   );
 };
