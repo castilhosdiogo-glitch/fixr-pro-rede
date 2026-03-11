@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --font-display: 'Roboto Condensed', sans-serif;
+    --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
 
     --background: 220 14% 96%;
@@ -41,7 +41,7 @@
     --input: 220 14% 89%;
     --ring: 25 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 220 20% 12%;
@@ -69,36 +69,100 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer utilities {
   .gradient-hero {
-    background: linear-gradient(135deg, hsl(220 20% 14%) 0%, hsl(220 24% 22%) 100%);
+    background: linear-gradient(145deg, hsl(220 22% 10%) 0%, hsl(220 28% 18%) 50%, hsl(25 40% 16%) 100%);
   }
 
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(25 100% 50%) 0%, hsl(30 100% 58%) 100%);
+    background: linear-gradient(135deg, hsl(25 100% 50%) 0%, hsl(35 100% 55%) 100%);
   }
 
   .gradient-card {
     background: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
   }
 
+  .gradient-glass {
+    background: linear-gradient(135deg, hsl(0 0% 100% / 0.9) 0%, hsl(0 0% 100% / 0.7) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .gradient-premium {
+    background: linear-gradient(135deg, hsl(25 100% 50%) 0%, hsl(340 80% 55%) 50%, hsl(280 70% 50%) 100%);
+  }
+
+  .gradient-cta {
+    background: linear-gradient(135deg, hsl(25 100% 48%) 0%, hsl(30 100% 55%) 100%);
+    box-shadow: 0 8px 32px -8px hsl(25 100% 50% / 0.4);
+  }
+
   .shadow-card {
-    box-shadow: 0 1px 3px 0 hsl(220 20% 12% / 0.06), 0 1px 2px -1px hsl(220 20% 12% / 0.06);
+    box-shadow: 0 1px 3px 0 hsl(220 20% 12% / 0.04), 0 1px 2px -1px hsl(220 20% 12% / 0.04);
   }
 
   .shadow-card-hover {
-    box-shadow: 0 4px 12px -2px hsl(220 20% 12% / 0.1), 0 2px 6px -2px hsl(220 20% 12% / 0.06);
+    box-shadow: 0 8px 24px -4px hsl(220 20% 12% / 0.1), 0 4px 8px -4px hsl(220 20% 12% / 0.06);
   }
 
   .shadow-elevated {
-    box-shadow: 0 10px 30px -8px hsl(25 100% 50% / 0.25), 0 4px 12px -4px hsl(220 20% 12% / 0.08);
+    box-shadow: 0 12px 40px -8px hsl(25 100% 50% / 0.3), 0 4px 16px -4px hsl(220 20% 12% / 0.08);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 40px -8px hsl(25 100% 50% / 0.2);
   }
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(25 100% 55%) 0%, hsl(35 100% 60%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .border-gradient {
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, hsl(25 100% 50%), hsl(35 100% 60%));
+    z-index: -1;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .counter-badge {
+    background: linear-gradient(135deg, hsl(152 56% 40%) 0%, hsl(160 60% 45%) 100%);
+    box-shadow: 0 4px 12px -2px hsl(152 56% 40% / 0.4);
   }
 }

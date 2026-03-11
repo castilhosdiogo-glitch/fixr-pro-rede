@@ -1,68 +1,43 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Hammer, Zap, Droplets, SprayCan, Key, Wind, type LucideIcon } from "lucide-react";
 import type { Category } from "@/data/mock";
 
 const iconMap: Record<string, LucideIcon> = {
-  Hammer,
-  Zap,
-  Droplets,
-  SprayCan,
-  Key,
-  Wind,
-};
-
-const colorMap: Record<string, string> = {
-  Hammer: "bg-primary/10 text-primary",
-  Zap: "bg-primary/10 text-primary",
-  Droplets: "bg-accent/10 text-accent",
-  SprayCan: "bg-success/10 text-success",
-  Key: "bg-primary/10 text-primary",
-  Wind: "bg-accent/10 text-accent",
+  Hammer, Zap, Droplets, SprayCan, Key, Wind,
 };
 
 interface CategoryButtonProps {
   category: Category;
   compact?: boolean;
+  index?: number;
 }
 
-const CategoryButton = ({ category, compact }: CategoryButtonProps) => {
+const CategoryButton = ({ category, compact, index = 0 }: CategoryButtonProps) => {
   const Icon = iconMap[category.icon] || Hammer;
-  const colors = colorMap[category.icon] || "bg-primary/10 text-primary";
 
-  if (compact) {
-    return (
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+    >
       <Link
         to={`/buscar?categoria=${category.id}`}
-        className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card shadow-card hover:shadow-card-hover transition-all duration-200 group"
+        className="group flex flex-col items-center gap-2 p-4 rounded-xl bg-card shadow-card hover:shadow-card-hover transition-all duration-300"
       >
-        <div className={`flex items-center justify-center w-12 h-12 rounded-xl ${colors} group-hover:scale-105 transition-transform`}>
-          <Icon size={22} />
+        <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <Icon size={20} className="text-primary-foreground" />
         </div>
         <span className="text-xs font-medium text-foreground text-center leading-tight">
           {category.name}
         </span>
+        {!compact && (
+          <span className="text-[10px] text-muted-foreground">{category.count} profissionais</span>
+        )}
       </Link>
-    );
-  }
-
-  return (
-    <Link
-      to={`/buscar?categoria=${category.id}`}
-      className="flex items-center gap-4 w-full p-4 rounded-lg bg-card shadow-card hover:shadow-card-hover transition-all duration-200 group"
-    >
-      <div className={`flex items-center justify-center w-12 h-12 rounded-xl ${colors} group-hover:scale-105 transition-transform`}>
-        <Icon size={22} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="font-display text-sm uppercase tracking-tight text-foreground">
-          {category.name}
-        </h3>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {category.count} profissionais
-        </p>
-      </div>
-      <span className="text-muted-foreground group-hover:text-primary transition-colors">→</span>
-    </Link>
+    </motion.div>
   );
 };
 
