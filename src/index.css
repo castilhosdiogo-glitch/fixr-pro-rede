@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Condensed:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,46 +9,47 @@
     --font-display: 'Roboto Condensed', sans-serif;
     --font-body: 'Inter', sans-serif;
 
-    --background: 0 0% 96%; /* #F5F5F5 concreto claro */
-    --foreground: 0 0% 12%; /* #1E1E1E grafite */
+    --background: 220 14% 96%;
+    --foreground: 220 20% 12%;
 
-    --card: 0 0% 100%; /* #FFFFFF gesso */
-    --card-foreground: 0 0% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
+    --popover-foreground: 220 20% 12%;
 
-    --primary: 25 100% 50%; /* #FF6B00 laranja segurança */
+    --primary: 25 100% 50%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 30 100% 58%;
 
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 12%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 220 20% 12%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 10% 46%;
 
-    --accent: 213 100% 34%; /* #004AAD azul ferramenta */
+    --accent: 213 100% 34%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 125 45% 33%; /* #2E7D32 verde sinal */
+    --success: 152 56% 40%;
     --success-foreground: 0 0% 100%;
 
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
+    --border: 220 14% 89%;
+    --input: 220 14% 89%;
     --ring: 25 100% 50%;
 
-    --radius: 0.25rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 12%;
+    --sidebar-foreground: 220 20% 12%;
     --sidebar-primary: 25 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 95%;
-    --sidebar-accent-foreground: 0 0% 12%;
-    --sidebar-border: 0 0% 85%;
+    --sidebar-accent: 220 14% 95%;
+    --sidebar-accent-foreground: 220 20% 12%;
+    --sidebar-border: 220 14% 89%;
     --sidebar-ring: 25 100% 50%;
   }
 }
@@ -62,12 +63,42 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     font-weight: 700;
-    text-transform: uppercase;
     letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(220 20% 14%) 0%, hsl(220 24% 22%) 100%);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(25 100% 50%) 0%, hsl(30 100% 58%) 100%);
+  }
+
+  .gradient-card {
+    background: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
+  }
+
+  .shadow-card {
+    box-shadow: 0 1px 3px 0 hsl(220 20% 12% / 0.06), 0 1px 2px -1px hsl(220 20% 12% / 0.06);
+  }
+
+  .shadow-card-hover {
+    box-shadow: 0 4px 12px -2px hsl(220 20% 12% / 0.1), 0 2px 6px -2px hsl(220 20% 12% / 0.06);
+  }
+
+  .shadow-elevated {
+    box-shadow: 0 10px 30px -8px hsl(25 100% 50% / 0.25), 0 4px 12px -4px hsl(220 20% 12% / 0.08);
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }
