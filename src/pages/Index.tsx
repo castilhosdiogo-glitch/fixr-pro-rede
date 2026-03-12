@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import HeroSection from "@/components/landing/HeroSection";
 import CategoriesSection from "@/components/landing/CategoriesSection";
+import TrustSection from "@/components/landing/TrustSection";
 import ProfessionalsSection from "@/components/landing/ProfessionalsSection";
 import SocialProofSection from "@/components/landing/SocialProofSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
@@ -33,9 +34,10 @@ const Index = () => {
 
       <HeroSection />
       <CategoriesSection />
+      <TrustSection />
+      <HowItWorksSection />
       <ProfessionalsSection />
       <SocialProofSection />
-      <HowItWorksSection />
       <PricingSection />
       <FinalCTASection />
 

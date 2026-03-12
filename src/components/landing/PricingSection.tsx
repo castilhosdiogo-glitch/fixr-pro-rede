@@ -4,35 +4,37 @@ import { CheckCircle, TrendingUp, Zap, Crown, Sparkles } from "lucide-react";
 
 const plans = [
   {
-    name: "Fundador",
+    name: "Gratuito",
     icon: TrendingUp,
     price: "Grátis",
-    subtitle: "3 meses grátis para os 500 primeiros",
-    badge: "497 vagas restantes",
-    featured: true,
-    benefits: [
-      "Criar perfil profissional",
-      "Aparecer nas buscas",
-      "Receber solicitações",
-    ],
-    cta: "Garantir Vaga Grátis",
-    ctaStyle: "gradient-cta text-primary-foreground",
-  },
-  {
-    name: "Profix Pro",
-    icon: Zap,
-    price: "R$29",
-    subtitle: "/mês",
+    subtitle: "Para começar na plataforma",
     badge: null,
     featured: false,
     benefits: [
-      "Destaque nas buscas",
-      "Mais solicitações",
-      "Selo Profissional",
-      "Estatísticas de perfil",
+      "Criar perfil profissional",
+      "Aparecer nas buscas",
+      "Receber solicitações básicas",
+      "Visibilidade padrão",
     ],
-    cta: "Assinar Pro",
-    ctaStyle: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+    cta: "Começar Grátis",
+    ctaStyle: "border-2 border-border text-foreground hover:border-primary hover:text-primary",
+  },
+  {
+    name: "Profissional",
+    icon: Zap,
+    price: "R$29",
+    subtitle: "/mês",
+    badge: "Mais popular",
+    featured: true,
+    benefits: [
+      "Maior visibilidade nas buscas",
+      "Receber mais solicitações",
+      "Selo Profissional verificado",
+      "Estatísticas de perfil",
+      "Prioridade no atendimento",
+    ],
+    cta: "Assinar Profissional",
+    ctaStyle: "gradient-cta text-primary-foreground",
   },
   {
     name: "Destaque",
@@ -42,10 +44,11 @@ const plans = [
     badge: null,
     featured: false,
     benefits: [
-      "Tudo do Pro incluído",
-      "Prioridade máxima na busca",
-      "Destaque visual no perfil",
-      "Máxima visibilidade",
+      "Tudo do Profissional incluído",
+      "Ranking prioritário na busca",
+      "Selo de destaque no perfil",
+      "Posição premium nos resultados",
+      "Perfil em destaque na homepage",
     ],
     cta: "Assinar Destaque",
     ctaStyle: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
@@ -53,7 +56,7 @@ const plans = [
 ];
 
 const PricingSection = () => (
-  <section className="px-4 py-10 max-w-lg mx-auto">
+  <section className="px-4 py-12 max-w-lg mx-auto">
     <motion.div
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
@@ -62,13 +65,13 @@ const PricingSection = () => (
     >
       <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
         <Sparkles size={12} />
-        Oferta de Lançamento
+        Planos para Profissionais
       </div>
       <h2 className="font-display text-2xl text-foreground">
-        Planos para Profissionais
+        Cresça no seu ritmo
       </h2>
       <p className="text-sm text-muted-foreground mt-1">
-        Comece grátis, cresça quando quiser
+        Comece grátis. Evolua quando estiver pronto.
       </p>
     </motion.div>
 
