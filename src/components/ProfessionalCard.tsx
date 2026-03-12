@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Star, ShieldCheck, Crown, MapPin, ArrowRight } from "lucide-react";
+import { Star, ShieldCheck, Crown, MapPin, ArrowRight, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Professional } from "@/data/mock";
 
@@ -75,6 +75,12 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
                 <MapPin size={10} />
                 {professional.city}
               </div>
+              {professional.reviewCount > 50 && (
+                <div className="flex items-center gap-1 text-xs text-success">
+                  <CheckCircle size={10} />
+                  {professional.reviewCount}+ serviços
+                </div>
+              )}
             </div>
           </div>
 

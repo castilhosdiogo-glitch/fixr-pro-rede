@@ -1,40 +1,48 @@
 import { motion } from "framer-motion";
-import { Search, BarChart3, MessageSquare } from "lucide-react";
+import { Search, BarChart3, MessageSquare, CheckCircle } from "lucide-react";
 
 const steps = [
-  { icon: Search, title: "Busque", desc: "Encontre profissionais por categoria ou serviço na sua cidade" },
-  { icon: BarChart3, title: "Compare", desc: "Veja avaliações reais, experiência e perfis verificados" },
-  { icon: MessageSquare, title: "Contrate", desc: "Solicite orçamento direto e combine o serviço" },
+  { icon: Search, title: "Busque", desc: "Encontre profissionais por categoria e cidade na sua região", number: "01" },
+  { icon: BarChart3, title: "Compare", desc: "Veja avaliações reais, métricas de serviço e perfis verificados", number: "02" },
+  { icon: MessageSquare, title: "Converse", desc: "Envie uma mensagem protegida e descreva o que você precisa", number: "03" },
+  { icon: CheckCircle, title: "Contrate", desc: "Confirme o serviço com segurança dentro da plataforma", number: "04" },
 ];
 
 const HowItWorksSection = () => (
-  <section className="px-4 py-10 max-w-lg mx-auto">
-    <motion.h2
+  <section className="px-4 py-12 max-w-lg mx-auto">
+    <motion.div
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      className="font-display text-lg text-foreground text-center mb-8"
+      className="text-center mb-8"
     >
-      Como funciona
-    </motion.h2>
-    <div className="flex flex-col gap-6">
+      <h2 className="font-display text-2xl text-foreground">
+        Como funciona
+      </h2>
+      <p className="text-sm text-muted-foreground mt-1">
+        Simples, rápido e seguro
+      </p>
+    </motion.div>
+    <div className="flex flex-col gap-5">
       {steps.map((item, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, x: -16 }}
+          whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: i * 0.15 }}
+          transition={{ duration: 0.4, delay: i * 0.12 }}
           className="flex items-start gap-4"
         >
-          <div className="flex-shrink-0 w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-elevated">
-            <item.icon size={20} className="text-primary-foreground" />
-          </div>
-          <div className="pt-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-primary uppercase tracking-wider">Passo {i + 1}</span>
+          <div className="flex-shrink-0 relative">
+            <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-elevated">
+              <item.icon size={20} className="text-primary-foreground" />
             </div>
-            <h3 className="font-display text-base text-foreground mt-0.5">{item.title}</h3>
+            <span className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center text-[9px] font-display font-bold">
+              {item.number}
+            </span>
+          </div>
+          <div className="pt-1.5">
+            <h3 className="font-display text-base text-foreground">{item.title}</h3>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.desc}</p>
           </div>
         </motion.div>

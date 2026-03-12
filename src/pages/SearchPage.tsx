@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { ArrowLeft, Search, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, Search, MapPin } from "lucide-react";
 import { professionals, categories, AVAILABLE_CITIES } from "@/data/mock";
 import ProfessionalCard from "@/components/ProfessionalCard";
 import BottomNav from "@/components/BottomNav";
@@ -8,25 +8,37 @@ import BottomNav from "@/components/BottomNav";
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("categoria");
+  const cityParam = searchParams.get("cidade");
   const [query, setQuery] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState(cityParam || "");
 
   const filtered = useMemo(() => {
-    return professionals.filter((p) => {
-      const matchesCategory = categoryFilter ? p.categoryId === categoryFilter : true;
-      const matchesCity = cityFilter ? p.city === cityFilter : true;
-      const matchesQuery = query
-        ? p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.category.toLowerCase().includes(query.toLowerCase()) ||
-          p.city.toLowerCase().includes(query.toLowerCase())
-        : true;
-      return matchesCategory && matchesQuery && matchesCity;
-    });
+    return professionals
+      .filter((p) => {
+        const matchesCategory = categoryFilter ? p.categoryId === categoryFilter : true;
+        const matchesCity = cityFilter ? p.city === cityFilter : true;
+        const matchesQuery = query
+          ? p.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.category.toLowerCase().includes(query.toLowerCase()) ||
+            p.city.toLowerCase().includes(query.toLowerCase())
+          : true;
+        return matchesCategory && matchesQuery && matchesCity;
+      })
+      .sort((a, b) => {
+        // Ranking algorithm: rating + reviews + premium
+        const scoreA = a.rating * 10 + a.reviewCount * 0.1 + (a.premium ? 5 : 0);
+        const scoreB = b.rating * 10 + b.reviewCount * 0.1 + (b.premium ? 5 : 0);
+        return scoreB - scoreA;
+      });
   }, [categoryFilter, query, cityFilter]);
 
   const categoryName = categoryFilter
     ? categories.find((c) => c.id === categoryFilter)?.name
     : null;
+
+  const pageTitle = categoryName && cityFilter
+    ? `${categoryName} em ${cityFilter}`
+    : categoryName || "Buscar Profissionais";
 
   return (
     <div className="min-h-screen pb-20">
@@ -36,15 +48,15 @@ const SearchPage = () => {
           <Link to="/" className="text-foreground hover:text-primary transition-colors">
             <ArrowLeft size={22} />
           </Link>
-          <h1 className="font-display text-base uppercase tracking-tight text-foreground">
-            {categoryName || "Buscar Profissionais"}
+          <h1 className="font-display text-base tracking-tight text-foreground truncate">
+            {pageTitle}
           </h1>
         </div>
       </header>
 
       {/* Search + filters */}
       <div className="px-4 py-3 max-w-lg mx-auto space-y-2">
-        <div className="flex items-center gap-3 bg-card rounded-lg shadow-card px-4 py-3">
+        <div className="flex items-center gap-3 bg-card rounded-xl shadow-card px-4 py-3">
           <Search size={18} className="text-muted-foreground flex-shrink-0" />
           <input
             type="text"
@@ -56,16 +68,19 @@ const SearchPage = () => {
         </div>
 
         <div className="flex gap-2">
-          <select
-            value={cityFilter}
-            onChange={(e) => setCityFilter(e.target.value)}
-            className="flex-1 bg-card rounded-lg shadow-card px-3 py-2 text-xs text-foreground outline-none border-none"
-          >
-            <option value="">Todas as cidades</option>
-            {AVAILABLE_CITIES.map((city) => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2 flex-1 bg-card rounded-xl shadow-card px-3 py-2">
+            <MapPin size={14} className="text-muted-foreground flex-shrink-0" />
+            <select
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+              className="w-full bg-transparent text-xs text-foreground outline-none appearance-none cursor-pointer"
+            >
+              <option value="">Todas as cidades</option>
+              {AVAILABLE_CITIES.map((city) => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
 
           {!categoryFilter && (
             <div className="flex gap-1.5 overflow-x-auto flex-1">
@@ -73,7 +88,7 @@ const SearchPage = () => {
                 <Link
                   key={cat.id}
                   to={`/buscar?categoria=${cat.id}`}
-                  className="px-3 py-2 rounded-lg bg-card shadow-card text-xs font-medium text-foreground whitespace-nowrap hover:text-primary transition-colors"
+                  className="px-3 py-2 rounded-xl bg-card shadow-card text-xs font-medium text-foreground whitespace-nowrap hover:text-primary transition-colors"
                 >
                   {cat.name}
                 </Link>
@@ -86,11 +101,11 @@ const SearchPage = () => {
       {/* Results */}
       <div className="px-4 max-w-lg mx-auto">
         <p className="text-xs text-muted-foreground mb-3">
-          {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+          {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} · ordenados por relevância
         </p>
         <div className="flex flex-col gap-2">
-          {filtered.map((prof) => (
-            <ProfessionalCard key={prof.id} professional={prof} />
+          {filtered.map((prof, i) => (
+            <ProfessionalCard key={prof.id} professional={prof} index={i} />
           ))}
           {filtered.length === 0 && (
             <div className="text-center py-16">

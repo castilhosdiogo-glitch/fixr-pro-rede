@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, ShieldCheck, Crown, MapPin, Clock, Phone, MessageSquare } from "lucide-react";
+import { ArrowLeft, Star, ShieldCheck, Crown, MapPin, Clock, MessageSquare, CheckCircle, Shield, Zap } from "lucide-react";
 import { professionals } from "@/data/mock";
 import ReviewItem from "@/components/ReviewItem";
 import BottomNav from "@/components/BottomNav";
@@ -23,6 +23,8 @@ const ProfessionalProfile = () => {
     .join("")
     .slice(0, 2);
 
+  const professionalReviews = professional.reviews || [];
+
   return (
     <div className="min-h-screen pb-28">
       {/* Header */}
@@ -41,7 +43,7 @@ const ProfessionalProfile = () => {
         {/* Profile header */}
         <div className="bg-card rounded-b-xl p-5">
           <div className="flex gap-4">
-            <div className="flex-shrink-0 flex items-center justify-center w-20 h-20 rounded-2xl bg-secondary text-foreground font-display text-2xl uppercase">
+            <div className="flex-shrink-0 flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground font-display text-2xl uppercase shadow-elevated">
               {initials}
             </div>
             <div className="flex-1">
@@ -79,6 +81,34 @@ const ProfessionalProfile = () => {
                 <Crown size={12} fill="currentColor" /> Destaque
               </span>
             )}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">
+              <Shield size={12} /> Chat protegido
+            </span>
+          </div>
+
+          {/* Service metrics */}
+          <div className="grid grid-cols-3 gap-3 mt-5">
+            <div className="rounded-xl bg-background p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <CheckCircle size={12} className="text-success" />
+              </div>
+              <p className="font-display text-lg text-foreground">{professional.reviewCount}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Serviços</p>
+            </div>
+            <div className="rounded-xl bg-background p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Star size={12} className="text-primary" fill="currentColor" />
+              </div>
+              <p className="font-display text-lg text-foreground">{professional.rating}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Avaliação</p>
+            </div>
+            <div className="rounded-xl bg-background p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Zap size={12} className="text-primary" />
+              </div>
+              <p className="font-display text-lg text-foreground">~2h</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Resposta</p>
+            </div>
           </div>
 
           {/* Details */}
@@ -90,10 +120,6 @@ const ProfessionalProfile = () => {
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <Clock size={14} />
               {professional.experience}
-            </div>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Phone size={14} />
-              {professional.phone}
             </div>
           </div>
 
@@ -110,12 +136,12 @@ const ProfessionalProfile = () => {
           </h2>
           <div className="bg-card rounded-xl overflow-hidden">
             <div className="px-4">
-              {professional.reviews.map((review) => (
+              {professionalReviews.map((review) => (
                 <ReviewItem key={review.id} review={review} />
               ))}
             </div>
           </div>
-          {professional.reviews.length === 0 && (
+          {professionalReviews.length === 0 && (
             <p className="text-sm text-muted-foreground py-8 text-center">
               Nenhum trabalho registrado ainda.
             </p>
@@ -123,22 +149,15 @@ const ProfessionalProfile = () => {
         </div>
       </div>
 
-      {/* Fixed CTA */}
+      {/* Fixed CTA - No phone, only platform actions */}
       <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-card/95 backdrop-blur-md border-t border-border">
         <div className="max-w-lg mx-auto flex gap-2">
-          <a
-            href={`tel:${professional.phone}`}
-            className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-lg border border-border text-foreground font-medium text-sm hover:border-primary transition-colors"
-          >
-            <Phone size={16} />
-            Ligar
-          </a>
           <Link
             to={`/orcamento/${professional.id}`}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-lg gradient-primary text-primary-foreground font-display uppercase tracking-wider text-sm shadow-elevated hover:opacity-90 transition-opacity"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl gradient-primary text-primary-foreground font-display uppercase tracking-wider text-sm shadow-elevated hover:opacity-90 transition-opacity"
           >
             <MessageSquare size={16} />
-            Solicitar Orçamento
+            Solicitar Serviço
           </Link>
         </div>
       </div>
