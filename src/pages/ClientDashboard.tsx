@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ClipboardList, CheckCircle, Star, Calendar, ArrowLeft, MessageSquare, TrendingUp, ChevronRight, Clock } from "lucide-react";
+import { ArrowLeft, ClipboardList, MessageSquare, Star, Search, Clock, ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { motion } from "framer-motion";
 
-interface Stats {
-  requestsReceived: number;
-  servicesCompleted: number;
-  averageRating: number;
-  upcomingServices: number;
+interface ClientStats {
+  totalRequests: number;
+  pendingRequests: number;
+  completedRequests: number;
+  reviewsGiven: number;
 }
 
 interface RecentRequest {
@@ -18,29 +18,28 @@ interface RecentRequest {
   description: string;
   status: string;
   created_at: string;
-  client_id: string;
+  professional_id: string;
 }
 
 const statusLabel: Record<string, { text: string; color: string }> = {
-  pending: { text: "Novo", color: "bg-warning/15 text-warning" },
+  pending: { text: "Pendente", color: "bg-warning/15 text-warning" },
   accepted: { text: "Aceito", color: "bg-success/15 text-success" },
   scheduled: { text: "Agendado", color: "bg-primary/15 text-primary" },
   completed: { text: "Concluído", color: "bg-success/15 text-success" },
   cancelled: { text: "Cancelado", color: "bg-destructive/15 text-destructive" },
 };
 
-const DashboardPage = () => {
+const ClientDashboard = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<Stats>({
-    requestsReceived: 0,
-    servicesCompleted: 0,
-    averageRating: 0,
-    upcomingServices: 0,
+  const [stats, setStats] = useState<ClientStats>({
+    totalRequests: 0,
+    pendingRequests: 0,
+    completedRequests: 0,
+    reviewsGiven: 0,
   });
   const [recentRequests, setRecentRequests] = useState<RecentRequest[]>([]);
   const [profile, setProfile] = useState<any>(null);
-  const [proProfile, setProProfile] = useState<any>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,31 +51,22 @@ const DashboardPage = () => {
     if (!user) return;
 
     const fetchData = async () => {
-      const [profileRes, proRes, requests, completed, reviews, upcoming, recentRes] = await Promise.all([
+      const [profileRes, totalRes, pendingRes, completedRes, reviewsRes, recentRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("professional_profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("professional_id", user.id),
-        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("professional_id", user.id).eq("status", "completed"),
-        supabase.from("reviews").select("rating").eq("professional_id", user.id),
-        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("professional_id", user.id).eq("status", "scheduled"),
-        supabase.from("service_requests").select("id, description, status, created_at, client_id").eq("professional_id", user.id).order("created_at", { ascending: false }).limit(5),
+        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("client_id", user.id),
+        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("client_id", user.id).eq("status", "pending"),
+        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("client_id", user.id).eq("status", "completed"),
+        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("client_id", user.id),
+        supabase.from("service_requests").select("id, description, status, created_at, professional_id").eq("client_id", user.id).order("created_at", { ascending: false }).limit(5),
       ]);
 
       setProfile(profileRes.data);
-      setProProfile(proRes.data);
-
-      const ratings = reviews.data || [];
-      const avgRating = ratings.length > 0
-        ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
-        : 0;
-
       setStats({
-        requestsReceived: requests.count || 0,
-        servicesCompleted: completed.count || 0,
-        averageRating: Math.round(avgRating * 10) / 10,
-        upcomingServices: upcoming.count || 0,
+        totalRequests: totalRes.count || 0,
+        pendingRequests: pendingRes.count || 0,
+        completedRequests: completedRes.count || 0,
+        reviewsGiven: reviewsRes.count || 0,
       });
-
       setRecentRequests((recentRes.data as RecentRequest[]) || []);
     };
 
@@ -91,7 +81,7 @@ const DashboardPage = () => {
     );
   }
 
-  const initials = (profile?.full_name || "P")
+  const initials = (profile?.full_name || "U")
     .split(" ")
     .map((n: string) => n[0])
     .join("")
@@ -99,10 +89,10 @@ const DashboardPage = () => {
     .toUpperCase();
 
   const cards = [
-    { icon: ClipboardList, label: "Solicitações", value: stats.requestsReceived, color: "text-primary", bg: "bg-primary/10" },
-    { icon: CheckCircle, label: "Realizados", value: stats.servicesCompleted, color: "text-success", bg: "bg-success/10" },
-    { icon: Star, label: "Avaliação", value: stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "—", color: "text-warning", bg: "bg-warning/10" },
-    { icon: Calendar, label: "Agendados", value: stats.upcomingServices, color: "text-accent", bg: "bg-accent/10" },
+    { icon: ClipboardList, label: "Solicitações", value: stats.totalRequests, color: "text-primary", bg: "bg-primary/10" },
+    { icon: Clock, label: "Pendentes", value: stats.pendingRequests, color: "text-warning", bg: "bg-warning/10" },
+    { icon: Star, label: "Concluídos", value: stats.completedRequests, color: "text-success", bg: "bg-success/10" },
+    { icon: MessageSquare, label: "Avaliações", value: stats.reviewsGiven, color: "text-accent", bg: "bg-accent/10" },
   ];
 
   return (
@@ -114,13 +104,13 @@ const DashboardPage = () => {
             <ArrowLeft size={22} />
           </button>
           <h1 className="font-display text-base tracking-tight text-foreground">
-            Painel Profissional
+            Meu Painel
           </h1>
         </div>
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-5 space-y-5">
-        {/* Profile summary */}
+        {/* Welcome */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -129,19 +119,14 @@ const DashboardPage = () => {
           <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center text-primary-foreground font-display text-lg">
             {initials}
           </div>
-          <div className="flex-1">
+          <div>
             <h2 className="font-display text-lg text-foreground">
-              {profile?.full_name || "Profissional"}
+              Olá, {profile?.full_name?.split(" ")[0] || "Usuário"}!
             </h2>
             <p className="text-xs text-muted-foreground">
-              {proProfile?.category_name || "Profissional"} · {profile?.city || ""}
+              {profile?.city ? `${profile.city}, ${profile.state}` : "Bem-vindo ao PROFIX"}
             </p>
           </div>
-          {proProfile?.verified && (
-            <div className="px-2.5 py-1 rounded-full bg-success/15 text-success text-[10px] font-medium">
-              Verificado
-            </div>
-          )}
         </motion.div>
 
         {/* Stats grid */}
@@ -168,60 +153,24 @@ const DashboardPage = () => {
           })}
         </div>
 
-        {/* Performance bar */}
+        {/* Quick action */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-2xl bg-card shadow-card p-4"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Desempenho</span>
-            <TrendingUp size={14} className="text-success" />
-          </div>
-          <div className="space-y-3">
-            <div>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Taxa de resposta</span>
-                <span className="text-foreground font-medium">95%</span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div className="h-full rounded-full bg-success" style={{ width: "95%" }} />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Tempo médio de resposta</span>
-                <span className="text-foreground font-medium flex items-center gap-1">
-                  <Clock size={10} /> 15 min
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div className="h-full rounded-full bg-primary" style={{ width: "85%" }} />
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Quick actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="flex gap-3"
         >
           <Link
-            to="/mensagens"
-            className="flex-1 rounded-2xl bg-card shadow-card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow"
+            to="/buscar"
+            className="flex items-center gap-3 rounded-2xl gradient-primary p-4 shadow-elevated hover:scale-[1.01] transition-transform"
           >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <MessageSquare size={18} className="text-primary" />
+            <div className="w-10 h-10 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
+              <Search size={18} className="text-primary-foreground" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">Mensagens</p>
-              <p className="text-[11px] text-muted-foreground">Ver conversas</p>
+            <div className="flex-1">
+              <p className="text-primary-foreground font-display text-sm">Encontrar Profissional</p>
+              <p className="text-primary-foreground/60 text-xs">Buscar por serviço ou região</p>
             </div>
-            <ChevronRight size={16} className="text-muted-foreground" />
+            <ChevronRight size={18} className="text-primary-foreground/60" />
           </Link>
         </motion.div>
 
@@ -259,8 +208,11 @@ const DashboardPage = () => {
           ) : (
             <div className="rounded-2xl bg-card shadow-card p-8 text-center">
               <p className="text-sm text-muted-foreground">
-                Suas solicitações de serviço aparecerão aqui.
+                Você ainda não fez nenhuma solicitação.
               </p>
+              <Link to="/buscar" className="text-primary text-sm font-medium mt-2 inline-block">
+                Buscar profissionais
+              </Link>
             </div>
           )}
         </motion.div>
@@ -271,4 +223,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+export default ClientDashboard;
