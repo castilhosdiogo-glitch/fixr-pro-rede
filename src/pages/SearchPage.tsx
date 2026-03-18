@@ -25,7 +25,6 @@ const SearchPage = () => {
         return matchesCategory && matchesQuery && matchesCity;
       })
       .sort((a, b) => {
-        // Ranking algorithm: rating + reviews + premium
         const scoreA = a.rating * 10 + a.reviewCount * 0.1 + (a.premium ? 5 : 0);
         const scoreB = b.rating * 10 + b.reviewCount * 0.1 + (b.premium ? 5 : 0);
         return scoreB - scoreA;
@@ -41,9 +40,9 @@ const SearchPage = () => {
     : categoryName || "Buscar Profissionais";
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border px-4 py-3">
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/50 px-4 py-3">
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <Link to="/" className="text-foreground hover:text-primary transition-colors">
             <ArrowLeft size={22} />
@@ -54,10 +53,10 @@ const SearchPage = () => {
         </div>
       </header>
 
-      {/* Search + filters */}
+      {/* Search bar */}
       <div className="px-4 py-3 max-w-lg mx-auto space-y-2">
-        <div className="flex items-center gap-3 bg-card rounded-xl shadow-card px-4 py-3">
-          <Search size={18} className="text-muted-foreground flex-shrink-0" />
+        <div className="flex items-center gap-2 bg-card rounded-2xl shadow-card px-4 py-3">
+          <Search size={16} className="text-muted-foreground flex-shrink-0" />
           <input
             type="text"
             placeholder="Nome, serviço ou cidade..."
@@ -65,36 +64,19 @@ const SearchPage = () => {
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
-        </div>
-
-        <div className="flex gap-2">
-          <div className="flex items-center gap-2 flex-1 bg-card rounded-xl shadow-card px-3 py-2">
+          <div className="flex items-center gap-1.5 border-l border-border pl-3">
             <MapPin size={14} className="text-muted-foreground flex-shrink-0" />
             <select
               value={cityFilter}
               onChange={(e) => setCityFilter(e.target.value)}
-              className="w-full bg-transparent text-xs text-foreground outline-none appearance-none cursor-pointer"
+              className="bg-transparent text-xs text-foreground outline-none appearance-none cursor-pointer max-w-[110px]"
             >
-              <option value="">Todas as cidades</option>
+              <option value="">Todas</option>
               {AVAILABLE_CITIES.map((city) => (
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
           </div>
-
-          {!categoryFilter && (
-            <div className="flex gap-1.5 overflow-x-auto flex-1">
-              {categories.slice(0, 3).map((cat) => (
-                <Link
-                  key={cat.id}
-                  to={`/buscar?categoria=${cat.id}`}
-                  className="px-3 py-2 rounded-xl bg-card shadow-card text-xs font-medium text-foreground whitespace-nowrap hover:text-primary transition-colors"
-                >
-                  {cat.name}
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
