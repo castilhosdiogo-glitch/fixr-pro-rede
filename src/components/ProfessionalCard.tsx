@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { Star, ShieldCheck, Crown, MapPin, ArrowRight, CheckCircle } from "lucide-react";
+import { Star, ShieldCheck, Crown, MapPin, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Professional } from "@/data/mock";
 
@@ -31,9 +30,8 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
     >
-      <Link
-        to={`/profissional/${professional.id}`}
-        className="group block rounded-xl bg-card shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden"
+      <div
+        className="block rounded-xl bg-card shadow-card transition-all duration-300 overflow-hidden"
       >
         <div className="flex gap-4 p-4">
           {/* Avatar */}
@@ -84,12 +82,8 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
             </div>
           </div>
 
-          {/* Arrow */}
-          <div className="flex items-center">
-            <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors" />
-          </div>
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 };
