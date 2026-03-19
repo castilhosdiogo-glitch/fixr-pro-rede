@@ -9,7 +9,7 @@ const steps = [
 ];
 
 const HowItWorksSection = () => (
-  <section className="px-4 py-12 max-w-lg mx-auto">
+  <section className="px-4 py-12 max-w-lg mx-auto" id="como-funciona">
     <motion.div
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}

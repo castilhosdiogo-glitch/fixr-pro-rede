@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle, TrendingUp, Zap, Crown, Sparkles } from "lucide-react";
+import { CheckCircle, TrendingUp, Zap, Crown, Sparkles, FileText, AlertTriangle, BarChart3 } from "lucide-react";
 
 const plans = [
   {
-    name: "Gratuito",
+    name: "Starter",
     icon: TrendingUp,
     price: "Grátis",
-    subtitle: "Para começar na plataforma",
+    priceAfter: "R$9,90",
+    subtitle: "30 dias grátis, depois R$9,90/mês",
     badge: null,
     featured: false,
     benefits: [
@@ -16,13 +17,14 @@ const plans = [
       "Receber solicitações básicas",
       "Visibilidade padrão",
     ],
-    cta: "Começar Grátis",
+    cta: "Começar Grátis por 30 dias",
     ctaStyle: "border-2 border-border text-foreground hover:border-primary hover:text-primary",
   },
   {
     name: "Profissional",
     icon: Zap,
-    price: "R$29",
+    price: "R$19,90",
+    priceAfter: null,
     subtitle: "/mês",
     badge: "Mais popular",
     featured: true,
@@ -32,36 +34,41 @@ const plans = [
       "Selo Profissional verificado",
       "Estatísticas de perfil",
       "Prioridade no atendimento",
+      "Opção de formalização como MEI",
     ],
     cta: "Assinar Profissional",
     ctaStyle: "gradient-cta text-primary-foreground",
   },
   {
-    name: "Destaque",
+    name: "Premium",
     icon: Crown,
-    price: "R$59",
+    price: "R$39,90",
+    priceAfter: null,
     subtitle: "/mês",
-    badge: null,
+    badge: "Hub Fiscal",
     featured: false,
     benefits: [
       "Tudo do Profissional incluído",
       "Ranking prioritário na busca",
       "Selo de destaque no perfil",
-      "Posição premium nos resultados",
       "Perfil em destaque na homepage",
+      "Hub Fiscal completo",
+      "Acompanhamento do MEI",
+      "Alerta de vencimento do DAS",
+      "Monitoramento do limite MEI",
     ],
-    cta: "Assinar Destaque",
+    cta: "Assinar Premium",
     ctaStyle: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
   },
 ];
 
 const PricingSection = () => (
-  <section className="px-4 py-12 max-w-lg mx-auto">
+  <section className="px-4 py-16 max-w-lg mx-auto" id="planos">
     <motion.div
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      className="text-center mb-8"
+      className="text-center mb-10"
     >
       <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
         <Sparkles size={12} />
@@ -71,7 +78,7 @@ const PricingSection = () => (
         Cresça no seu ritmo
       </h2>
       <p className="text-sm text-muted-foreground mt-1">
-        Comece grátis. Evolua quando estiver pronto.
+        Comece grátis por 30 dias. Evolua quando estiver pronto.
       </p>
     </motion.div>
 
@@ -132,6 +139,47 @@ const PricingSection = () => (
         </motion.div>
       ))}
     </div>
+
+    {/* Hub Fiscal Highlight */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="mt-8 rounded-2xl bg-card border border-border shadow-card p-6"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+          <FileText size={20} className="text-primary-foreground" />
+        </div>
+        <div>
+          <h3 className="font-display text-lg text-foreground">Hub Fiscal PROFIX</h3>
+          <p className="text-xs text-muted-foreground">Exclusivo do plano Premium</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-secondary/50">
+          <BarChart3 size={18} className="text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Acompanhamento MEI</p>
+            <p className="text-xs text-muted-foreground">Faturamento e status em tempo real</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-secondary/50">
+          <AlertTriangle size={18} className="text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Alerta DAS</p>
+            <p className="text-xs text-muted-foreground">Nunca perca o vencimento</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-secondary/50">
+          <TrendingUp size={18} className="text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Limite MEI</p>
+            <p className="text-xs text-muted-foreground">Monitore seu teto de faturamento</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   </section>
 );
 

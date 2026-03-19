@@ -1,16 +1,25 @@
-import { useState, useMemo } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, MapPin } from "lucide-react";
 import { professionals, categories, AVAILABLE_CITIES } from "@/data/mock";
 import ProfessionalCard from "@/components/ProfessionalCard";
 import BottomNav from "@/components/BottomNav";
+import { useAuth } from "@/hooks/useAuth";
 
 const SearchPage = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("categoria");
   const cityParam = searchParams.get("cidade");
   const [query, setQuery] = useState("");
   const [cityFilter, setCityFilter] = useState(cityParam || "");
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
 
   const filtered = useMemo(() => {
     return professionals
@@ -39,9 +48,11 @@ const SearchPage = () => {
     ? `${categoryName} em ${cityFilter}`
     : categoryName || "Buscar Profissionais";
 
+  if (loading) return null;
+  if (!user) return null;
+
   return (
     <div className="min-h-screen pb-20 bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/50 px-4 py-3">
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <Link to="/" className="text-foreground hover:text-primary transition-colors">
@@ -53,8 +64,7 @@ const SearchPage = () => {
         </div>
       </header>
 
-      {/* Search bar */}
-      <div className="px-4 py-3 max-w-lg mx-auto space-y-2">
+      <div className="px-4 py-3 max-w-lg mx-auto">
         <div className="flex items-center gap-2 bg-card rounded-2xl shadow-card px-4 py-3">
           <Search size={16} className="text-muted-foreground flex-shrink-0" />
           <input
@@ -80,7 +90,6 @@ const SearchPage = () => {
         </div>
       </div>
 
-      {/* Results */}
       <div className="px-4 max-w-lg mx-auto">
         <p className="text-xs text-muted-foreground mb-3">
           {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} · ordenados por relevância
