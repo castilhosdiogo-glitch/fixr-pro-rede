@@ -1,5 +1,4 @@
 import { Star, ShieldCheck, Crown, MapPin, CheckCircle } from "lucide-react";
-import { Star, ShieldCheck, Crown, MapPin, ArrowRight, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Professional } from "@/data/mock";
 
