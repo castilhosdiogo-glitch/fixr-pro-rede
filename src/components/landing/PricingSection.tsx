@@ -117,6 +117,12 @@ const PricingSection = () => (
               <span className="text-sm text-muted-foreground">{plan.subtitle}</span>
             )}
           </div>
+          {plan.priceAfter && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 border border-primary/20 mb-2">
+              <span className="text-primary font-display text-lg font-bold">{plan.priceAfter}</span>
+              <span className="text-xs text-muted-foreground">/mês após 30 dias</span>
+            </div>
+          )}
           {!plan.subtitle.startsWith("/") && (
             <p className="text-xs text-muted-foreground mb-4">{plan.subtitle}</p>
           )}
