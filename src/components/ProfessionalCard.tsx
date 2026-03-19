@@ -83,12 +83,8 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
             </div>
           </div>
 
-          {/* Arrow */}
-          <div className="flex items-center">
-            <ArrowRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors" />
-          </div>
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 };
