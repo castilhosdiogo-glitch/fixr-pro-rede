@@ -31,9 +31,8 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
       viewport={{ once: true }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
     >
-      <Link
-        to={`/profissional/${professional.id}`}
-        className="group block rounded-xl bg-card shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden"
+      <div
+        className="block rounded-xl bg-card shadow-card transition-all duration-300 overflow-hidden"
       >
         <div className="flex gap-4 p-4">
           {/* Avatar */}
