@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Hammer, Zap, Droplets, SprayCan, Key, Wind, type LucideIcon } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import type { Category } from "@/data/mock";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -15,6 +16,16 @@ interface CategoryButtonProps {
 
 const CategoryButton = ({ category, compact, index = 0 }: CategoryButtonProps) => {
   const Icon = iconMap[category.icon] || Hammer;
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (!user) {
+      navigate("/auth");
+    } else {
+      navigate(`/buscar?categoria=${category.id}`);
+    }
+  };
 
   return (
     <motion.div
@@ -23,9 +34,9 @@ const CategoryButton = ({ category, compact, index = 0 }: CategoryButtonProps) =
       viewport={{ once: true }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
     >
-      <Link
-        to={`/buscar?categoria=${category.id}`}
-        className="group flex flex-col items-center gap-2 p-4 rounded-xl bg-card shadow-card hover:shadow-card-hover transition-all duration-300"
+      <button
+        onClick={handleClick}
+        className="group flex flex-col items-center gap-2 p-4 rounded-xl bg-card shadow-card hover:shadow-card-hover transition-all duration-300 w-full"
       >
         <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
           <Icon size={20} className="text-primary-foreground" />
@@ -36,7 +47,7 @@ const CategoryButton = ({ category, compact, index = 0 }: CategoryButtonProps) =
         {!compact && (
           <span className="text-[10px] text-muted-foreground">{category.count} profissionais</span>
         )}
-      </Link>
+      </button>
     </motion.div>
   );
 };

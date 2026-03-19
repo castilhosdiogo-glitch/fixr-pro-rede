@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, ArrowRight, MapPin, Shield, Users, Star, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, ArrowRight, MapPin, Shield, Users, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { categories, AVAILABLE_CITIES } from "@/data/mock";
+import { useAuth } from "@/hooks/useAuth";
 
 const STATS = [
   { value: "500+", label: "Profissionais", icon: Users },
@@ -12,14 +13,27 @@ const STATS = [
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [service, setService] = useState("");
   const [city, setCity] = useState("");
 
   const handleSearch = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
     const params = new URLSearchParams();
     if (service) params.set("categoria", service);
     if (city) params.set("cidade", city);
     navigate(`/buscar?${params.toString()}`);
+  };
+
+  const handleFindProfessional = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    navigate("/buscar");
   };
 
   return (
@@ -93,6 +107,7 @@ const HeroSection = () => {
                 <button
                   onClick={handleSearch}
                   className="flex-shrink-0 w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shadow-elevated hover:scale-105 transition-transform"
+                  aria-label="Buscar profissionais"
                 >
                   <ArrowRight size={18} className="text-primary-foreground" />
                 </button>
@@ -108,18 +123,18 @@ const HeroSection = () => {
           transition={{ duration: 0.6, delay: 0.35 }}
           className="flex gap-3 mt-8 max-w-md mx-auto"
         >
-          <Link
-            to="/buscar"
+          <button
+            onClick={handleFindProfessional}
             className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl gradient-cta text-primary-foreground font-display text-sm tracking-wide hover:scale-[1.02] transition-transform"
           >
             Encontrar Profissional
-          </Link>
-          <Link
-            to="/auth"
+          </button>
+          <button
+            onClick={() => navigate("/auth")}
             className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border border-primary-foreground/20 text-primary-foreground font-display text-sm tracking-wide hover:bg-primary-foreground/5 transition-colors"
           >
             Ser um Profixssional
-          </Link>
+          </button>
         </motion.div>
 
         {/* Stats */}
