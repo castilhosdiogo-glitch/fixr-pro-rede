@@ -1,0 +1,412 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AUTENTICAÇÃO & USUÁRIOS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model User {
+  id                    String            @id @default(cuid())
+  email                 String            @unique
+  senha_hash            String
+  nome                  String
+  cpf                   String            @unique
+  telefone              String
+  tipo_usuario          TipoUsuario       @default(CLIENTE)
+  plano                 Plano             @default(EXPLORADOR)
+
+  // Autenticação social
+  google_id             String?           @unique
+  apple_id              String?           @unique
+
+  // Identidade verificada
+  documento_url         String?
+  selfie_url            String?
+  verificado            Boolean           @default(false)
+  verificado_em         DateTime?
+
+  // MEI
+  cnpj                  String?           @unique
+  mei_verificado        Boolean           @default(false)
+
+  // Profissional específico
+  profissional          Professional?
+
+  // Relacionamentos
+  servicos_cliente      Service[]         @relation("ClienteServicos")
+  servicos_profissional Service[]         @relation("ProfissionalServicos")
+  mensagens             Message[]
+  avaliacoes_dado       Review[]          @relation("AvaliacaoDado")
+  avaliacoes_recebido   Review[]          @relation("AvaliacaoRecebido")
+  pagamentos_cliente    Payment[]         @relation("ClientePagamentos")
+  pagamentos_prof       Payment[]         @relation("ProfissionalPagamentos")
+  disputas              Dispute[]
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([email])
+  @@index([cpf])
+  @@index([tipo_usuario])
+}
+
+model Professional {
+  id                      String            @id @default(cuid())
+  user_id                 String            @unique
+  user                    User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  categoria              String            // Ex: "Eletricista", "Encanador"
+  bio                    String?
+  foto_perfil_url        String?
+  avaliacao_media        Float             @default(0)
+  total_servicos         Int               @default(0)
+  total_avaliacoes       Int               @default(0)
+
+  // Faturamento e limite MEI
+  faturamento_acumulado  Decimal           @default(0) @db.Decimal(15, 2)
+  limite_mei_alerta_70_enviado    Boolean   @default(false)
+  limite_mei_alerta_90_enviado    Boolean   @default(false)
+  limite_mei_alerta_100_enviado   Boolean   @default(false)
+  ano_fiscal_atual       Int
+
+  // Relacionamentos
+  agendamentos          Schedule[]
+  orcamentos            Quote[]
+  membros_equipe        TeamMember[]
+  portfolio             Portfolio[]
+  logs_limite_mei       MEILimitLog[]
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([user_id])
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PLANOS & SUBSCRIPTIONS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+enum Plano {
+  EXPLORADOR
+  PARCEIRO
+  ELITE
+}
+
+model SubscriptionPlan {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  monthly_price   Float
+  description     String
+  features        Json      // JSON object com todos os features
+  created_at      DateTime  @default(now())
+
+  @@map("subscription_plans")
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SERVIÇOS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model Service {
+  id                  String            @id @default(cuid())
+  cliente_id          String
+  cliente             User              @relation("ClienteServicos", fields: [cliente_id], references: [id], onDelete: Cascade)
+  profissional_id     String?
+  profissional        User?             @relation("ProfissionalServicos", fields: [profissional_id], references: [id], onDelete: SetNull)
+
+  categoria           String
+  descricao           String
+  endereco            String
+  urgencia            Urgencia          @default(NORMAL)
+  status              StatusServico     @default(ABERTO)
+  valor               Decimal           @db.Decimal(10, 2)
+  comissao            Decimal           @db.Decimal(10, 2)
+  comissao_percentual Float             // 15, 12 ou 10 conforme plano
+
+  // Hub fiscal
+  nfse_numero         String?
+  nfse_pdf_url        String?
+  nfse_emitida_em     DateTime?
+
+  // Relacionamentos
+  mensagens           Message[]
+  pagamento           Payment?
+  avaliacoes          Review[]
+  disputa             Dispute?
+  agendamentos        Schedule[]
+  orcamentos          Quote[]
+  portfolio_fotos     Portfolio[]
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([cliente_id])
+  @@index([profissional_id])
+  @@index([status])
+  @@index([categoria])
+}
+
+enum Urgencia {
+  BAIXA
+  NORMAL
+  ALTA
+  CRITICA
+}
+
+enum StatusServico {
+  ABERTO
+  PROPOSTA_ENVIADA
+  ACEITO
+  EM_PROGRESSO
+  CONCLUIDO
+  CANCELADO
+  DISPUTADO
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CHAT EM TEMPO REAL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model Message {
+  id              String          @id @default(cuid())
+  servico_id      String
+  servico         Service         @relation(fields: [servico_id], references: [id], onDelete: Cascade)
+  remetente_id    String
+  remetente       User            @relation(fields: [remetente_id], references: [id], onDelete: Cascade)
+
+  tipo            TipoMensagem    @default(TEXTO)
+  conteudo        String?
+  arquivo_url     String?
+  duracao         Int?            // segundos (para áudio)
+
+  lido            Boolean         @default(false)
+  lido_em         DateTime?
+
+  createdAt       DateTime        @default(now())
+
+  @@index([servico_id])
+  @@index([remetente_id])
+  @@index([lido])
+}
+
+enum TipoMensagem {
+  TEXTO
+  AUDIO
+  FOTO
+  VIDEO
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PAGAMENTOS & ESCROW
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model Payment {
+  id                    String          @id @default(cuid())
+  servico_id            String          @unique
+  servico               Service         @relation(fields: [servico_id], references: [id], onDelete: Cascade)
+  cliente_id            String
+  cliente               User            @relation("ClientePagamentos", fields: [cliente_id], references: [id], onDelete: Cascade)
+  profissional_id       String
+  profissional          User            @relation("ProfissionalPagamentos", fields: [profissional_id], references: [id], onDelete: Cascade)
+
+  valor_total           Decimal         @db.Decimal(10, 2)
+  comissao              Decimal         @db.Decimal(10, 2)
+  valor_profissional    Decimal         @db.Decimal(10, 2)
+
+  status                StatusPagamento @default(PENDENTE)
+  pix_id                String?
+  pix_qr_code           String?
+  pix_copy_paste        String?
+
+  repassado_em          DateTime?
+
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  @@index([cliente_id])
+  @@index([profissional_id])
+  @@index([status])
+}
+
+enum StatusPagamento {
+  PENDENTE
+  PROCESSANDO
+  CONFIRMADO
+  REPASSA DO
+  REEMBOLSADO
+  FALHA
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AVALIAÇÕES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model Review {
+  id                  String          @id @default(cuid())
+  servico_id          String
+  servico             Service         @relation(fields: [servico_id], references: [id], onDelete: Cascade)
+  avaliador_id        String
+  avaliador           User            @relation("AvaliacaoDado", fields: [avaliador_id], references: [id], onDelete: Cascade)
+  avaliado_id         String
+  avaliado            User            @relation("AvaliacaoRecebido", fields: [avaliado_id], references: [id], onDelete: Cascade)
+
+  nota                Int             // 1-5 stars
+  comentario          String?
+
+  createdAt           DateTime        @default(now())
+
+  @@index([servico_id])
+  @@index([avaliador_id])
+  @@index([avaliado_id])
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DISPUTAS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model Dispute {
+  id                  String          @id @default(cuid())
+  servico_id          String          @unique
+  servico             Service         @relation(fields: [servico_id], references: [id], onDelete: Cascade)
+  criado_por          String
+  criador             User            @relation(fields: [criado_por], references: [id], onDelete: Cascade)
+
+  motivo              String
+  descricao           String?
+  status              StatusDisputa   @default(ABERTA)
+  resolucao           String?
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([servico_id])
+  @@index([criado_por])
+  @@index([status])
+}
+
+enum StatusDisputa {
+  ABERTA
+  EM_ANALISE
+  RESOLVIDA
+  FECHADA
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ELITE FEATURES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model Schedule {
+  id                  String          @id @default(cuid())
+  profissional_id     String
+  profissional        Professional    @relation(fields: [profissional_id], references: [id], onDelete: Cascade)
+
+  data                DateTime        @db.Date
+  hora_inicio         DateTime        @db.Time
+  hora_fim            DateTime        @db.Time
+  disponivel          Boolean         @default(true)
+
+  servico_id          String?
+  servico             Service?        @relation(fields: [servico_id], references: [id], onDelete: SetNull)
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([profissional_id])
+  @@index([data])
+}
+
+model Quote {
+  id                  String          @id @default(cuid())
+  servico_id          String
+  servico             Service         @relation(fields: [servico_id], references: [id], onDelete: Cascade)
+  profissional_id     String
+  profissional        Professional    @relation(fields: [profissional_id], references: [id], onDelete: Cascade)
+
+  itens_json          Json            // [{descricao, valor}, ...]
+  valor_total         Decimal         @db.Decimal(10, 2)
+  status              StatusOrcamento @default(PENDENTE)
+  validade            DateTime
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([servico_id])
+  @@index([profissional_id])
+  @@index([status])
+}
+
+enum StatusOrcamento {
+  PENDENTE
+  APROVADO
+  RECUSADO
+}
+
+model TeamMember {
+  id                  String          @id @default(cuid())
+  profissional_id     String
+  profissional        Professional    @relation(fields: [profissional_id], references: [id], onDelete: Cascade)
+
+  nome                String
+  funcao              String
+  foto_url            String?
+  ativo               Boolean         @default(true)
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([profissional_id])
+}
+
+model Portfolio {
+  id                  String          @id @default(cuid())
+  profissional_id     String
+  profissional        Professional    @relation(fields: [profissional_id], references: [id], onDelete: Cascade)
+
+  foto_url            String
+  legenda             String?
+  servico_id          String?
+  servico             Service?        @relation(fields: [servico_id], references: [id], onDelete: SetNull)
+
+  createdAt           DateTime        @default(now())
+
+  @@index([profissional_id])
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MEI LIMIT TRACKING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+model MEILimitLog {
+  id                  String          @id @default(cuid())
+  profissional_id     String
+  profissional        Professional    @relation(fields: [profissional_id], references: [id], onDelete: Cascade)
+
+  percentual          Decimal         @db.Decimal(5, 2)
+  faturamento_atual   Decimal         @db.Decimal(15, 2)
+  evento              String          // "70%", "90%", "100%"
+  notificacao_enviada Boolean         @default(false)
+
+  createdAt           DateTime        @default(now())
+
+  @@index([profissional_id])
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ENUMS ADICIONAIS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+enum TipoUsuario {
+  CLIENTE
+  PROFISSIONAL
+  ADMIN
+}

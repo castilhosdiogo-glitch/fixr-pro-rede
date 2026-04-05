@@ -1,0 +1,38 @@
+# Regras e Estruturação do Projeto (Project Rules & Structure)
+
+Este arquivo serve como o repositório principal das regras de desenvolvimento e estruturação que a Inteligência Artificial e a equipe devem seguir ao contribuir com este projeto. 
+
+Você pode adicionar ou editar as regras abaixo de acordo com as necessidades do seu projeto e sua stack tecnológica (React, Node, Python, etc.).
+
+## 📌 Regras Gerais
+- Escreva código limpo, legível e modular.
+- O idioma preferencial para o código e comentários é [Defina o idioma, ex: Inglês/Português].
+- Funções, classes e variáveis devem ter nomes descritivos.
+
+## 🏗️ Estrutura de Pastas (Guia Inicial)
+Você pode personalizar esta estrutura de acordo com o seu framework:
+
+```text
+/src
+  /components    # Componentes reutilizáveis de UI
+  /pages         # Páginas e roteamento da aplicação
+  /services      # Comunicação com APIs externas e regra de negócios
+  /utils         # Funções utilitárias auxiliares
+  /hooks         # Custom hooks (se usar React)
+  /assets        # Imagens, fontes e estilos globais
+/tests           # Testes automatizados (Unitários, E2E)
+/docs            # Documentações específicas, guias e ADRs
+```
+
+## 🛠️ Regras de Arquitetura e Padrões
+1. **Responsabilidade Única:** Cada componente ou função deve ter apenas uma responsabilidade.
+2. **Separação de Preocupações:** Mantenha a lógica de negócios separada da interface do usuário.
+3. **Gerenciamento de Estado:** [Defina qual tecnologia usar, ex: Redux, Context API, Zustand].
+4. **Testes:** Todo código novo deve ser coberto por testes.
+
+## 🎨 Design e Estilização
+- Siga as melhores práticas de acessibilidade (a11y).
+- [Se applicable] Use TailwindCSS ou Vanilla CSS para estilização, mantendo a consistência do sistema de design estabelecido.
+
+---
+**Instruções para a IA:** Leia e aplique rigorosamente as diretrizes acima como contexto fundamental durante o desenvolvimento deste projeto.
