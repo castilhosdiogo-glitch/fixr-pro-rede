@@ -8,14 +8,20 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+<<<<<<< HEAD
     "lint:fix": "eslint . --fix",
     "scan:sast": "semgrep --config=p/security-audit src/ supabase/functions/",
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@sentry/react": "^7.91.0",
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -46,12 +52,18 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@supabase/supabase-js": "^2.99.1",
     "@tanstack/react-query": "^5.83.0",
+<<<<<<< HEAD
     "@types/dompurify": "^3.0.5",
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
+<<<<<<< HEAD
     "dompurify": "^3.3.3",
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.35.2",
     "input-otp": "^1.4.2",
@@ -60,7 +72,10 @@
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
+<<<<<<< HEAD
     "react-helmet-async": "^3.0.0",
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     "react-hook-form": "^7.61.1",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.30.1",
@@ -93,7 +108,10 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",
+<<<<<<< HEAD
     "vite-plugin-pwa": "^0.19.8",
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     "vitest": "^3.2.4"
   }
 }

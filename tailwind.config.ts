@@ -1,5 +1,8 @@
 import type { Config } from "tailwindcss";
+<<<<<<< HEAD
 import tailwindcssAnimate from "tailwindcss-animate";
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 
 export default {
   darkMode: ["class"],
@@ -18,8 +21,13 @@ export default {
     },
     extend: {
       fontFamily: {
+<<<<<<< HEAD
         display: ["'Outfit'", "sans-serif"],
         body: ["'Outfit'", "sans-serif"],
+=======
+        display: ["'Roboto Condensed'", "sans-serif"],
+        body: ["'Inter'", "sans-serif"],
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
       },
       colors: {
         border: "hsl(var(--border))",
@@ -91,5 +99,9 @@ export default {
       },
     },
   },
+<<<<<<< HEAD
   plugins: [tailwindcssAnimate],
+=======
+  plugins: [require("tailwindcss-animate")],
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 } satisfies Config;

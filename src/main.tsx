@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+<<<<<<< HEAD
 import * as Sentry from "@sentry/react";
 import App from "./App.tsx";
 import "./index.css";
@@ -26,3 +27,9 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </ErrorBoundary>
 );
+=======
+import App from "./App.tsx";
+import "./index.css";
+
+createRoot(document.getElementById("root")!).render(<App />);
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a

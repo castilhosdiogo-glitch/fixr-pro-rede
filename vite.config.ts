@@ -2,17 +2,26 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+<<<<<<< HEAD
 import { VitePWA } from "vite-plugin-pwa";
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
+<<<<<<< HEAD
     host: "0.0.0.0",
     port: 3000,
+=======
+    host: "::",
+    port: 8080,
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     hmr: {
       overlay: false,
     },
   },
+<<<<<<< HEAD
   plugins: [
     react(),
     mode === "development" && componentTagger(),
@@ -49,6 +58,9 @@ export default defineConfig(({ mode }) => ({
       }
     })
   ].filter(Boolean),
+=======
+  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Mail, Lock, User, Phone, Briefcase, AlertTriangle, Gift } from "lucide-react";
@@ -30,12 +31,44 @@ const AuthPage = () => {
     }
   }, [refFromUrl]);
   const pendingRefCode = sessionStorage.getItem("Fixr_ref_code");
+=======
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Mail, Lock, User, Phone, Briefcase } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+type AuthMode = "login" | "register-client" | "register-professional";
+
+const CITIES = [
+  "Porto Alegre",
+  "Gravataí",
+  "Canoas",
+  "Cachoeirinha",
+  "Viamão",
+  "Alvorada",
+];
+
+const CATEGORIES = [
+  { id: "montador", name: "Montador de Móveis" },
+  { id: "eletricista", name: "Eletricista" },
+  { id: "encanador", name: "Encanador" },
+  { id: "diarista", name: "Diarista" },
+  { id: "chaveiro", name: "Chaveiro" },
+  { id: "ar-condicionado", name: "Técnico de Ar Condicionado" },
+];
+
+const AuthPage = () => {
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<AuthMode>("login");
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
     fullName: "",
     phone: "",
+<<<<<<< HEAD
     city: AVAILABLE_CITIES[0],
     categoryId: "",
     description: "",
@@ -67,12 +100,20 @@ const AuthPage = () => {
   const slotStatus = currentSlot?.status;
 
   const currentCategory = categories.find((c) => c.id === form.categoryId);
+=======
+    city: CITIES[0],
+    categoryId: CATEGORIES[0].id,
+    description: "",
+    experience: "",
+  });
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 
   const update = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleLogin = async () => {
     setLoading(true);
+<<<<<<< HEAD
       const { data, error } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password,
@@ -108,6 +149,18 @@ const AuthPage = () => {
     });
     if (error) {
       toast.error(error.message);
+=======
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Login realizado!");
+      navigate("/");
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     }
   };
 
@@ -116,6 +169,7 @@ const AuthPage = () => {
       toast.error("Informe seu nome completo.");
       return;
     }
+<<<<<<< HEAD
     if (!form.email.trim() || !form.password.trim()) {
       toast.error("Preencha e-mail e senha.");
       return;
@@ -138,12 +192,19 @@ const AuthPage = () => {
 
     // All data goes via metadata — the DB trigger handles profile creation
     const { data: authData, error: authError } = await supabase.auth.signUp({
+=======
+    setLoading(true);
+    const isProfessional = mode === "register-professional";
+
+    const { data, error } = await supabase.auth.signUp({
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
       email: form.email,
       password: form.password,
       options: {
         emailRedirectTo: window.location.origin,
         data: {
           full_name: form.fullName,
+<<<<<<< HEAD
           user_type: isProfessional ? "professional" : "client",
           phone: form.phone || null,
           city: form.city,
@@ -154,16 +215,24 @@ const AuthPage = () => {
             description: form.description || null,
             experience: form.experience || null,
           }),
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
         },
       },
     });
 
+<<<<<<< HEAD
     if (authError) {
       toast.error(authError.message);
+=======
+    if (error) {
+      toast.error(error.message);
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
       setLoading(false);
       return;
     }
 
+<<<<<<< HEAD
     // ── Save LGPD consent ──────────────────────────────────────
     if (authData.user?.id) {
       await supabase
@@ -203,10 +272,36 @@ const AuthPage = () => {
         }
       } catch {
         sessionStorage.removeItem("Fixr_ref_code");
+=======
+    const userId = data.user?.id;
+    if (userId) {
+      // Update profile with city and type
+      await supabase
+        .from("profiles")
+        .update({
+          user_type: isProfessional ? "professional" : "client",
+          phone: form.phone,
+          city: form.city,
+          state: "RS",
+          full_name: form.fullName,
+        })
+        .eq("user_id", userId);
+
+      if (isProfessional) {
+        const cat = CATEGORIES.find((c) => c.id === form.categoryId);
+        await supabase.from("professional_profiles").insert({
+          user_id: userId,
+          category_id: form.categoryId,
+          category_name: cat?.name || "",
+          description: form.description,
+          experience: form.experience,
+        });
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
       }
     }
 
     setLoading(false);
+<<<<<<< HEAD
 
     if (!authData.session) {
       toast.success("Cadastro realizado! Verifique seu e-mail para confirmar sua conta.", {
@@ -217,6 +312,10 @@ const AuthPage = () => {
       const destination = isProfessional ? "/dashboard" : "/meu-painel";
       navigate(destination);
     }
+=======
+    toast.success("Conta criada! Verifique seu email para confirmar.");
+    navigate("/");
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -227,6 +326,7 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+<<<<<<< HEAD
       <SEO title={(mode === "login" ? "Entrar" : "Criar Conta") + " | Fixr"} description="Acesse ou crie sua conta no Fixr para contratar ou oferecer serviços na sua região." />
       <header className="bg-background/80 backdrop-blur-xl border-b border-border/50 p-4 sticky top-0 z-50">
         <div className="flex items-center gap-6 max-w-md mx-auto">
@@ -239,10 +339,24 @@ const AuthPage = () => {
               : mode === "register-client"
               ? "Sou Cliente"
               : "Sou Profissional"}
+=======
+      <header className="bg-card border-b-2 border-border p-4">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="text-foreground">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="font-display text-lg uppercase tracking-tight text-foreground">
+            {mode === "login"
+              ? "Entrar"
+              : mode === "register-client"
+              ? "Cadastro Cliente"
+              : "Cadastro Profixssional"}
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
           </h1>
         </div>
       </header>
 
+<<<<<<< HEAD
       <div className="p-4 space-y-4 max-w-md mx-auto pt-8">
         {/* Referral code banner */}
         {pendingRefCode && mode !== "login" && (
@@ -265,75 +379,129 @@ const AuthPage = () => {
             <Logo className="w-24 h-24 mx-auto mb-6 text-primary" />
             <h2 className="font-display text-4xl font-extrabold text-foreground tracking-tight">Fixr</h2>
             <p className="text-sm font-semibold text-muted-foreground">Conectando você ao profissional certo</p>
+=======
+      <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-md mx-auto">
+        {/* Mode selector */}
+        {mode === "login" && (
+          <div className="text-center space-y-2 py-4">
+            <h2 className="font-display text-2xl text-primary">PROFIX</h2>
+            <p className="text-sm text-muted-foreground">A rede dos Profixssionais</p>
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
           </div>
         )}
 
         {/* Email */}
         <div className="space-y-1">
+<<<<<<< HEAD
           <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0 mb-2 block">Seu E-mail</label>
           <div className="flex items-center gap-4 bg-secondary/20 border border-border rounded-2xl px-4 py-4 focus-within:border-primary focus-within:ring-0 transition-all">
             <Mail size={18} className="text-primary" />
+=======
+          <label className="text-xs font-display uppercase text-muted-foreground">Email</label>
+          <div className="flex items-center gap-3 bg-card border-2 border-border px-4 py-3">
+            <Mail size={16} className="text-muted-foreground" />
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
             <input
               type="email"
               required
               value={form.email}
               onChange={(e) => update("email", e.target.value)}
+<<<<<<< HEAD
               placeholder="SEU@EMAIL.COM"
               className="w-full bg-transparent text-base font-medium text-foreground placeholder:text-muted-foreground/30 outline-none uppercase"
+=======
+              placeholder="seu@email.com"
+              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
             />
           </div>
         </div>
 
         {/* Password */}
         <div className="space-y-1">
+<<<<<<< HEAD
           <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0 mb-2 block">Senha de Acesso</label>
           <div className="flex items-center gap-4 bg-secondary/20 border border-border rounded-2xl px-4 py-4 focus-within:border-primary focus-within:ring-0 transition-all">
             <Lock size={18} className="text-primary" />
+=======
+          <label className="text-xs font-display uppercase text-muted-foreground">Senha</label>
+          <div className="flex items-center gap-3 bg-card border-2 border-border px-4 py-3">
+            <Lock size={16} className="text-muted-foreground" />
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
             <input
               type="password"
               required
               minLength={6}
               value={form.password}
               onChange={(e) => update("password", e.target.value)}
+<<<<<<< HEAD
               placeholder="••••••••"
               className="w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground/30 outline-none"
+=======
+              placeholder="Mínimo 6 caracteres"
+              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
             />
           </div>
         </div>
 
         {/* Registration fields */}
         {mode !== "login" && (
+<<<<<<< HEAD
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0 mb-2 block">Nome Completo</label>
               <div className="flex items-center gap-4 bg-secondary/20 border border-border rounded-2xl px-4 py-4 focus-within:border-primary focus-within:ring-0 transition-all">
                 <User size={18} className="text-primary" />
+=======
+          <>
+            <div className="space-y-1">
+              <label className="text-xs font-display uppercase text-muted-foreground">Nome completo</label>
+              <div className="flex items-center gap-3 bg-card border-2 border-border px-4 py-3">
+                <User size={16} className="text-muted-foreground" />
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
                 <input
                   type="text"
                   required
                   value={form.fullName}
                   onChange={(e) => update("fullName", e.target.value)}
+<<<<<<< HEAD
                   placeholder="NOME E SOBRENOME"
                   className="w-full bg-transparent text-base font-medium text-foreground placeholder:text-muted-foreground/30 outline-none uppercase"
+=======
+                  placeholder="Seu nome"
+                  className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
                 />
               </div>
             </div>
 
             <div className="space-y-1">
+<<<<<<< HEAD
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0 mb-2 block">WhatsApp de Contato</label>
               <div className="flex items-center gap-4 bg-secondary/20 border border-border rounded-2xl px-4 py-4 focus-within:border-primary focus-within:ring-0 transition-all">
                 <Phone size={18} className="text-primary" />
+=======
+              <label className="text-xs font-display uppercase text-muted-foreground">Telefone</label>
+              <div className="flex items-center gap-3 bg-card border-2 border-border px-4 py-3">
+                <Phone size={16} className="text-muted-foreground" />
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
                 <input
                   type="tel"
                   value={form.phone}
                   onChange={(e) => update("phone", e.target.value)}
                   placeholder="(51) 99999-0000"
+<<<<<<< HEAD
                   className="w-full bg-transparent text-base font-medium text-foreground placeholder:text-muted-foreground/30 outline-none"
+=======
+                  className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
                 />
               </div>
             </div>
 
             <div className="space-y-1">
+<<<<<<< HEAD
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0 mb-2 block">Sua Região</label>
               <select
                 value={form.city}
@@ -346,10 +514,25 @@ const AuthPage = () => {
               </select>
             </div>
         </div>
+=======
+              <label className="text-xs font-display uppercase text-muted-foreground">Cidade</label>
+              <select
+                value={form.city}
+                onChange={(e) => update("city", e.target.value)}
+                className="w-full bg-card border-2 border-border px-4 py-3 text-sm text-foreground outline-none"
+              >
+                {CITIES.map((city) => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
+          </>
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
         )}
 
         {/* Professional-only fields */}
         {mode === "register-professional" && (
+<<<<<<< HEAD
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0 mb-2 block">O que você faz?</label>
@@ -360,10 +543,23 @@ const AuthPage = () => {
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id} className="bg-background">{cat.name}</option>
+=======
+          <>
+            <div className="space-y-1">
+              <label className="text-xs font-display uppercase text-muted-foreground">Categoria do serviço</label>
+              <select
+                value={form.categoryId}
+                onChange={(e) => update("categoryId", e.target.value)}
+                className="w-full bg-card border-2 border-border px-4 py-3 text-sm text-foreground outline-none"
+              >
+                {CATEGORIES.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
                 ))}
               </select>
             </div>
 
+<<<<<<< HEAD
             {/* Slot status — shown after city + category are selected */}
             {form.categoryId && form.city && !checkingSlot && slotAvailable === false && !waitingListDone && (
               <WaitingListForm
@@ -405,17 +601,34 @@ const AuthPage = () => {
                 placeholder="CONTE O QUE VOCÊ FAZ DE MELHOR..."
                 rows={3}
                 className="w-full bg-secondary/20 border border-border rounded-2xl px-4 py-4 text-base font-medium text-foreground focus:border-primary placeholder:text-muted-foreground/30 outline-none resize-none uppercase"
+=======
+            <div className="space-y-1">
+              <label className="text-xs font-display uppercase text-muted-foreground">Descrição do serviço</label>
+              <textarea
+                value={form.description}
+                onChange={(e) => update("description", e.target.value)}
+                placeholder="Descreva seus serviços..."
+                rows={3}
+                className="w-full bg-card border-2 border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none resize-none"
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
               />
             </div>
 
             <div className="space-y-1">
+<<<<<<< HEAD
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0 mb-2 block">Tempo de experiência</label>
               <div className="flex items-center gap-4 bg-secondary/20 border border-border rounded-2xl px-4 py-4 focus-within:border-primary focus-within:ring-0 transition-all">
                 <Briefcase size={18} className="text-primary" />
+=======
+              <label className="text-xs font-display uppercase text-muted-foreground">Experiência</label>
+              <div className="flex items-center gap-3 bg-card border-2 border-border px-4 py-3">
+                <Briefcase size={16} className="text-muted-foreground" />
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
                 <input
                   type="text"
                   value={form.experience}
                   onChange={(e) => update("experience", e.target.value)}
+<<<<<<< HEAD
                   placeholder="EX: 5 ANOS"
                   className="w-full bg-transparent text-base font-medium text-foreground placeholder:text-muted-foreground/30 outline-none uppercase"
                 />
@@ -477,10 +690,28 @@ const AuthPage = () => {
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="currentColor" opacity="0.8"/>
           </svg>
           Conta Google
+=======
+                  placeholder="Ex: 5 anos"
+                  className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-4 bg-primary text-primary-foreground font-display uppercase tracking-wider text-base disabled:opacity-50"
+        >
+          {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar Conta"}
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
         </button>
 
         {/* Mode switching */}
         {mode === "login" ? (
+<<<<<<< HEAD
           <div className="space-y-3 pt-6 text-center border-t border-border/50">
             <h3 className="font-display font-medium text-foreground">Novo por aqui?</h3>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -488,19 +719,35 @@ const AuthPage = () => {
                 type="button"
                 onClick={() => setMode("register-client")}
                 className="flex-1 py-4 bg-secondary/20 border-2 border-border text-foreground font-display font-black text-xs uppercase tracking-widest rounded-2xl hover:border-primary hover:text-primary active:scale-95 transition-all"
+=======
+          <div className="space-y-2 text-center">
+            <p className="text-sm text-muted-foreground">Não tem conta?</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setMode("register-client")}
+                className="flex-1 py-3 border-2 border-border text-foreground font-display uppercase text-xs tracking-wider hover:border-primary transition-colors"
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
               >
                 Sou Cliente
               </button>
               <button
                 type="button"
                 onClick={() => setMode("register-professional")}
+<<<<<<< HEAD
                 className="flex-1 py-4 border-2 border-primary bg-primary/10 text-primary font-display font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-primary/20 active:scale-95 transition-all"
               >
                 Sou Profissional
+=======
+                className="flex-1 py-3 border-2 border-primary bg-primary/10 text-primary font-display uppercase text-xs tracking-wider"
+              >
+                Sou Profixssional
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
               </button>
             </div>
           </div>
         ) : (
+<<<<<<< HEAD
           <div className="pt-6 border-t border-border/50">
             <button
               type="button"
@@ -512,9 +759,23 @@ const AuthPage = () => {
           </div>
         )}
       </div>
+=======
+          <button
+            type="button"
+            onClick={() => setMode("login")}
+            className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Já tem conta? <span className="text-primary font-medium">Entrar</span>
+          </button>
+        )}
+      </form>
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     </div>
   );
 };
 
 export default AuthPage;
+<<<<<<< HEAD
 
+=======
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
