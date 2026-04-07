@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
@@ -21,4 +22,15 @@ export default defineConfig({
       use: { ...devices['Pixel 5'] },
     },
   ],
+=======
+import { createLovableConfig } from "lovable-agent-playwright-config/config";
+
+export default createLovableConfig({
+  // Add your custom playwright configuration overrides here
+  // Example:
+  // timeout: 60000,
+  // use: {
+  //   baseURL: 'http://localhost:3000',
+  // },
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 });

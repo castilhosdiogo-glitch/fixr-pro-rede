@@ -7,6 +7,7 @@ interface ReviewItemProps {
 
 const ReviewItem = ({ review }: ReviewItemProps) => {
   return (
+<<<<<<< HEAD
     <div className="border-t border-border/40 py-6 last:pb-8">
       <div className="flex items-center justify-between mb-3">
         <span className="font-display font-black text-xs uppercase tracking-widest text-foreground">
@@ -26,6 +27,31 @@ const ReviewItem = ({ review }: ReviewItemProps) => {
             "{review.comment}"
           </p>
         </div>
+=======
+    <div className="border-t-2 border-border py-4">
+      <div className="flex items-center justify-between mb-1">
+        <span className="font-display text-sm uppercase text-foreground">
+          {review.clientName}
+        </span>
+        <div className="flex items-center gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              size={12}
+              className={i < review.rating ? "text-primary" : "text-border"}
+              fill={i < review.rating ? "currentColor" : "none"}
+            />
+          ))}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground uppercase font-display mb-2">
+        {review.serviceDescription} — {new Date(review.date).toLocaleDateString("pt-BR")}
+      </p>
+      {review.rating === 5 && review.comment && (
+        <p className="text-sm text-foreground leading-relaxed">
+          {review.comment}
+        </p>
+>>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
       )}
     </div>
   );

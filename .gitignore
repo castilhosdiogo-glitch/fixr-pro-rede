@@ -26,3 +26,13 @@ dist-ssr
 # Environment files
 .env
 .env.*
+
+# SSH Keys and Certificates
+*.pem
+*.key
+*.pub
+!*.example.pem
+
+# AWS Credentials
+~/.aws/credentials
+~/.aws/config
