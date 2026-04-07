@@ -26,6 +26,11 @@ const ClientDashboard      = lazy(() => import("./pages/ClientDashboard"));
 const AdminDashboard       = lazy(() => import("./pages/AdminDashboard"));
 const BroadcastRequestPage = lazy(() => import("./pages/BroadcastRequestPage"));
 const ReferralPage         = lazy(() => import("./pages/ReferralPage"));
+const HubFiscalPage        = lazy(() => import("./pages/HubFiscalPage"));
+const AgendaPage           = lazy(() => import("./pages/elite/AgendaPage"));
+const QuotesPage           = lazy(() => import("./pages/elite/QuotesPage"));
+const TeamPage             = lazy(() => import("./pages/elite/TeamPage"));
+const PortfolioPage        = lazy(() => import("./pages/elite/PortfolioPage"));
 
 // Legal pages — lazy loaded
 const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
@@ -80,6 +85,11 @@ const App = () => (
                     <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                     <Route path="/solicitar" element={<ProtectedRoute><BroadcastRequestPage /></ProtectedRoute>} />
                     <Route path="/indicar" element={<ProtectedRoute><ReferralPage /></ProtectedRoute>} />
+                    <Route path="/hub-fiscal" element={<ProtectedRoute><HubFiscalPage /></ProtectedRoute>} />
+                    <Route path="/elite/agenda" element={<ProtectedRoute><AgendaPage /></ProtectedRoute>} />
+                    <Route path="/elite/orcamentos" element={<ProtectedRoute><QuotesPage /></ProtectedRoute>} />
+                    <Route path="/elite/equipe" element={<ProtectedRoute><TeamPage /></ProtectedRoute>} />
+                    <Route path="/elite/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
 
                     <Route path="*" element={<NotFound />} />
                   </Routes>

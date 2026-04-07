@@ -1,65 +1,88 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle, TrendingUp, Zap, Crown, Sparkles, FileText, AlertTriangle, BarChart3 } from "lucide-react";
+import {
+  CheckCircle, TrendingUp, Zap, Crown, Sparkles,
+  FileText, AlertTriangle, BarChart3, Mic, Camera,
+  Video, Calendar, ClipboardList, Users, Images, Bell,
+} from "lucide-react";
 
 const plans = [
   {
-    name: "Starter",
+    name: "Explorador",
     icon: TrendingUp,
     price: "Grátis",
-    priceAfter: "R$9,90",
-    subtitle: "30 dias grátis, depois R$9,90/mês",
+    priceAfter: null,
+    subtitle: "Para começar na plataforma",
     badge: null,
     featured: false,
+    commission: "15%",
     benefits: [
-      "Criar perfil profissional",
-      "Aparecer nas buscas",
-      "Receber solicitações básicas",
-      "Visibilidade padrão",
+      "Até 8 pedidos por mês",
+      "Chat de texto",
+      "Perfil na busca (sem destaque)",
+      "Comissão de 15%",
     ],
-    cta: "Começar Grátis por 30 dias",
-    ctaStyle: "border-2 border-border text-foreground hover:border-primary hover:text-primary",
+    cta: "Começar Grátis",
   },
   {
-    name: "Profissional",
+    name: "Parceiro",
     icon: Zap,
     price: "R$19,90",
     priceAfter: null,
     subtitle: "/mês",
     badge: "Mais popular",
     featured: true,
+    commission: "12%",
     benefits: [
-      "Maior visibilidade nas buscas",
-      "Receber mais solicitações",
-      "Selo Profissional verificado",
-      "Estatísticas de perfil",
-      "Prioridade no atendimento",
-      "Opção de formalização como MEI",
+      "Pedidos ilimitados",
+      "Chat: texto + áudio + foto",
+      "Hub Fiscal completo (NFS-e + DAS + MEI)",
+      "Destaque na busca",
+      "Selo Parceiro Verificado",
+      "Estatísticas de desempenho",
+      "Suporte prioritário",
+      "Comissão de 12%",
     ],
-    cta: "Assinar Profissional",
-    ctaStyle: "gradient-cta text-primary-foreground",
+    cta: "Assinar Parceiro",
   },
   {
-    name: "Premium",
+    name: "Elite",
     icon: Crown,
     price: "R$39,90",
     priceAfter: null,
     subtitle: "/mês",
-    badge: "Hub Fiscal",
+    badge: "Elite",
     featured: false,
+    commission: "10%",
     benefits: [
-      "Tudo do Profissional incluído",
-      "Ranking prioritário na busca",
-      "Selo de destaque no perfil",
-      "Perfil em destaque na homepage",
-      "Hub Fiscal completo",
-      "Acompanhamento do MEI",
-      "Alerta de vencimento do DAS",
-      "Monitoramento do limite MEI",
+      "Tudo do Parceiro incluído",
+      "Chat: texto + áudio + foto + vídeo (30s)",
+      "Agenda integrada no perfil público",
+      "Orçamento personalizado no app",
+      "Gestão de equipe (até 3 colaboradores)",
+      "Portfólio público de fotos",
+      "Alerta de limite MEI em tempo real",
+      "Relatório mensal de faturamento",
+      "Topo absoluto na busca + destaque na homepage",
+      "Selo Elite com badge dourado",
+      "Comissão de 10%",
     ],
-    cta: "Assinar Premium",
-    ctaStyle: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+    cta: "Assinar Elite",
   },
+];
+
+const eliteFeatures = [
+  { icon: Calendar, title: "AGENDA INTEGRADA", desc: "Clientes agendam direto no seu perfil público" },
+  { icon: ClipboardList, title: "ORÇAMENTO NO APP", desc: "Envie orçamentos detalhados e receba aprovação com um toque" },
+  { icon: Users, title: "GESTÃO DE EQUIPE", desc: "Cadastre até 3 colaboradores no seu perfil" },
+  { icon: Images, title: "PORTFÓLIO PÚBLICO", desc: "Galeria de até 20 fotos dos seus serviços realizados" },
+  { icon: Bell, title: "ALERTA MEI", desc: "Notificação ao atingir 70%, 90% e 100% do limite anual" },
+];
+
+const chatFeatures = [
+  { icon: Mic, label: "ÁUDIO", desc: "Parceiro + Elite", color: "text-blue-400" },
+  { icon: Camera, label: "FOTO", desc: "Parceiro + Elite", color: "text-green-400" },
+  { icon: Video, label: "VÍDEO 30s", desc: "Somente Elite", color: "text-primary" },
 ];
 
 const PricingSection = () => (
@@ -78,7 +101,7 @@ const PricingSection = () => (
         CRESÇA O SEU NEGÓCIO
       </h2>
       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 max-w-xs">
-        COMECE GRÁTIS POR 30 DIAS. EVOLUA QUANDO ESTIVER PRONTO.
+        COMECE GRÁTIS. EVOLUA QUANDO ESTIVER PRONTO.
       </p>
     </motion.div>
 
@@ -91,24 +114,44 @@ const PricingSection = () => (
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: i * 0.1 }}
           className={`rounded-2xl bg-secondary/10 p-8 relative overflow-hidden border-2 ${
-            plan.featured
+            plan.name === "Elite"
+              ? "border-yellow-500/60 shadow-none"
+              : plan.featured
               ? "border-primary shadow-none"
               : "border-border shadow-none"
           }`}
         >
           {plan.badge && (
-            <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-2 text-[9px] font-black uppercase tracking-widest">
+            <div className={`absolute top-0 right-0 px-4 py-2 text-[9px] font-black uppercase tracking-widest ${
+              plan.name === "Elite"
+                ? "bg-yellow-500 text-black"
+                : "bg-primary text-primary-foreground"
+            }`}>
               {plan.badge.toUpperCase()}
             </div>
           )}
 
           <div className="flex items-center gap-4 mb-6">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 ${
-              plan.featured ? "bg-primary border-primary" : "bg-background border-border"
+              plan.name === "Elite"
+                ? "bg-yellow-500/10 border-yellow-500/60"
+                : plan.featured
+                ? "bg-primary border-primary"
+                : "bg-background border-border"
             }`}>
-              <plan.icon size={20} className={plan.featured ? "text-primary-foreground" : "text-primary"} />
+              <plan.icon size={20} className={
+                plan.name === "Elite" ? "text-yellow-500" :
+                plan.featured ? "text-primary-foreground" : "text-primary"
+              } />
             </div>
-            <h3 className="font-display font-black text-xl uppercase tracking-tighter text-foreground">{plan.name}</h3>
+            <div>
+              <h3 className="font-display font-black text-xl uppercase tracking-tighter text-foreground">
+                {plan.name}
+              </h3>
+              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                COMISSÃO {plan.commission}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-baseline gap-2 mb-2">
@@ -117,20 +160,18 @@ const PricingSection = () => (
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{plan.subtitle}</span>
             )}
           </div>
-          {plan.priceAfter && (
-            <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 mb-4">
-              <span className="text-primary font-display font-black text-lg">{plan.priceAfter}</span>
-              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">/MÊS APÓS 30 DIAS</span>
-            </div>
-          )}
           {!plan.subtitle.startsWith("/") && (
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-6">{plan.subtitle.toUpperCase()}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">
+              {plan.subtitle.toUpperCase()}
+            </p>
           )}
 
           <ul className="space-y-3.5 text-xs font-black uppercase tracking-widest text-foreground mt-8 border-t border-border/40 pt-8">
             {plan.benefits.map((b) => (
               <li key={b} className="flex items-center gap-4">
-                <CheckCircle size={16} className="text-primary flex-shrink-0" />
+                <CheckCircle size={16} className={
+                  plan.name === "Elite" ? "text-yellow-500 flex-shrink-0" : "text-primary flex-shrink-0"
+                } />
                 {b.toUpperCase()}
               </li>
             ))}
@@ -139,8 +180,10 @@ const PricingSection = () => (
           <Link
             to="/auth"
             className={`block mt-10 w-full py-5 rounded-2xl font-display font-black text-xs uppercase tracking-[0.3em] text-center transition-all active:scale-[0.98] ${
-              plan.featured 
-                ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+              plan.name === "Elite"
+                ? "bg-yellow-500 text-black hover:bg-yellow-400"
+                : plan.featured
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "border-2 border-border text-foreground hover:border-primary hover:text-primary"
             }`}
           >
@@ -150,48 +193,95 @@ const PricingSection = () => (
       ))}
     </div>
 
-    {/* Hub Fiscal Highlight */}
+    {/* Chat com mídia */}
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="mt-12 rounded-2xl bg-background border-2 border-primary p-8"
+      className="mt-10 rounded-2xl bg-background border-2 border-border p-8"
+    >
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-12 h-12 rounded-2xl bg-primary/10 border-2 border-border flex items-center justify-center">
+          <Mic size={22} className="text-primary" />
+        </div>
+        <div>
+          <h3 className="font-display font-black text-lg uppercase tracking-tighter text-foreground">CHAT COM MÍDIA</h3>
+          <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">COMUNICAÇÃO PROFISSIONAL COMPLETA</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        {chatFeatures.map(({ icon: Icon, label, desc, color }) => (
+          <div key={label} className="flex flex-col items-center gap-2 p-4 bg-secondary/10 border border-border rounded-xl text-center">
+            <Icon size={20} className={color} />
+            <p className="text-[9px] font-black uppercase tracking-widest text-foreground">{label}</p>
+            <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground opacity-70">{desc}</p>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+
+    {/* Hub Fiscal */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="mt-6 rounded-2xl bg-background border-2 border-primary p-8"
     >
       <div className="flex items-center gap-4 mb-8">
         <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center border-2 border-primary">
           <FileText size={28} className="text-primary-foreground" />
         </div>
         <div>
-          <h3 className="font-display font-black text-xl uppercase tracking-tighter text-foreground">APOIO AO MEI Fixr</h3>
-          <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">AJUDA EXCLUSIVA DO PLANO PREMIUM</p>
+          <h3 className="font-display font-black text-xl uppercase tracking-tighter text-foreground">HUB FISCAL FIXR</h3>
+          <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">PARCEIRO + ELITE</p>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4">
-        <div className="flex items-start gap-4 p-5 bg-secondary/10 border border-border group hover:border-primary transition-colors">
-          <BarChart3 size={20} className="text-primary flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-foreground">ACOMPANHAMENTO MEI</p>
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-70">VEJA SEU FATURAMENTO DE FORMA SIMPLES</p>
+        {[
+          { icon: BarChart3, title: "EMISSÃO DE NFS-e", desc: "Nota fiscal de serviço eletrônica integrada" },
+          { icon: AlertTriangle, title: "ALERTA DA GUIA DAS", desc: "Nunca mais esqueça de pagar seu MEI" },
+          { icon: TrendingUp, title: "GUIA MEI ASSISTIDO", desc: "Passo a passo para formalização como MEI" },
+        ].map(({ icon: Icon, title, desc }) => (
+          <div key={title} className="flex items-start gap-4 p-5 bg-secondary/10 border border-border hover:border-primary transition-colors rounded-xl">
+            <Icon size={20} className="text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-foreground">{title}</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-70">{desc}</p>
+            </div>
           </div>
+        ))}
+      </div>
+    </motion.div>
+
+    {/* Features Elite */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="mt-6 rounded-2xl bg-background border-2 border-yellow-500/60 p-8"
+    >
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 flex items-center justify-center border-2 border-yellow-500/60">
+          <Crown size={28} className="text-yellow-500" />
         </div>
-        <div className="flex items-start gap-4 p-5 bg-secondary/10 border border-border group hover:border-primary transition-colors">
-          <AlertTriangle size={20} className="text-primary flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-foreground">ALERTA DA GUIA DAS</p>
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-70">NUNCA MAIS ESQUEÇA DE PAGAR SEU MEI</p>
+        <div>
+          <h3 className="font-display font-black text-xl uppercase tracking-tighter text-foreground">EXCLUSIVO ELITE</h3>
+          <p className="text-[10px] font-black uppercase tracking-widest text-yellow-500 mt-1">RECURSOS AVANÇADOS PARA CRESCER MAIS</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-4">
+        {eliteFeatures.map(({ icon: Icon, title, desc }) => (
+          <div key={title} className="flex items-start gap-4 p-5 bg-secondary/10 border border-border hover:border-yellow-500/60 transition-colors rounded-xl">
+            <Icon size={20} className="text-yellow-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-foreground">{title}</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-70">{desc}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-start gap-4 p-5 bg-secondary/10 border border-border group hover:border-primary transition-colors">
-          <TrendingUp size={20} className="text-primary flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-foreground">LIMITE DO MEI</p>
-            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-70">AVISAMOS QUANDO ESTIVER PERTO DO LIMITE ANUAL</p>
-          </div>
-        </div>
+        ))}
       </div>
     </motion.div>
   </section>
 );
 
 export default PricingSection;
-

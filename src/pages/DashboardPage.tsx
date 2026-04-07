@@ -1,7 +1,7 @@
 ﻿import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ClipboardList, CheckCircle, Star, Calendar, ArrowLeft, MessageSquare, TrendingUp, ChevronRight, Clock, Zap, Gift, ShieldCheck } from "lucide-react";
+import { ClipboardList, CheckCircle, Star, Calendar, ArrowLeft, MessageSquare, TrendingUp, ChevronRight, Clock, Zap, Gift, ShieldCheck, FileText } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -16,6 +16,8 @@ import { useActiveServices } from "@/hooks/useServiceCompletion";
 import ActiveServiceCard from "@/components/ActiveServiceCard";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { PushToggle } from "@/components/notifications/PushToggle";
+import { usePlanGate } from "@/hooks/usePlanGate";
+import { Link } from "react-router-dom";
 
 interface Stats {
   requestsReceived: number;
@@ -91,6 +93,22 @@ const DashboardPage = () => {
   // Referral stats for the CTA widget
   const { data: referralStats } = useMyReferralStats();
 
+  // Plan gate for limit warnings
+  const { plan, limits, requestsNearLimit, requestsAtLimit } = usePlanGate();
+  const { data: planData } = useQuery({
+    queryKey: ["professional-plan", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("professional_profiles")
+        .select("plan_name, monthly_request_count")
+        .eq("user_id", user!.id)
+        .single();
+      return data;
+    },
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+
   if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -153,6 +171,36 @@ const DashboardPage = () => {
             </div>
           )}
         </motion.div>
+
+        {/* Alerta de limite — Explorador */}
+        {planData?.plan_name === "explorador" && requestsAtLimit() && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border-2 border-destructive bg-destructive/5 p-5">
+            <p className="font-display font-black text-xs uppercase tracking-widest text-destructive mb-1">
+              🚫 LIMITE MENSAL ATINGIDO
+            </p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Você usou todos os 8 pedidos do plano Explorador este mês. Faça upgrade para receber mais solicitações.
+            </p>
+            <Link to="/#planos" className="inline-block px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-black text-[10px] uppercase tracking-widest active:scale-95">
+              VER PLANO PARCEIRO →
+            </Link>
+          </motion.div>
+        )}
+        {planData?.plan_name === "explorador" && requestsNearLimit() && !requestsAtLimit() && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border-2 border-yellow-500/50 bg-yellow-500/5 p-5">
+            <p className="font-display font-black text-xs uppercase tracking-widest text-yellow-500 mb-1">
+              ⚠️ QUASE NO LIMITE — {planData?.monthly_request_count ?? 0}/8 PEDIDOS
+            </p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Você está próximo do limite do plano Explorador. Seja Parceiro para pedidos ilimitados.
+            </p>
+            <Link to="/#planos" className="inline-block px-5 py-2.5 rounded-xl border border-yellow-500/50 text-yellow-500 font-display font-black text-[10px] uppercase tracking-widest hover:bg-yellow-500/10 transition-colors">
+              SER PARCEIRO →
+            </Link>
+          </motion.div>
+        )}
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 gap-3">
@@ -273,6 +321,44 @@ const DashboardPage = () => {
             </div>
             <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
           </Link>
+        </motion.div>
+
+        {/* Hub Fiscal + Elite features */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36 }}
+          className="grid grid-cols-2 gap-3">
+          <Link to="/hub-fiscal"
+            className="flex items-center gap-3 p-4 rounded-2xl border-2 border-border bg-secondary/10 hover:border-primary transition-colors group">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <FileText size={18} className="text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-widest text-foreground truncate">HUB FISCAL</p>
+              <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">NFS-E · DAS · MEI</p>
+            </div>
+          </Link>
+          {planData?.plan_name === "elite" ? (
+            <Link to="/elite/agenda"
+              className="flex items-center gap-3 p-4 rounded-2xl border-2 border-yellow-500/40 bg-yellow-500/5 hover:border-yellow-500/70 transition-colors group">
+              <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                <Calendar size={18} className="text-yellow-500" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-widest text-foreground truncate">AGENDA</p>
+                <p className="text-[8px] font-black uppercase tracking-widest text-yellow-500 mt-0.5">ELITE</p>
+              </div>
+            </Link>
+          ) : (
+            <Link to="/#planos"
+              className="flex items-center gap-3 p-4 rounded-2xl border-2 border-border bg-secondary/5 opacity-50 hover:opacity-70 transition-opacity">
+              <div className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center flex-shrink-0">
+                <Zap size={18} className="text-muted-foreground" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground truncate">ELITE</p>
+                <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50 mt-0.5">VER PLANOS</p>
+              </div>
+            </Link>
+          )}
         </motion.div>
 
         {/* Referral CTA */}

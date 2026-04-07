@@ -91,6 +91,24 @@ export function useEnablePush() {
   });
 }
 
+/** Sends a push notification to a specific user via the edge function */
+export async function sendPushNotification(
+  userId: string,
+  payload: { title: string; body: string; type?: string; url?: string }
+): Promise<void> {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+  if (!supabaseUrl || !supabaseKey) return;
+  await fetch(`${supabaseUrl}/functions/v1/push-notify`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${supabaseKey}`,
+    },
+    body: JSON.stringify({ user_id: userId, ...payload }),
+  });
+}
+
 /** Unsubscribes and removes from DB */
 export function useDisablePush() {
   const { user } = useAuth();
