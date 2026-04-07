@@ -72,23 +72,34 @@ const AuthPage = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleLogin = async () => {
+    // Validações ANTES de chamar Supabase
+    if (!form.email.trim()) {
+      toast.error("Informe seu e-mail.");
+      return;
+    }
+    if (!form.password.trim()) {
+      toast.error("Informe sua senha.");
+      return;
+    }
+
     setLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: form.email,
-        password: form.password,
-      });
-      setLoading(false);
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Login realizado!");
-        // Use metadata to determine redirection if possible, or fetch from profile
-        if (data?.user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("user_type")
-            .eq("user_id", data.user.id)
-            .single();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
+    setLoading(false);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Login realizado!");
+      // Use metadata to determine redirection if possible, or fetch from profile
+      if (data?.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("user_id", data.user.id)
+          .single();
 
         const destination = profile?.user_type === "professional" ? "/dashboard" : "/meu-painel";
         navigate(destination);
@@ -268,6 +279,8 @@ const AuthPage = () => {
           </div>
         )}
 
+        {/* AUTH FORM */}
+        <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email */}
         <div className="space-y-1">
           <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-0 mb-2 block">Seu E-mail</label>
@@ -447,13 +460,14 @@ const AuthPage = () => {
         {/* Submit — hidden when slot is FULL for professionals */}
         {!(mode === "register-professional" && slotAvailable === false) && (
           <button
-            onClick={(e) => handleSubmit(e)}
+            type="submit"
             disabled={loading || checkingSlot || (mode !== "login" && !privacyAccepted)}
             className="w-full mt-10 py-6 bg-primary text-primary-foreground font-display font-black text-xs uppercase tracking-[0.3em] rounded-2xl hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
           >
             {loading ? "Processando..." : checkingSlot && mode === "register-professional" ? "Verificando vagas..." : mode === "login" ? "Entrar" : "Criar Minha Conta"}
           </button>
         )}
+        </form>
 
         {/* Google OAuth (Only for login technically, or it acts as a dual-purpose on Supabase) */}
         <div className="relative py-6">
