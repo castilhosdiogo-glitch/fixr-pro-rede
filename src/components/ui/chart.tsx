@@ -58,6 +58,13 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
+/** Sanitize CSS values to prevent XSS via dangerouslySetInnerHTML */
+const sanitizeCssValue = (value: string): string =>
+  value.replace(/[<>"'\\]/g, "");
+
+const sanitizeId = (value: string): string =>
+  value.replace(/[^a-zA-Z0-9_-]/g, "");
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
 
@@ -65,17 +72,20 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
+  const safeId = sanitizeId(id);
+
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${sanitizeCssValue(prefix)} [data-chart=${safeId}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    const safeColor = color ? sanitizeCssValue(color) : null;
+    return safeColor ? `  --color-${sanitizeId(key)}: ${safeColor};` : null;
   })
   .join("\n")}
 }

@@ -130,7 +130,14 @@ const AuthPage = () => {
       toast.error("Preencha e-mail e senha.");
       return;
     }
-
+    if (form.password.trim().length < 8) {
+      toast.error("A senha deve ter no mínimo 8 caracteres.");
+      return;
+    }
+    if (mode === "register-professional" && !form.categoryId) {
+      toast.error("Selecione sua categoria de atuação.");
+      return;
+    }
     if (mode !== "login" && !privacyAccepted) {
       toast.error("Você deve aceitar a Política de Privacidade para continuar.");
       return;
@@ -304,7 +311,7 @@ const AuthPage = () => {
             <input
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={form.password}
               onChange={(e) => update("password", e.target.value)}
               placeholder="••••••••"
