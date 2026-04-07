@@ -75,7 +75,6 @@ ALTER TABLE public.service_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
-<<<<<<< HEAD
 CREATE POLICY "Professional profiles viewable by everyone" ON public.profiles FOR SELECT USING (user_type = 'professional');
 CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Profiles viewable by involved users" ON public.profiles FOR SELECT USING (
@@ -85,9 +84,6 @@ CREATE POLICY "Profiles viewable by involved users" ON public.profiles FOR SELEC
        OR (professional_id = auth.uid() AND client_id = profiles.user_id)
   )
 );
-=======
-CREATE POLICY "Profiles viewable by everyone" ON public.profiles FOR SELECT USING (true);
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
 

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ﻿import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -17,15 +16,6 @@ import { useActiveServices } from "@/hooks/useServiceCompletion";
 import ActiveServiceCard from "@/components/ActiveServiceCard";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { PushToggle } from "@/components/notifications/PushToggle";
-=======
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { ClipboardList, CheckCircle, Star, Calendar, ArrowLeft, MessageSquare, TrendingUp, ChevronRight, Clock } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import BottomNav from "@/components/BottomNav";
-import { motion } from "framer-motion";
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 
 interface Stats {
   requestsReceived: number;
@@ -53,7 +43,6 @@ const statusLabel: Record<string, { text: string; color: string }> = {
 const DashboardPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-<<<<<<< HEAD
   const { data, isLoading } = useQuery({
     queryKey: ["professionalDashboard", user?.id],
     enabled: !!user,
@@ -69,47 +58,11 @@ const DashboardPage = () => {
         supabase.from("service_requests").select("id, description, status, created_at, client_id").eq("professional_id", user!.id).order("created_at", { ascending: false }).limit(5),
       ]);
 
-=======
-  const [stats, setStats] = useState<Stats>({
-    requestsReceived: 0,
-    servicesCompleted: 0,
-    averageRating: 0,
-    upcomingServices: 0,
-  });
-  const [recentRequests, setRecentRequests] = useState<RecentRequest[]>([]);
-  const [profile, setProfile] = useState<any>(null);
-  const [proProfile, setProProfile] = useState<any>(null);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    }
-  }, [user, loading, navigate]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchData = async () => {
-      const [profileRes, proRes, requests, completed, reviews, upcoming, recentRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("professional_profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("professional_id", user.id),
-        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("professional_id", user.id).eq("status", "completed"),
-        supabase.from("reviews").select("rating").eq("professional_id", user.id),
-        supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("professional_id", user.id).eq("status", "scheduled"),
-        supabase.from("service_requests").select("id, description, status, created_at, client_id").eq("professional_id", user.id).order("created_at", { ascending: false }).limit(5),
-      ]);
-
-      setProfile(profileRes.data);
-      setProProfile(proRes.data);
-
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
       const ratings = reviews.data || [];
       const avgRating = ratings.length > 0
         ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
         : 0;
 
-<<<<<<< HEAD
       return {
         profile: profileRes.data,
         proProfile: proRes.data,
@@ -139,22 +92,6 @@ const DashboardPage = () => {
   const { data: referralStats } = useMyReferralStats();
 
   if (loading || isLoading) {
-=======
-      setStats({
-        requestsReceived: requests.count || 0,
-        servicesCompleted: completed.count || 0,
-        averageRating: Math.round(avgRating * 10) / 10,
-        upcomingServices: upcoming.count || 0,
-      });
-
-      setRecentRequests((recentRes.data as RecentRequest[]) || []);
-    };
-
-    fetchData();
-  }, [user]);
-
-  if (loading) {
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">Carregando...</p>
@@ -178,7 +115,6 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen pb-20 bg-background">
-<<<<<<< HEAD
       <SEO title="Painel do Profissional | Fixr" />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background border-b border-border px-4 py-4">
@@ -190,17 +126,6 @@ const DashboardPage = () => {
             SISTEMA DE COMANDO
           </h1>
           <NotificationBell />
-=======
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/50 px-4 py-3">
-        <div className="flex items-center gap-3 max-w-lg mx-auto">
-          <button onClick={() => navigate(-1)} className="text-foreground hover:text-primary transition-colors">
-            <ArrowLeft size={22} />
-          </button>
-          <h1 className="font-display text-base tracking-tight text-foreground">
-            Painel Profissional
-          </h1>
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
         </div>
       </header>
 
@@ -209,7 +134,6 @@ const DashboardPage = () => {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-<<<<<<< HEAD
           className="flex items-center gap-5 border border-border p-6 bg-secondary/10 rounded-2xl shadow-none"
         >
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-display font-black text-2xl">
@@ -226,24 +150,6 @@ const DashboardPage = () => {
           {proProfile?.verified && (
             <div className="px-3 py-1 rounded-2xl bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-widest">
               AUTORIDADE VERIFICADA
-=======
-          className="flex items-center gap-4"
-        >
-          <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center text-primary-foreground font-display text-lg">
-            {initials}
-          </div>
-          <div className="flex-1">
-            <h2 className="font-display text-lg text-foreground">
-              {profile?.full_name || "Profissional"}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {proProfile?.category_name || "Profissional"} · {profile?.city || ""}
-            </p>
-          </div>
-          {proProfile?.verified && (
-            <div className="px-2.5 py-1 rounded-full bg-success/15 text-success text-[10px] font-medium">
-              Verificado
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
             </div>
           )}
         </motion.div>
@@ -258,7 +164,6 @@ const DashboardPage = () => {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-<<<<<<< HEAD
                 className="rounded-2xl bg-card border border-border p-5 flex flex-col items-start gap-4 hover:border-primary transition-colors cursor-default"
               >
                 <div className={`w-12 h-12 rounded-2xl ${card.bg} flex items-center justify-center border border-current opacity-80`}>
@@ -270,23 +175,11 @@ const DashboardPage = () => {
                     {card.label}
                   </span>
                 </div>
-=======
-                className="rounded-2xl bg-card shadow-card p-4 flex flex-col items-start gap-2"
-              >
-                <div className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center`}>
-                  <Icon size={18} className={card.color} />
-                </div>
-                <span className="font-display text-2xl text-foreground">{card.value}</span>
-                <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
-                  {card.label}
-                </span>
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
               </motion.div>
             );
           })}
         </div>
 
-<<<<<<< HEAD
         {/* Reputation & Trust Score */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -325,14 +218,11 @@ const DashboardPage = () => {
           <KycUploadForm />
         </motion.div>
 
-=======
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
         {/* Performance bar */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-<<<<<<< HEAD
           className="rounded-2xl bg-card border border-border p-6"
         >
           <div className="flex items-center justify-between mb-6 border-l-2 border-primary pl-4">
@@ -358,33 +248,6 @@ const DashboardPage = () => {
               </div>
               <div className="h-4 rounded-2xl bg-secondary/20 border border-border p-0.5 overflow-hidden">
                 <div className="h-full rounded-2xl bg-primary" style={{ width: "85%" }} />
-=======
-          className="rounded-2xl bg-card shadow-card p-4"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Desempenho</span>
-            <TrendingUp size={14} className="text-success" />
-          </div>
-          <div className="space-y-3">
-            <div>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Taxa de resposta</span>
-                <span className="text-foreground font-medium">95%</span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div className="h-full rounded-full bg-success" style={{ width: "95%" }} />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Tempo médio de resposta</span>
-                <span className="text-foreground font-medium flex items-center gap-1">
-                  <Clock size={10} /> 15 min
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div className="h-full rounded-full bg-primary" style={{ width: "85%" }} />
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
               </div>
             </div>
           </div>
@@ -395,7 +258,6 @@ const DashboardPage = () => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-<<<<<<< HEAD
           className="flex gap-4"
         >
           <Link
@@ -488,50 +350,22 @@ const DashboardPage = () => {
           </motion.div>
         )}
 
-=======
-          className="flex gap-3"
-        >
-          <Link
-            to="/mensagens"
-            className="flex-1 rounded-2xl bg-card shadow-card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <MessageSquare size={18} className="text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">Mensagens</p>
-              <p className="text-[11px] text-muted-foreground">Ver conversas</p>
-            </div>
-            <ChevronRight size={16} className="text-muted-foreground" />
-          </Link>
-        </motion.div>
-
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
         {/* Recent requests */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-<<<<<<< HEAD
           <h3 className="font-display font-black text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 pl-1">
             REGISTRO DE OPERAÇÕES
           </h3>
           {recentRequests.length > 0 ? (
             <div className="space-y-3">
-=======
-          <h3 className="font-display text-sm uppercase tracking-wider text-muted-foreground mb-3">
-            Solicitações Recentes
-          </h3>
-          {recentRequests.length > 0 ? (
-            <div className="space-y-2">
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
               {recentRequests.map((req) => {
                 const st = statusLabel[req.status] || statusLabel.pending;
                 return (
                   <div
                     key={req.id}
-<<<<<<< HEAD
                     className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4 border-l-4 border-l-primary hover:bg-secondary/10 transition-colors"
                   >
                     <div className="flex-1 min-w-0">
@@ -541,17 +375,6 @@ const DashboardPage = () => {
                       </p>
                     </div>
                     <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-2xl border border-current ${st.color}`}>
-=======
-                    className="rounded-2xl bg-card shadow-card p-4 flex items-center gap-3"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground truncate">{req.description}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {new Date(req.created_at).toLocaleDateString("pt-BR")}
-                      </p>
-                    </div>
-                    <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${st.color}`}>
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
                       {st.text}
                     </span>
                   </div>
@@ -559,15 +382,9 @@ const DashboardPage = () => {
               })}
             </div>
           ) : (
-<<<<<<< HEAD
             <div className="rounded-2xl bg-card border border-dashed border-border p-12 text-center">
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                 Nenhuma operação detectada no sistema.
-=======
-            <div className="rounded-2xl bg-card shadow-card p-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                Suas solicitações de serviço aparecerão aqui.
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
               </p>
             </div>
           )}
@@ -580,7 +397,4 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-<<<<<<< HEAD
 
-=======
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a

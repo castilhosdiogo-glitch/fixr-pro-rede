@@ -1,33 +1,5 @@
 import type { Config } from "tailwindcss";
-<<<<<<< HEAD
 import tailwindcssAnimate from "tailwindcss-animate";
-=======
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
-
-export default {
-  darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
-  prefix: "",
-  theme: {
-    container: {
-      center: true,
-      padding: "1rem",
-      screens: {
-        sm: "640px",
-        md: "768px",
-        lg: "1024px",
-        xl: "1200px",
-      },
-    },
-    extend: {
-      fontFamily: {
-<<<<<<< HEAD
-        display: ["'Outfit'", "sans-serif"],
-        body: ["'Outfit'", "sans-serif"],
-=======
-        display: ["'Roboto Condensed'", "sans-serif"],
-        body: ["'Inter'", "sans-serif"],
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
       },
       colors: {
         border: "hsl(var(--border))",
@@ -99,9 +71,5 @@ export default {
       },
     },
   },
-<<<<<<< HEAD
   plugins: [tailwindcssAnimate],
-=======
-  plugins: [require("tailwindcss-animate")],
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 } satisfies Config;

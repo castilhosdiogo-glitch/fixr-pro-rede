@@ -5,11 +5,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-<<<<<<< HEAD
   { ignores: ["dist", "playwright-fixture.ts", "supabase/functions/**"] },
-=======
-  { ignores: ["dist"] },
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -24,15 +20,11 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-<<<<<<< HEAD
       "@typescript-eslint/no-unused-vars": ["warn", {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_"
       }],
       "@typescript-eslint/no-explicit-any": "warn",
-=======
-      "@typescript-eslint/no-unused-vars": "off",
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
     },
   },
 );

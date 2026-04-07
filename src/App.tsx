@@ -1,17 +1,11 @@
-<<<<<<< HEAD
 import { lazy, Suspense } from "react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
-=======
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
-<<<<<<< HEAD
 import { HelmetProvider } from "react-helmet-async";
 import { InstallPrompt } from "./components/InstallPrompt";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -99,44 +93,6 @@ const App = () => (
       </AuthProvider>
     </QueryClientProvider>
   </HelmetProvider>
-=======
-import Index from "./pages/Index";
-import SearchPage from "./pages/SearchPage";
-import ProfessionalProfile from "./pages/ProfessionalProfile";
-import QuoteRequest from "./pages/QuoteRequest";
-import MessagesPage from "./pages/MessagesPage";
-import ProfilePage from "./pages/ProfilePage";
-import AuthPage from "./pages/AuthPage";
-import DashboardPage from "./pages/DashboardPage";
-import ClientDashboard from "./pages/ClientDashboard";
-import NotFound from "./pages/NotFound";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/buscar" element={<SearchPage />} />
-            <Route path="/profissional/:id" element={<ProfessionalProfile />} />
-            <Route path="/orcamento/:id" element={<QuoteRequest />} />
-            <Route path="/mensagens" element={<MessagesPage />} />
-            <Route path="/perfil" element={<ProfilePage />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/meu-painel" element={<ClientDashboard />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
->>>>>>> f38df2aedbfdd1c2343837c06db5bb59b8dcdb8a
 );
 
 export default App;
