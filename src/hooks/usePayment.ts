@@ -40,8 +40,9 @@ export function useCreatePaymentIntent() {
 
       // Call edge function to create payment intent
       const session = await supabase.auth.getSession();
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
       const response = await fetch(
-        "https://hoymfqveawkomiixtvpw.supabase.co/functions/v1/create-payment-intent",
+        `${supabaseUrl}/functions/v1/create-payment-intent`,
         {
           method: "POST",
           headers: {

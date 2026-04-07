@@ -1,4 +1,4 @@
-import { Home, Search, MessageSquare, User, LayoutDashboard, ClipboardList } from "lucide-react";
+import { Home, Search, MessageSquare, User, ClipboardList } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 

@@ -1,6 +1,6 @@
 ﻿import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Drill, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, Drill, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const HeroSection = () => {
@@ -8,7 +8,7 @@ const HeroSection = () => {
   const { user } = useAuth();
 
   const handleRegister = () => {
-    navigate("/auth?tab=register");
+    navigate("/auth", { state: { mode: "register-client" } });
   };
 
   return (

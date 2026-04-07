@@ -7,7 +7,6 @@ import {
   MEIPersonalDataSchema,
   MEICNPJSchema,
   MEIPersonalData,
-  MEICNPJData,
   formatCPF,
   formatCNPJ,
   formatCEP,
@@ -16,7 +15,6 @@ import {
 import {
   validateCNPJWithAPI,
   saveMEIRegistration,
-  getMEIProfile,
   hasCompletedMEI,
 } from "@/services/mei-service";
 

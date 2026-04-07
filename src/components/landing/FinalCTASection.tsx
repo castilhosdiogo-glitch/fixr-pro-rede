@@ -25,7 +25,8 @@ const FinalCTASection = () => (
           </p>
           <div className="flex flex-col gap-4">
             <Link
-              to="/auth?tab=register"
+              to="/auth"
+              state={{ mode: "register-professional" }}
               className="inline-flex items-center justify-center gap-4 px-10 py-6 bg-white text-primary font-display font-black text-xs uppercase tracking-[0.3em] rounded-2xl hover:bg-black hover:text-white transition-all duration-300 active:scale-[0.98]"
             >
               CRIAR MEU PERFIL

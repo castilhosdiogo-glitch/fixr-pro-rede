@@ -60,7 +60,8 @@ export const Footer = () => {
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
                 <Link
-                  to="/auth?tab=register"
+                  to="/auth"
+                  state={{ mode: "register-professional" }}
                   className="hover:text-primary transition-colors"
                 >
                   Criar Perfil
@@ -123,8 +124,7 @@ export const Footer = () => {
         <div className="border-t border-border pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
             <p>
-              © {currentYear} Fixrapp Tecnologia Ltda. CNPJ: [a inserir]. Todos os direitos
-              reservados.
+              © {currentYear} Fixrapp Tecnologia Ltda. Todos os direitos reservados.
             </p>
             <div className="flex gap-4">
               <a

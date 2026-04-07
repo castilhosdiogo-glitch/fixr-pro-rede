@@ -448,7 +448,7 @@ const AuthPage = () => {
             />
             <label htmlFor="privacy-consent" className="text-[9px] font-medium text-muted-foreground cursor-pointer flex-1">
               Concordo com a{" "}
-              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary font-black hover:underline">
+              <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="text-primary font-black hover:underline">
                 Política de Privacidade
               </a>
               {" "}e autorizo o processamento de meus dados pessoais conforme descrito (LGPD).
