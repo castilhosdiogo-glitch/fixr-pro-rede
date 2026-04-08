@@ -116,7 +116,7 @@ const DashboardPage = () => {
     );
   }
 
-  const initials = (profile?.full_name || "P")
+  const profileInitials = ((data?.profile?.full_name) || "P")
     .split(" ")
     .map((n: string) => n[0])
     .join("")
@@ -154,7 +154,7 @@ const DashboardPage = () => {
           className="flex items-center gap-5 border border-border p-6 bg-secondary/10 rounded-2xl shadow-none"
         >
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-display font-black text-2xl">
-            {initials}
+            {profileInitials}
           </div>
           <div className="flex-1 min-w-0">
             <h2 className="font-display font-black text-xl text-foreground uppercase tracking-tight truncate">
