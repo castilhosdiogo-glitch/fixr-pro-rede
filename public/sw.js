@@ -1,57 +1,42 @@
-// FIXR Service Worker — Network-first para HTML, Cache-first para assets com hash
-const CACHE_VERSION = 'fixr-v3';
+// FIXR Service Worker — Cache-first para assets estáticos
+const CACHE_NAME = 'fixr-v1';
+const STATIC_ASSETS = [
+  '/',
+  '/index.html',
+];
 
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  // Apaga TODOS os caches antigos
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
   );
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
+  // Apenas cache GET requests para assets estáticos
   if (event.request.method !== 'GET') return;
+  if (event.request.url.includes('/rest/v1/') || event.request.url.includes('/auth/')) return;
 
-  // Nunca cachear: API, auth, extensões do Chrome
-  const url = event.request.url;
-  if (
-    url.includes('/rest/v1/') ||
-    url.includes('/auth/') ||
-    url.startsWith('chrome-extension://') ||
-    url.startsWith('chrome://')
-  ) return;
-
-  // index.html — sempre buscar da rede (nunca cache)
-  if (url.endsWith('/') || url.endsWith('/index.html') || !url.includes('.')) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // Assets com hash no nome (ex: index-DDWwJVST.js) — cache-first
-  if (url.includes('/assets/')) {
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200) return response;
-          const clone = response.clone();
-          caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, clone));
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  // Demais requests — network-first
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((response) => {
+        if (!response || response.status !== 200 || response.type === 'opaque') {
+          return response;
+        }
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      });
+    })
   );
 });
