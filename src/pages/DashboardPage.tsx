@@ -17,7 +17,6 @@ import ActiveServiceCard from "@/components/ActiveServiceCard";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { PushToggle } from "@/components/notifications/PushToggle";
 import { usePlanGate } from "@/hooks/usePlanGate";
-import { Link } from "react-router-dom";
 
 interface Stats {
   requestsReceived: number;
