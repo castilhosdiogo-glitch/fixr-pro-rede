@@ -20,6 +20,10 @@ Sentry.init({
 
 // Registra o Service Worker do PWA
 if ("serviceWorker" in navigator) {
+  // Desregistra service workers antigos antes de registrar novo
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((reg) => reg.unregister());
+  });
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch((error) => {
       console.error("SW registration failed:", error);
