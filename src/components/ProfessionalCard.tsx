@@ -17,6 +17,8 @@ interface ProfessionalCardProps {
 const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) => {
   const { user } = useAuth();
   const { data: reputation } = useProfessionalReputation(professional.id);
+  const initials = (professional.name || "P")
+    .split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <motion.div
