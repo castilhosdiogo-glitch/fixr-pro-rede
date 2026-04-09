@@ -1,11 +1,16 @@
 ﻿import { useState, useEffect, useRef, useMemo } from "react";
-import { ArrowLeft, MessageSquare, Send, AlertTriangle, Shield } from "lucide-react";
+import { ArrowLeft, MessageSquare, Send, AlertTriangle, Shield, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import BottomNav from "@/components/BottomNav";
 import { SEO } from "@/components/SEO";
+import { usePlanGate } from "@/hooks/usePlanGate";
+import { useUploadChatMedia } from "@/hooks/useChatMedia";
+import AudioRecorder from "@/components/chat/AudioRecorder";
+import MediaPicker from "@/components/chat/MediaPicker";
+import MediaMessage from "@/components/chat/MediaMessage";
 
 interface Message {
   id: string;
@@ -14,6 +19,9 @@ interface Message {
   content: string;
   created_at: string;
   is_read: boolean | null;
+  tipo?: string;
+  arquivo_url?: string;
+  duracao?: number;
 }
 
 interface PartnerProfile {
@@ -39,6 +47,9 @@ const MessagesPage = () => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const isProfessional = profile?.user_type === "professional";
+
+  const planGate = usePlanGate();
+  const uploadMedia = useUploadChatMedia();
 
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
   const [input, setInput] = useState("");
@@ -196,12 +207,38 @@ const MessagesPage = () => {
       sender_id: user.id,
       receiver_id: selectedPartnerId,
       content: input.trim(),
+      tipo: "text",
     });
 
     setInput("");
     setSending(false);
     queryClient.invalidateQueries({ queryKey: ["conversation", user.id, selectedPartnerId] });
     queryClient.invalidateQueries({ queryKey: ["all-messages", user.id] });
+  };
+
+  const handleSendMedia = async (blob: Blob, type: "audio" | "photo" | "video", duration?: number) => {
+    if (!user || !selectedPartnerId || sending) return;
+    setSending(true);
+
+    try {
+      const url = await uploadMedia.mutateAsync({ file: blob, type });
+
+      await supabase.from("messages").insert({
+        sender_id: user.id,
+        receiver_id: selectedPartnerId,
+        content: type === "audio" ? "Mensagem de áudio" : type === "photo" ? "Foto" : "Vídeo",
+        tipo: type,
+        arquivo_url: url,
+        duracao: duration ?? null,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["conversation", user.id, selectedPartnerId] });
+      queryClient.invalidateQueries({ queryKey: ["all-messages", user.id] });
+    } catch {
+      // upload failed silently
+    } finally {
+      setSending(false);
+    }
   };
 
   if (!user) {
@@ -255,7 +292,16 @@ const MessagesPage = () => {
                       : "bg-secondary/10 border-border text-foreground"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                  {msg.tipo && msg.tipo !== "text" && msg.arquivo_url ? (
+                    <MediaMessage
+                      tipo={msg.tipo as "audio" | "photo" | "video"}
+                      arquivoUrl={msg.arquivo_url}
+                      duracao={msg.duracao}
+                      isMine={isMine}
+                    />
+                  ) : (
+                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                  )}
                   <p
                     className={`text-[9px] mt-2 font-black uppercase tracking-widest ${
                       isMine ? "text-primary-foreground/50 text-right" : "text-muted-foreground"
@@ -282,6 +328,31 @@ const MessagesPage = () => {
               </p>
             </div>
           )}
+          <div className="flex items-center gap-2 mb-2">
+            <AudioRecorder
+              onRecordComplete={(blob, duration) => handleSendMedia(blob, "audio", duration)}
+              disabled={!planGate.can("chatAudio") || sending || uploadMedia.isPending}
+            />
+            <MediaPicker
+              onMediaSelect={(file, type) => handleSendMedia(file, type)}
+              canPhoto={planGate.can("chatPhoto")}
+              canVideo={planGate.can("chatVideo")}
+              disabled={sending || uploadMedia.isPending}
+            />
+            {uploadMedia.isPending && (
+              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">
+                ENVIANDO...
+              </span>
+            )}
+            {(!planGate.can("chatAudio") || !planGate.can("chatPhoto")) && (
+              <button
+                onClick={() => navigate("/planos")}
+                className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Lock size={10} /> UPGRADE P/ MÍDIA
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-0">
             <input
               type="text"
