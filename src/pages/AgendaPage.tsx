@@ -58,7 +58,7 @@ const AgendaPage = () => {
       const { data } = await supabase
         .from("schedules")
         .select("*")
-        .eq("professional_id", profile!.id)
+        .eq("profissional_id", profile!.id)
         .gte("start_at", new Date().toISOString().split("T")[0])
         .order("start_at", { ascending: true });
       return (data || []) as Schedule[];
@@ -69,7 +69,7 @@ const AgendaPage = () => {
     mutationFn: async () => {
       if (!profile?.id) throw new Error("Perfil não encontrado");
       const { error } = await supabase.from("schedules").insert({
-        professional_id: profile.id,
+        profissional_id: profile.id,
         title,
         client_name: clientName || null,
         description: description || null,

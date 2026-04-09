@@ -49,10 +49,17 @@ const TeamPage = () => {
       const { data } = await supabase
         .from("team_members")
         .select("*")
-        .eq("professional_id", profile!.id)
-        .eq("active", true)
-        .order("name");
-      return (data || []) as TeamMember[];
+        .eq("profissional_id", profile!.id)
+        .eq("ativo", true)
+        .order("nome");
+      return (data || []).map((m: Record<string, unknown>) => ({
+        id: m.id as string,
+        name: (m.nome as string) || "",
+        role: (m.funcao as string) || null,
+        phone: (m.phone as string) || null,
+        email: (m.email as string) || null,
+        active: m.ativo as boolean,
+      })) as TeamMember[];
     },
   });
 
@@ -60,9 +67,9 @@ const TeamPage = () => {
     mutationFn: async () => {
       if (!profile?.id) throw new Error("Perfil não encontrado");
       const { error } = await supabase.from("team_members").insert({
-        professional_id: profile.id,
-        name,
-        role: role || null,
+        profissional_id: profile.id,
+        nome: name,
+        funcao: role || null,
         phone: phone || null,
         email: email || null,
       });
@@ -84,7 +91,7 @@ const TeamPage = () => {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from("team_members")
-        .update({ active: false })
+        .update({ ativo: false })
         .eq("id", id);
       if (error) throw error;
     },

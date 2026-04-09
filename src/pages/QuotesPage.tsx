@@ -60,9 +60,18 @@ const QuotesPage = () => {
       const { data } = await supabase
         .from("quotes")
         .select("*")
-        .eq("professional_id", profile!.id)
+        .eq("profissional_id", profile!.id)
         .order("created_at", { ascending: false });
-      return (data || []) as Quote[];
+      return (data || []).map((q: Record<string, unknown>) => ({
+        id: q.id as string,
+        client_name: (q.client_name as string) || "",
+        client_phone: (q.client_phone as string) || null,
+        description: (q.description as string) || null,
+        total: Number(q.total || q.valor_total || 0),
+        status: (q.status as string) || "draft",
+        valid_until: (q.validade as string) || null,
+        created_at: q.created_at as string,
+      })) as Quote[];
     },
   });
 
@@ -74,11 +83,12 @@ const QuotesPage = () => {
       const { data: quote, error } = await supabase
         .from("quotes")
         .insert({
-          professional_id: profile.id,
+          profissional_id: profile.id,
           client_name: clientName,
           client_phone: clientPhone || null,
           description: description || null,
           total,
+          valor_total: total,
         })
         .select("id")
         .single();
