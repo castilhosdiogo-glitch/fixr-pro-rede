@@ -1,5 +1,5 @@
-﻿import { useState, useMemo, useEffect } from "react";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
+﻿import { useState, useMemo } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, Search, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -13,8 +13,7 @@ import { useSlotOccupancy } from "@/hooks/useSupplyControl";
 import { SlotIndicator } from "@/components/supply/SlotIndicator";
 
 const SearchPage = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const { loading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get("categoria") || "";
   const cityParam = searchParams.get("cidade") || "";
@@ -63,7 +62,8 @@ const SearchPage = () => {
       if (error) throw error;
 
       // Map Supabase data to the interface expected by ProfessionalCard
-      return (data || []).map((pro: any) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (data || []).map((pro: Record<string, any>) => ({
         id: pro.id,
         name: pro.profiles?.full_name || "Profissional",
         photo: pro.profiles?.avatar_url || "",
@@ -79,6 +79,7 @@ const SearchPage = () => {
         experience: pro.experience || "N/A",
         phone: pro.profiles?.phone || "",
         reviews: [], // Placeholder for now
+        plan_name: pro.plan_name || "explorador"
       }));
     },
   });
@@ -115,7 +116,7 @@ const SearchPage = () => {
   const singleSlot = categoryFilter && cityFilter ? slotData[0] : null;
 
   const categoryName = categoryFilter
-    ? categories.find((c: any) => c.id === categoryFilter)?.name
+    ? categories.find((c: { id: string; name: string }) => c.id === categoryFilter)?.name
     : null;
 
   const pageTitle = categoryName && cityFilter
@@ -165,7 +166,7 @@ const SearchPage = () => {
               className="w-full bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none appearance-none cursor-pointer"
             >
               <option value="" className="bg-background">TODAS</option>
-              {categories.map((cat: any) => (
+              {categories.map((cat: { id: string; name: string }) => (
                 <option key={cat.id} value={cat.id} className="bg-background">
                   {cat.name.toUpperCase()}
                 </option>

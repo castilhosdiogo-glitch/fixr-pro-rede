@@ -31,6 +31,7 @@ export interface Professional {
   experience: string;
   phone: string;
   reviews: Review[];
+  plan_name?: string;
 }
 
 export const AVAILABLE_CITIES = [
