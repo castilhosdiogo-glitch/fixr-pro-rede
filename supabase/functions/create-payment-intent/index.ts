@@ -47,6 +47,17 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const db = createClient(supabaseUrl, supabaseKey);
 
+    // Verify caller's JWT
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return errorResponse("UNAUTHORIZED", "Missing authorization header", 401);
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user: caller }, error: authError } = await db.auth.getUser(token);
+    if (authError || !caller) {
+      return errorResponse("UNAUTHORIZED", "Invalid or expired token", 401);
+    }
+
     // Validate and parse request body
     const validation = await validateRequestBody(req, PaymentIntentSchema);
     if (!validation.success) {
@@ -65,6 +76,12 @@ Deno.serve(async (req) => {
     const sanitizedBroadcastId = sanitizeUUID(broadcast_id);
     const sanitizedProfessionalId = sanitizeUUID(professional_id);
     const sanitizedClientId = sanitizeUUID(client_id);
+
+    // Verify caller matches client_id
+    if (caller.id !== sanitizedClientId) {
+      console.warn(`[SECURITY] JWT user ${caller.id} tried to pay as ${sanitizedClientId}`);
+      return errorResponse("FORBIDDEN", "Client ID does not match authenticated user", 403);
+    }
 
     if (!sanitizedBroadcastId || !sanitizedProfessionalId || !sanitizedClientId) {
       return validationErrorResponse({

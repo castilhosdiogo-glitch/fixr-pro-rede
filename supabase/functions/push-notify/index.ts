@@ -114,6 +114,25 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Verify caller's JWT — must be an authenticated user or service role
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return errorResponse("UNAUTHORIZED", "Missing authorization header", 401);
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    // Allow service role key for internal/cron calls
+    const isServiceRole = token === serviceRoleKey;
+    if (!isServiceRole) {
+      const tempDb = createClient(supabaseUrl, serviceRoleKey);
+      const { data: { user: caller }, error: authError } = await tempDb.auth.getUser(token);
+      if (authError || !caller) {
+        return errorResponse("UNAUTHORIZED", "Invalid or expired token", 401);
+      }
+    }
+
     // Validate request body
     const validation = await validateRequestBody(req, PushNotificationSchema);
     if (!validation.success) {
@@ -144,8 +163,6 @@ Deno.serve(async (req) => {
 
     const vapidPublic = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
     const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY") ?? "";
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
     const db = createClient(supabaseUrl, serviceRoleKey);
 
