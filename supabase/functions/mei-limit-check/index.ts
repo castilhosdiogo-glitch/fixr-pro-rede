@@ -35,19 +35,19 @@ Deno.serve(async (req: Request) => {
     const yearEnd = `${currentYear}-12-31`;
 
     // Get all Elite professionals with MEI revenue data
-    const { data: eliteProfiles, error: profilesError } = await db
+    const { data: parceiroProfiles, error: profilesError } = await db
       .from("professional_profiles")
       .select("id, user_id, plan_name")
-      .eq("plan_name", "elite");
+      .eq("plan_name", "parceiro");
 
     if (profilesError) throw profilesError;
-    if (!eliteProfiles || eliteProfiles.length === 0) {
-      return successResponse({ message: "No elite profiles to check", checked: 0 });
+    if (!parceiroProfiles || parceiroProfiles.length === 0) {
+      return successResponse({ message: "No parceiro profiles to check", checked: 0 });
     }
 
     let notificationsSent = 0;
 
-    for (const profile of eliteProfiles) {
+    for (const profile of parceiroProfiles) {
       // Get total revenue for this year
       const { data: revenues } = await db
         .from("mei_revenue_tracking")
@@ -106,7 +106,7 @@ Deno.serve(async (req: Request) => {
 
     return successResponse({
       message: "MEI limit check complete",
-      checked: eliteProfiles.length,
+      checked: parceiroProfiles.length,
       notificationsSent,
     });
   } catch (err) {

@@ -74,7 +74,7 @@ export default function FAQ() {
         {
           question: "Quanto custa usar o Fixr?",
           answer:
-            "O cadastro e uso básico da Plataforma são gratuitos. A Fixr cobra uma comissão sobre cada serviço realizado, descontada automaticamente no repasse. A taxa varia conforme o plano escolhido — Free (18%), Pro (12%) ou Elite (10%). Veja mais detalhes no aplicativo.",
+            "O cadastro é gratuito no plano Explorador, com comissão de 15% sobre cada serviço. O plano Parceiro (R$ 29,90/mês) reduz a comissão para 10% e libera recursos extras como áudio, vídeo no chat, agenda e hub fiscal.",
         },
         {
           question: "Como e quando recebo o pagamento?",
@@ -87,9 +87,9 @@ export default function FAQ() {
             "Sim. Você escolhe quais pedidos aceitar. No entanto, uma taxa de recusa muito alta pode impactar seu posicionamento nos resultados de busca da Plataforma. Recomendamos aceitar apenas pedidos que você realmente pode atender.",
         },
         {
-          question: "O que é o Plano Pro e o Plano Elite?",
+          question: "O que é o Plano Parceiro?",
           answer:
-            "O Plano Pro (R$ 49/mês) e o Plano Elite (R$ 99/mês) oferecem benefícios como menor taxa de comissão, destaque nos resultados de busca, badge de verificação avançada e acesso a pedidos ilimitados. O plano Free permite até 5 pedidos por mês.",
+            "O Plano Parceiro (R$ 29,90/mês) oferece comissão reduzida de 10%, solicitações ilimitadas, destaque nos resultados de busca, chat com áudio e vídeo, agenda integrada, hub fiscal e muito mais. O plano Explorador é gratuito e permite até 8 solicitações por mês.",
         },
         {
           question: "Posso abrir meu MEI pelo Fixr?",

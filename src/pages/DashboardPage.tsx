@@ -176,28 +176,22 @@ const DashboardPage = () => {
               </Link>
             </div>
           ) : (
-            <div className={`p-4 rounded-2xl border-2 flex items-center gap-4 ${
-              planGate.isElite ? "border-primary/30 bg-primary/5" : "border-border bg-secondary/5"
-            }`}>
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-                planGate.isElite ? "bg-primary/15" : "bg-secondary/20"
-              }`}>
-                <Crown size={18} className={planGate.isElite ? "text-primary" : "text-muted-foreground"} />
+            <div className="p-4 rounded-2xl border-2 border-primary/30 bg-primary/5 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                <Crown size={18} className="text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-[10px] font-black uppercase tracking-widest ${
-                  planGate.isElite ? "text-primary" : "text-foreground"
-                }`}>
-                  PLANO {planGate.plan.toUpperCase()}
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary">
+                  PLANO PARCEIRO
                 </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Solicitações ilimitadas</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Solicitações ilimitadas · Comissão 10%</p>
               </div>
             </div>
           )}
         </motion.div>
 
-        {/* Quick shortcuts — Elite features */}
-        {(planGate.isParceiro || planGate.isElite) && (
+        {/* Quick shortcuts — Parceiro features */}
+        {planGate.isParceiro && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -208,22 +202,18 @@ const DashboardPage = () => {
               <Receipt size={18} className="text-primary" />
               <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground text-center">Fiscal</span>
             </Link>
-            {planGate.isElite && (
-              <>
-                <Link to="/agenda" className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border hover:border-primary transition-colors">
-                  <Calendar size={18} className="text-primary" />
-                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground text-center">Agenda</span>
-                </Link>
-                <Link to="/orcamentos" className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border hover:border-primary transition-colors">
-                  <FileText size={18} className="text-primary" />
-                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground text-center">Orçamentos</span>
-                </Link>
-                <Link to="/equipe" className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border hover:border-primary transition-colors">
-                  <Users size={18} className="text-primary" />
-                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground text-center">Equipe</span>
-                </Link>
-              </>
-            )}
+            <Link to="/agenda" className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border hover:border-primary transition-colors">
+              <Calendar size={18} className="text-primary" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground text-center">Agenda</span>
+            </Link>
+            <Link to="/orcamentos" className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border hover:border-primary transition-colors">
+              <FileText size={18} className="text-primary" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground text-center">Orçamentos</span>
+            </Link>
+            <Link to="/equipe" className="flex flex-col items-center gap-2 p-3 rounded-2xl border border-border hover:border-primary transition-colors">
+              <Users size={18} className="text-primary" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground text-center">Equipe</span>
+            </Link>
           </motion.div>
         )}
 

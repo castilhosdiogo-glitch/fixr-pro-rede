@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export type PlanName = "explorador" | "parceiro" | "elite";
+export type PlanName = "explorador" | "parceiro";
 
 export type PlanFeature = keyof typeof PLAN_LIMITS.explorador;
 
@@ -13,7 +13,7 @@ export const PLAN_LIMITS = {
     commissionRate: 15,
     chatText: true,
     chatAudio: false,
-    chatPhoto: false,
+    chatPhoto: true,
     chatVideo: false,
     hubFiscalNfse: false,
     hubFiscalDas: false,
@@ -21,32 +21,13 @@ export const PLAN_LIMITS = {
     agenda: false,
     quotes: false,
     teamManagement: false,
-    portfolioLimit: 5,
+    portfolioLimit: 0,
     meiRevenueTracking: false,
     searchBoost: 0,
     price: 0,
   },
   parceiro: {
     label: "Parceiro",
-    monthlyRequests: Infinity,
-    commissionRate: 12,
-    chatText: true,
-    chatAudio: true,
-    chatPhoto: true,
-    chatVideo: false,
-    hubFiscalNfse: true,
-    hubFiscalDas: true,
-    hubFiscalMeiLimit: false,
-    agenda: false,
-    quotes: false,
-    teamManagement: false,
-    portfolioLimit: 10,
-    meiRevenueTracking: false,
-    searchBoost: 1,
-    price: 1990,
-  },
-  elite: {
-    label: "Elite",
     monthlyRequests: Infinity,
     commissionRate: 10,
     chatText: true,
@@ -62,7 +43,7 @@ export const PLAN_LIMITS = {
     portfolioLimit: 20,
     meiRevenueTracking: true,
     searchBoost: 2,
-    price: 3990,
+    price: 2990,
   },
 } as const;
 
@@ -74,17 +55,9 @@ export interface PlanGate {
   canAcceptRequest: boolean;
   isLoading: boolean;
   can: (feature: PlanFeature) => boolean;
-  hasMinPlan: (min: PlanName) => boolean;
   isParceiro: boolean;
-  isElite: boolean;
   upgradeMessage: string | null;
 }
-
-const PLAN_ORDER: Record<PlanName, number> = {
-  explorador: 0,
-  parceiro: 1,
-  elite: 2,
-};
 
 export function usePlanGate(): PlanGate {
   const { user } = useAuth();
@@ -101,8 +74,12 @@ export function usePlanGate(): PlanGate {
         supabase.rpc("get_monthly_request_count", { p_user_id: user!.id }),
       ]);
 
+      // Migrate any legacy "elite" plan to "parceiro"
+      const rawPlan = proRes.data?.plan_name ?? "explorador";
+      const plan: PlanName = rawPlan === "elite" ? "parceiro" : (rawPlan as PlanName);
+
       return {
-        plan: (proRes.data?.plan_name ?? "explorador") as PlanName,
+        plan,
         monthlyRequestCount: (typeof countRes.data === "number" ? countRes.data : 0),
       };
     },
@@ -123,9 +100,9 @@ export function usePlanGate(): PlanGate {
   let upgradeMessage: string | null = null;
   if (plan === "explorador") {
     if (requestsRemaining === 0) {
-      upgradeMessage = "Você atingiu o limite de 8 solicitações este mês. Faça upgrade para o plano Parceiro para solicitações ilimitadas.";
+      upgradeMessage = "Você atingiu o limite de 8 solicitações este mês. Seja Parceiro e tenha pedidos ilimitados por R$ 29,90/mês.";
     } else if (requestsRemaining !== null && requestsRemaining <= 2) {
-      upgradeMessage = `Restam apenas ${requestsRemaining} solicitações este mês. Considere o plano Parceiro para não ter limites.`;
+      upgradeMessage = `Restam apenas ${requestsRemaining} solicitações este mês. Seja Parceiro para não ter limites.`;
     }
   }
 
@@ -137,9 +114,7 @@ export function usePlanGate(): PlanGate {
     canAcceptRequest,
     isLoading,
     can: (feature) => !!limits[feature],
-    hasMinPlan: (min) => PLAN_ORDER[plan] >= PLAN_ORDER[min],
-    isParceiro: PLAN_ORDER[plan] >= PLAN_ORDER.parceiro,
-    isElite: plan === "elite",
+    isParceiro: plan === "parceiro",
     upgradeMessage,
   };
 }

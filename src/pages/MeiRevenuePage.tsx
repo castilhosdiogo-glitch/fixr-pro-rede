@@ -90,7 +90,7 @@ const MeiRevenuePage = () => {
     onError: () => toast.error("Erro ao registrar receita"),
   });
 
-  if (!planGate.isElite) {
+  if (!planGate.isParceiro) {
     return (
       <div className="min-h-screen pb-20 bg-background flex items-center justify-center p-6">
         <SEO title="MEI Receitas | Fixr" />
@@ -98,13 +98,13 @@ const MeiRevenuePage = () => {
           <DollarSign size={48} className="mx-auto text-muted-foreground" />
           <h2 className="font-display font-black text-sm uppercase tracking-[0.2em]">CONTROLE MEI</h2>
           <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-            Acompanhe sua receita MEI e evite ultrapassar o limite. Exclusivo do plano Elite.
+            Acompanhe sua receita MEI e evite ultrapassar o limite. Exclusivo do plano Parceiro.
           </p>
           <button
             onClick={() => navigate("/planos")}
             className="px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest"
           >
-            UPGRADE PARA ELITE
+            SER PARCEIRO
           </button>
         </div>
         <BottomNav />

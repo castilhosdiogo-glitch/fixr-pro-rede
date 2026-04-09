@@ -55,10 +55,10 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
                 <h3 className="font-display font-black text-base uppercase tracking-tight text-foreground group-hover:text-primary transition-colors line-clamp-1">
                   {professional.name}
                 </h3>
-                {professional.plan_name === "elite" && (
+                {(professional.plan_name === "parceiro" || professional.plan_name === "elite") && (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/15 text-primary">
                     <Crown size={10} />
-                    <span className="text-[8px] font-black uppercase tracking-widest">ELITE</span>
+                    <span className="text-[8px] font-black uppercase tracking-widest">PARCEIRO</span>
                   </span>
                 )}
                 {reputation && (

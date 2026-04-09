@@ -102,7 +102,7 @@ const AgendaPage = () => {
     },
   });
 
-  if (!planGate.isElite) {
+  if (!planGate.isParceiro) {
     return (
       <div className="min-h-screen pb-20 bg-background flex items-center justify-center p-6">
         <SEO title="Agenda | Fixr" />
@@ -112,13 +112,13 @@ const AgendaPage = () => {
             AGENDA PROFISSIONAL
           </h2>
           <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-            Gerencie seus compromissos. Exclusivo do plano Elite.
+            Gerencie seus compromissos. Exclusivo do plano Parceiro.
           </p>
           <button
             onClick={() => navigate("/planos")}
             className="px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest"
           >
-            UPGRADE PARA ELITE
+            SER PARCEIRO
           </button>
         </div>
         <BottomNav />

@@ -31,7 +31,7 @@ const HubFiscalPage = () => {
 
   const { data: meiTotal = 0 } = useQuery({
     queryKey: ["meiTotal", profile?.id, currentYear],
-    enabled: !!profile?.id && planGate.isElite,
+    enabled: !!profile?.id && planGate.isParceiro,
     queryFn: async () => {
       const { data } = await supabase
         .from("mei_revenue_tracking")
@@ -82,7 +82,7 @@ const HubFiscalPage = () => {
 
       <div className="max-w-lg mx-auto p-4 space-y-4">
         {/* NFS-e Section — Parceiro+ */}
-        <Section title="NOTA FISCAL DE SERVIÇO (NFS-e)" locked={!planGate.isParceiro && !planGate.isElite}>
+        <Section title="NOTA FISCAL DE SERVIÇO (NFS-e)" locked={!planGate.isParceiro}>
           <div className="space-y-3">
             <div className="flex items-start gap-3 p-3 rounded-xl bg-secondary/10">
               <FileText size={16} className="text-primary flex-shrink-0 mt-0.5" />
@@ -116,7 +116,7 @@ const HubFiscalPage = () => {
         </Section>
 
         {/* DAS Section — Parceiro+ */}
-        <Section title="GUIA DAS MENSAL" locked={!planGate.isParceiro && !planGate.isElite}>
+        <Section title="GUIA DAS MENSAL" locked={!planGate.isParceiro}>
           <div className="space-y-3">
             <div className="flex items-start gap-3 p-3 rounded-xl bg-secondary/10">
               <Receipt size={16} className="text-primary flex-shrink-0 mt-0.5" />
@@ -147,8 +147,8 @@ const HubFiscalPage = () => {
           </div>
         </Section>
 
-        {/* MEI Limit Monitoring — Elite only */}
-        <Section title="MONITORAMENTO LIMITE MEI" locked={!planGate.isElite}>
+        {/* MEI Limit Monitoring — Parceiro */}
+        <Section title="MONITORAMENTO LIMITE MEI" locked={!planGate.isParceiro}>
           <div className="space-y-3">
             <div className="flex items-start gap-3 p-3 rounded-xl bg-secondary/10">
               <TrendingUp size={16} className="text-primary flex-shrink-0 mt-0.5" />

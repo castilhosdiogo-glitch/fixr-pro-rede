@@ -27,7 +27,7 @@ const AdminDashboard       = lazy(() => import("./pages/AdminDashboard"));
 const BroadcastRequestPage = lazy(() => import("./pages/BroadcastRequestPage"));
 const ReferralPage         = lazy(() => import("./pages/ReferralPage"));
 
-// Elite pages — lazy loaded
+// Parceiro pages — lazy loaded
 const AgendaPage     = lazy(() => import("./pages/AgendaPage"));
 const QuotesPage     = lazy(() => import("./pages/QuotesPage"));
 const TeamPage       = lazy(() => import("./pages/TeamPage"));
@@ -88,7 +88,7 @@ const App = () => (
                     <Route path="/solicitar" element={<ProtectedRoute><BroadcastRequestPage /></ProtectedRoute>} />
                     <Route path="/indicar" element={<ProtectedRoute><ReferralPage /></ProtectedRoute>} />
 
-                    {/* Elite Pages */}
+                    {/* Parceiro Pages */}
                     <Route path="/agenda" element={<ProtectedRoute><AgendaPage /></ProtectedRoute>} />
                     <Route path="/orcamentos" element={<ProtectedRoute><QuotesPage /></ProtectedRoute>} />
                     <Route path="/equipe" element={<ProtectedRoute><TeamPage /></ProtectedRoute>} />

@@ -344,12 +344,12 @@ const MessagesPage = () => {
                 ENVIANDO...
               </span>
             )}
-            {(!planGate.can("chatAudio") || !planGate.can("chatPhoto")) && (
+            {!planGate.can("chatAudio") && (
               <button
                 onClick={() => navigate("/planos")}
                 className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
               >
-                <Lock size={10} /> UPGRADE P/ MÍDIA
+                <Lock size={10} /> PARCEIRO P/ ÁUDIO E VÍDEO
               </button>
             )}
           </div>
