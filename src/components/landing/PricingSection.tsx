@@ -1,27 +1,28 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle, TrendingUp, Zap, Crown, Sparkles, FileText, AlertTriangle, BarChart3 } from "lucide-react";
+import { CheckCircle, TrendingUp, Zap, Crown, Sparkles, FileText, AlertTriangle, BarChart3, Mic, Camera, Video } from "lucide-react";
 
 const plans = [
   {
-    name: "Starter",
+    name: "Explorador",
     icon: TrendingUp,
     price: "Grátis",
-    priceAfter: "R$9,90",
-    subtitle: "30 dias grátis, depois R$9,90/mês",
+    priceAfter: null,
+    subtitle: "Para começar na plataforma",
     badge: null,
     featured: false,
     benefits: [
       "Criar perfil profissional",
       "Aparecer nas buscas",
-      "Receber solicitações básicas",
-      "Visibilidade padrão",
+      "Até 8 solicitações por mês",
+      "Chat com texto",
+      "Comissão de 15%",
     ],
-    cta: "Começar Grátis por 30 dias",
+    cta: "Começar Grátis",
     ctaStyle: "border-2 border-border text-foreground hover:border-primary hover:text-primary",
   },
   {
-    name: "Profissional",
+    name: "Parceiro",
     icon: Zap,
     price: "R$19,90",
     priceAfter: null,
@@ -29,35 +30,39 @@ const plans = [
     badge: "Mais popular",
     featured: true,
     benefits: [
-      "Maior visibilidade nas buscas",
-      "Receber mais solicitações",
+      "Solicitações ilimitadas",
+      "Chat com áudio e fotos",
+      "Comissão reduzida de 12%",
       "Selo Profissional verificado",
-      "Estatísticas de perfil",
-      "Prioridade no atendimento",
-      "Opção de formalização como MEI",
+      "Maior visibilidade nas buscas",
+      "Informações NFS-e",
+      "Alertas de pagamento DAS",
+      "Portfólio com até 10 fotos",
     ],
-    cta: "Assinar Profissional",
+    cta: "Assinar Parceiro",
     ctaStyle: "gradient-cta text-primary-foreground",
   },
   {
-    name: "Premium",
+    name: "Elite",
     icon: Crown,
     price: "R$39,90",
     priceAfter: null,
     subtitle: "/mês",
-    badge: "Hub Fiscal",
+    badge: "Completo",
     featured: false,
     benefits: [
-      "Tudo do Profissional incluído",
+      "Tudo do Parceiro incluído",
+      "Chat com vídeo",
+      "Comissão mínima de 10%",
       "Ranking prioritário na busca",
-      "Selo de destaque no perfil",
-      "Perfil em destaque na homepage",
-      "Hub Fiscal completo",
-      "Acompanhamento do MEI",
-      "Alerta de vencimento do DAS",
+      "Agenda integrada",
+      "Orçamentos personalizados",
+      "Gestão de equipe (até 3)",
+      "Portfólio com até 20 fotos",
       "Monitoramento do limite MEI",
+      "Hub Fiscal completo",
     ],
-    cta: "Assinar Premium",
+    cta: "Assinar Elite",
     ctaStyle: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
   },
 ];
@@ -78,7 +83,7 @@ const PricingSection = () => (
         CRESÇA O SEU NEGÓCIO
       </h2>
       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 max-w-xs">
-        COMECE GRÁTIS POR 30 DIAS. EVOLUA QUANDO ESTIVER PRONTO.
+        COMECE GRÁTIS. EVOLUA QUANDO ESTIVER PRONTO.
       </p>
     </motion.div>
 
@@ -117,12 +122,6 @@ const PricingSection = () => (
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{plan.subtitle}</span>
             )}
           </div>
-          {plan.priceAfter && (
-            <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 mb-4">
-              <span className="text-primary font-display font-black text-lg">{plan.priceAfter}</span>
-              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">/MÊS APÓS 30 DIAS</span>
-            </div>
-          )}
           {!plan.subtitle.startsWith("/") && (
             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-6">{plan.subtitle.toUpperCase()}</p>
           )}
@@ -139,8 +138,8 @@ const PricingSection = () => (
           <Link
             to="/auth"
             className={`block mt-10 w-full py-5 rounded-2xl font-display font-black text-xs uppercase tracking-[0.3em] text-center transition-all active:scale-[0.98] ${
-              plan.featured 
-                ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+              plan.featured
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "border-2 border-border text-foreground hover:border-primary hover:text-primary"
             }`}
           >
@@ -150,20 +149,61 @@ const PricingSection = () => (
       ))}
     </div>
 
+    {/* Chat com Mídia Highlight */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="mt-12 rounded-2xl bg-background border-2 border-border p-8"
+    >
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center border-2 border-primary">
+          <Mic size={28} className="text-primary-foreground" />
+        </div>
+        <div>
+          <h3 className="font-display font-black text-xl uppercase tracking-tighter text-foreground">CHAT COM MÍDIA</h3>
+          <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">COMUNIQUE-SE MELHOR COM SEUS CLIENTES</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-4">
+        <div className="flex items-start gap-4 p-5 bg-secondary/10 border border-border group hover:border-primary transition-colors">
+          <Mic size={20} className="text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-foreground">MENSAGENS DE ÁUDIO</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-70">PARCEIRO+ // GRAVE E ENVIE ÁUDIOS ATÉ 5MB</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-4 p-5 bg-secondary/10 border border-border group hover:border-primary transition-colors">
+          <Camera size={20} className="text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-foreground">ENVIO DE FOTOS</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-70">PARCEIRO+ // COMPARTILHE FOTOS ATÉ 10MB</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-4 p-5 bg-secondary/10 border border-border group hover:border-primary transition-colors">
+          <Video size={20} className="text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-foreground">ENVIO DE VÍDEOS</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1 opacity-70">ELITE // ENVIE VÍDEOS ATÉ 50MB</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+
     {/* Hub Fiscal Highlight */}
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="mt-12 rounded-2xl bg-background border-2 border-primary p-8"
+      className="mt-6 rounded-2xl bg-background border-2 border-primary p-8"
     >
       <div className="flex items-center gap-4 mb-8">
         <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center border-2 border-primary">
           <FileText size={28} className="text-primary-foreground" />
         </div>
         <div>
-          <h3 className="font-display font-black text-xl uppercase tracking-tighter text-foreground">APOIO AO MEI Fixr</h3>
-          <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">AJUDA EXCLUSIVA DO PLANO PREMIUM</p>
+          <h3 className="font-display font-black text-xl uppercase tracking-tighter text-foreground">HUB FISCAL</h3>
+          <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">APOIO AO MEI // PLANO ELITE</p>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4">
@@ -194,4 +234,3 @@ const PricingSection = () => (
 );
 
 export default PricingSection;
-
