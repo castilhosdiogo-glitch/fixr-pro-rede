@@ -1,5 +1,25 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
+
+export default {
+  darkMode: ["class"],
+  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "1rem",
+      screens: {
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1200px",
+      },
+    },
+    extend: {
+      fontFamily: {
+        display: ["'Outfit'", "sans-serif"],
+        body: ["'Outfit'", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
