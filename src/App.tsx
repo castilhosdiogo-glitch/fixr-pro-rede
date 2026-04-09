@@ -32,6 +32,7 @@ const AgendaPage     = lazy(() => import("./pages/AgendaPage"));
 const QuotesPage     = lazy(() => import("./pages/QuotesPage"));
 const TeamPage       = lazy(() => import("./pages/TeamPage"));
 const MeiRevenuePage = lazy(() => import("./pages/MeiRevenuePage"));
+const HubFiscalPage  = lazy(() => import("./pages/HubFiscalPage"));
 
 // Legal pages — lazy loaded
 const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
@@ -92,6 +93,7 @@ const App = () => (
                     <Route path="/orcamentos" element={<ProtectedRoute><QuotesPage /></ProtectedRoute>} />
                     <Route path="/equipe" element={<ProtectedRoute><TeamPage /></ProtectedRoute>} />
                     <Route path="/mei-receitas" element={<ProtectedRoute><MeiRevenuePage /></ProtectedRoute>} />
+                    <Route path="/hub-fiscal" element={<ProtectedRoute><HubFiscalPage /></ProtectedRoute>} />
 
                     <Route path="*" element={<NotFound />} />
                   </Routes>
