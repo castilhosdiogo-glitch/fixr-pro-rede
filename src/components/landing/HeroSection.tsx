@@ -1,14 +1,11 @@
 ﻿import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Drill, ShieldCheck } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-
 const HeroSection = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const handleRegister = () => {
-    navigate("/auth", { state: { mode: "register-client" } });
+    navigate("/auth", { state: { mode: "register-choose" } });
   };
 
   return (

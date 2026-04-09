@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import BottomNav from "@/components/BottomNav";
 import HeroSection from "@/components/landing/HeroSection";
 import CategoriesSection from "@/components/landing/CategoriesSection";
 import TrustSection from "@/components/landing/TrustSection";
@@ -57,7 +56,7 @@ const Index = () => {
                 </Link>
                 <Link
                   to="/auth"
-                  state={{ mode: "register-client" }}
+                  state={{ mode: "register-choose" }}
                   className="hidden sm:inline-flex px-8 py-3 bg-primary text-primary-foreground font-bold text-sm rounded-2xl shadow-sm hover:bg-primary/90 transition-all active:scale-95"
                 >
                   Cadastre-se

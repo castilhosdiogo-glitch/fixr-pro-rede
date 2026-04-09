@@ -7,10 +7,10 @@ import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
 import { useCategories } from "@/hooks/useCategories";
 import { AVAILABLE_CITIES } from "@/data/mock";
-import { useSlotOccupancy, SLOT_STATUS_CONFIG } from "@/hooks/useSupplyControl";
+import { useSlotOccupancy } from "@/hooks/useSupplyControl";
 import { WaitingListForm } from "@/components/supply/WaitingListForm";
 
-type AuthMode = "login" | "register-client" | "register-professional";
+type AuthMode = "login" | "register-choose" | "register-client" | "register-professional";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -28,6 +28,7 @@ const AuthPage = () => {
       // Pre-select professional registration mode when arriving via referral link
       if (mode === "login") setMode("register-professional");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refFromUrl]);
   const pendingRefCode = sessionStorage.getItem("Fixr_ref_code");
   const [loading, setLoading] = useState(false);
@@ -48,6 +49,7 @@ const AuthPage = () => {
     if (categories.length > 0 && !form.categoryId) {
       setForm((prev) => ({ ...prev, categoryId: categories[0].id }));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories]);
 
   // Reset waiting list state when city or category changes
@@ -110,7 +112,7 @@ const AuthPage = () => {
   };
 
   const handleGoogleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/`,
@@ -253,6 +255,8 @@ const AuthPage = () => {
           <h1 className="font-display font-bold text-sm text-foreground tracking-wide">
             {mode === "login"
               ? "Entrar"
+              : mode === "register-choose"
+              ? "Criar Conta"
               : mode === "register-client"
               ? "Sou Cliente"
               : "Sou Profissional"}
@@ -276,6 +280,55 @@ const AuthPage = () => {
           </div>
         )}
 
+        {/* Register type chooser */}
+        {mode === "register-choose" && (
+          <div className="space-y-6 py-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="text-center space-y-3">
+              <Logo className="w-20 h-20 mx-auto text-primary" />
+              <h2 className="font-display text-2xl font-extrabold text-foreground tracking-tight">Como deseja se cadastrar?</h2>
+              <p className="text-sm text-muted-foreground">Escolha o tipo de conta que melhor se encaixa</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMode("register-client")}
+              className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-border bg-secondary/10 hover:border-primary hover:bg-primary/5 transition-all active:scale-[0.98] group"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                <User size={24} className="text-primary" />
+              </div>
+              <div className="text-left flex-1">
+                <p className="font-display font-black text-sm uppercase tracking-widest text-foreground">SOU CLIENTE</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Quero contratar profissionais para meus serviços</p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMode("register-professional")}
+              className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-primary/30 bg-primary/5 hover:border-primary hover:bg-primary/10 transition-all active:scale-[0.98] group"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/25 transition-colors">
+                <Briefcase size={24} className="text-primary" />
+              </div>
+              <div className="text-left flex-1">
+                <p className="font-display font-black text-sm uppercase tracking-widest text-foreground">SOU PROFISSIONAL</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Quero oferecer meus serviços e receber clientes</p>
+              </div>
+            </button>
+
+            <div className="pt-4 border-t border-border/50">
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className="w-full py-3 text-center font-display font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Já tem conta? <span className="text-primary font-bold ml-1">Entrar</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Mode selector */}
         {mode === "login" && (
           <div className="text-center space-y-4 pb-10">
@@ -285,7 +338,8 @@ const AuthPage = () => {
           </div>
         )}
 
-        {/* AUTH FORM */}
+        {/* AUTH FORM — hidden during register-choose */}
+        {mode !== "register-choose" && (<>
         <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email */}
         <div className="space-y-1">
@@ -531,6 +585,7 @@ const AuthPage = () => {
             </button>
           </div>
         )}
+        </>)}
       </div>
     </div>
   );
