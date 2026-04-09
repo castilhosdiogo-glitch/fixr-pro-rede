@@ -21,4 +21,18 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks — cached independently, update rarely
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-query": ["@tanstack/react-query"],
+          "vendor-ui": ["framer-motion", "@radix-ui/react-tooltip", "@radix-ui/react-toast", "@radix-ui/react-dialog"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+          "vendor-sentry": ["@sentry/react"],
+        },
+      },
+    },
+  },
 }));

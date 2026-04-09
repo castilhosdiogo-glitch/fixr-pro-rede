@@ -1,0 +1,389 @@
+{
+  "project": {
+    "name": "Fixr SaaS",
+    "description": "Plataforma de serviços profissionais com planos, chat com mídia e features exclusivas",
+    "repository": "master branch",
+    "mainBranch": "main",
+    "currentDate": "2026-04-09",
+    "lastStableCommit": "6e172ff",
+    "lastStableCommitMessage": "fix: corrigir initials em ProfessionalCard e remover arquivos desnecessários"
+  },
+  "primaryRequests": [
+    {
+      "id": 1,
+      "name": "New Pricing Tiers",
+      "description": "Substituir planos Starter/Professional/Premium por novos planos",
+      "tiers": [
+        {
+          "name": "Explorador",
+          "price": "Grátis",
+          "priceAfter": "Pago após 30 dias",
+          "monthlyRequests": 8,
+          "commission": "15%",
+          "features": [
+            "Criar perfil profissional",
+            "Aparecer nas buscas",
+            "Receber solicitações básicas",
+            "Visibilidade padrão"
+          ]
+        },
+        {
+          "name": "Parceiro",
+          "price": "R$19,90",
+          "currency": "BRL",
+          "billingPeriod": "mês",
+          "monthlyRequests": "Ilimitado",
+          "commission": "12%",
+          "features": [
+            "Maior visibilidade nas buscas",
+            "Receber mais solicitações",
+            "Selo Profissional verificado",
+            "Estatísticas de perfil",
+            "Prioridade no atendimento",
+            "Opção de formalização como MEI",
+            "Hub Fiscal com NFS-e",
+            "Alerta de DAS"
+          ]
+        },
+        {
+          "name": "Elite",
+          "price": "R$39,90",
+          "currency": "BRL",
+          "billingPeriod": "mês",
+          "monthlyRequests": "Ilimitado",
+          "commission": "10%",
+          "features": [
+            "Tudo do Parceiro incluído",
+            "Ranking prioritário na busca",
+            "Selo de destaque no perfil",
+            "Perfil em destaque na homepage",
+            "Agenda integrada",
+            "Orçamento personalizado",
+            "Gestão de equipe (até 3 membros)",
+            "Portfólio público (até 20 fotos)",
+            "Alerta de limite MEI em tempo real",
+            "Chat com mídia completa (audio, foto, video)",
+            "Hub Fiscal com monitoramento MEI"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Chat Media System",
+      "description": "Sistema de mídia para mensagens com upload S3",
+      "mediaTypes": [
+        {
+          "type": "audio",
+          "maxSize": "5MB",
+          "formats": [".m4a", ".webm"],
+          "features": ["Gravação ao segurar", "Reprodutor com barra de progresso"]
+        },
+        {
+          "type": "foto",
+          "maxSize": "10MB",
+          "formats": [".jpg", ".jpeg", ".png", ".webp"],
+          "features": ["Preview antes de enviar", "Toque para tela cheia"]
+        },
+        {
+          "type": "video",
+          "maxSize": "50MB",
+          "formats": [".mp4", ".webm"],
+          "features": ["Reprodutor nativo com controles"],
+          "restrictions": "Elite only"
+        }
+      ],
+      "components": [
+        "AudioRecorder.tsx",
+        "MediaPicker.tsx",
+        "MediaMessage.tsx",
+        "PlanUpgradePrompt.tsx"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Elite-Exclusive Features",
+      "features": [
+        {
+          "name": "Agenda integrada",
+          "page": "src/pages/elite/AgendaPage.tsx",
+          "description": "CRUD para agendamentos com data/hora"
+        },
+        {
+          "name": "Orçamento personalizado",
+          "page": "src/pages/elite/QuotesPage.tsx",
+          "description": "Criar orçamentos com preço itemizado, workflow de aprovação"
+        },
+        {
+          "name": "Gestão de equipe",
+          "page": "src/pages/elite/TeamPage.tsx",
+          "description": "Adicionar/remover membros (máx 3), nome, função, foto"
+        },
+        {
+          "name": "Portfólio público",
+          "page": "src/pages/elite/PortfolioPage.tsx",
+          "description": "Upload de fotos (máx 20), com legendas opcionais"
+        },
+        {
+          "name": "Hub Fiscal",
+          "page": "src/pages/HubFiscalPage.tsx",
+          "description": "NFS-e, DAS alerts, MEI guide, monitoramento de limite"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Security & Automation",
+      "items": [
+        {
+          "name": "Makefile",
+          "tools": ["gitleaks", "semgrep", "trivy", "prowler"]
+        },
+        {
+          "name": "Python Security Audit Script",
+          "file": "scripts/security-audit.py",
+          "output": "PDF report via reportlab"
+        }
+      ]
+    }
+  ],
+  "technicalStack": {
+    "frontend": {
+      "framework": "React",
+      "routing": "react-router-dom",
+      "stateManagement": "React Query (@tanstack/react-query)",
+      "animation": "framer-motion",
+      "styling": "Tailwind CSS + shadcn/ui",
+      "language": "TypeScript"
+    },
+    "backend": {
+      "database": "PostgreSQL (via Supabase)",
+      "auth": "Supabase Auth",
+      "storage": "Supabase Storage (S3-compatible)",
+      "realtime": "Supabase Realtime (WebSocket)",
+      "edgeFunctions": "Supabase Edge Functions",
+      "rls": "Row-Level Security policies"
+    },
+    "pwa": {
+      "serviceWorker": "Custom (currently disabled for stability)",
+      "pushNotifications": "Web Push Notifications (VAPID keys)",
+      "caching": "Cache-first for hashed assets, network-first for index.html"
+    },
+    "deployment": {
+      "platform": "DigitalOcean App Platform",
+      "cicd": "GitHub Actions",
+      "buildValidation": "Git hooks with gitleaks/semgrep"
+    },
+    "security": {
+      "hooks": [
+        "gitleaks - Secret scanning",
+        "semgrep - Code pattern analysis",
+        "trivy - Vulnerability scanning",
+        "prowler - AWS/Cloud security"
+      ]
+    }
+  },
+  "fileStructure": {
+    "migrations": {
+      "pending": "supabase/migrations/016_plans_media_elite.sql",
+      "status": "Not yet executed in production",
+      "size": "14KB+",
+      "creates": [
+        "Enums: message_type, plan_name, quote_status",
+        "Tables: schedules, quotes, team_members, portfolio, mei_revenue_tracking",
+        "Columns: professional_profiles.plan_name, monthly_request_count, commission_rate, search_boost",
+        "Message table: tipo, arquivo_url, duracao fields",
+        "Triggers: limit enforcement, MEI alerts"
+      ]
+    },
+    "hooks": {
+      "created": [
+        {
+          "file": "src/hooks/usePlanGate.ts",
+          "lines": 250,
+          "exports": ["PLAN_LIMITS", "can()", "canChat()", "hasMinPlan()"],
+          "purpose": "Feature gating based on plan tier"
+        }
+      ]
+    },
+    "components": {
+      "chat": [
+        "src/components/chat/AudioRecorder.tsx",
+        "src/components/chat/MediaPicker.tsx",
+        "src/components/chat/MediaMessage.tsx",
+        "src/components/chat/PlanUpgradePrompt.tsx"
+      ]
+    },
+    "pages": {
+      "created": [
+        "src/pages/HubFiscalPage.tsx",
+        "src/pages/elite/AgendaPage.tsx",
+        "src/pages/elite/QuotesPage.tsx",
+        "src/pages/elite/TeamPage.tsx",
+        "src/pages/elite/PortfolioPage.tsx"
+      ]
+    },
+    "modified": [
+      {
+        "file": "src/App.tsx",
+        "changes": "Added 5 lazy-loaded routes for Elite pages + HubFiscal"
+      },
+      {
+        "file": "src/pages/DashboardPage.tsx",
+        "changes": "Plan gate banner, request limit warnings, shortcuts to Hub Fiscal/Agenda"
+      },
+      {
+        "file": "src/pages/MessagesPage.tsx",
+        "changes": "Media components integration, push notifications for media"
+      },
+      {
+        "file": "src/components/landing/PricingSection.tsx",
+        "changes": "Redesigned with new plan names, Elite features highlight"
+      },
+      {
+        "file": "src/hooks/usePushNotifications.ts",
+        "changes": "Added sendPushNotification() function"
+      },
+      {
+        "file": "src/main.tsx",
+        "changes": "Service worker registration logic (modified for stability)"
+      },
+      {
+        "file": "public/sw.js",
+        "changes": "Service worker implementation (modified for stability)"
+      }
+    ],
+    "supportFiles": [
+      "Makefile - Security audit automation",
+      "scripts/security-audit.py - PDF report generation",
+      "supabase/functions/mei-limit-check/index.ts - Cron job"
+    ]
+  },
+  "errors": [
+    {
+      "id": 1,
+      "type": "ReferenceError",
+      "file": "src/components/ProfessionalCard.tsx",
+      "error": "initials is not defined",
+      "line": 36,
+      "rootCause": "Missing initials variable declaration",
+      "impact": "Broke entire site (ProfessionalCard used on landing page and search results)",
+      "fix": "Added: const initials = (professional.name || 'P').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();",
+      "fixedInCommit": "6e172ff",
+      "status": "RESOLVED"
+    },
+    {
+      "id": 2,
+      "type": "CSS Loading Failure",
+      "description": "Tela em branco - content invisible",
+      "rootCause": "Service worker caching strategy (CACHE_NAME = 'fixr-v1') never invalidated old CSS bundles",
+      "attempts": [
+        "Modified service worker to use CACHE_VERSION = 'fixr-v3' and delete old caches on activate",
+        "Changed to network-first for index.html, cache-first for hashed assets",
+        "Disabled service worker in main.tsx"
+      ],
+      "ultimateFix": "Completely reverted feature branch and applied only minimal ProfessionalCard fix",
+      "status": "RESOLVED"
+    },
+    {
+      "id": 3,
+      "type": "Bundle Hash Not Changing",
+      "description": "Despite multiple deploys, bundle index-DDWwJVST.js persisted",
+      "rootCause": "DigitalOcean build cache or incomplete pushes",
+      "verification": "All pushes reached GitHub main branch correctly",
+      "mitigation": "Added pre-commit hook to validate build before allowing push",
+      "status": "RESOLVED"
+    },
+    {
+      "id": 4,
+      "type": "Accidental Feature Branch Revert",
+      "description": "All new features removed during troubleshooting (Makefile, Elite pages, media chat, etc.)",
+      "cause": "Attempted to revert to stable commit during debugging",
+      "recovery": "Manually restored major feature files while keeping stable base",
+      "status": "RECOVERED"
+    }
+  ],
+  "lessons": [
+    "Code bugs introduced in comprehensive features can cascade with caching issues",
+    "Service worker cache strategy can mask underlying JavaScript errors with CSS problems",
+    "Pre-deployment testing is critical for catching missing variable declarations",
+    "Reverting service worker to network-first strategy removes masking effects",
+    "Each troubleshooting layer can introduce new problems - isolate and fix root cause first"
+  ],
+  "currentStatus": {
+    "siteStability": "Stable",
+    "lastStableCommit": "6e172ff",
+    "features": {
+      "coreApp": "Working",
+      "pricingTiers": "Not deployed (pending)",
+      "chatMedia": "Not deployed (pending)",
+      "elitePages": "Not deployed (pending)",
+      "hubFiscal": "Not deployed (pending)",
+      "securityAudit": "Not deployed (pending)",
+      "serviceWorker": "Disabled for stability"
+    },
+    "blockers": "None - ready for re-implementation"
+  },
+  "nextSteps": [
+    {
+      "step": 1,
+      "task": "Verify site is working (after 2026-04-09)",
+      "status": "Pending user confirmation"
+    },
+    {
+      "step": 2,
+      "task": "Re-implement comprehensive feature set using Claude Opus",
+      "reason": "User requested Opus for complex implementations to ensure code quality and avoid bugs",
+      "features": [
+        "Planos Explorador/Parceiro/Elite",
+        "Chat com mídia (audio, foto, video)",
+        "Features exclusivas Elite",
+        "Hub Fiscal com MEI tracking"
+      ]
+    },
+    {
+      "step": 3,
+      "task": "Run migration 016_plans_media_elite.sql in Supabase",
+      "status": "Pending"
+    },
+    {
+      "step": 4,
+      "task": "Setup security audit suite (Makefile, scripts)",
+      "status": "Pending"
+    },
+    {
+      "step": 5,
+      "task": "Configure MEI limit cron job",
+      "status": "Pending"
+    },
+    {
+      "step": 6,
+      "task": "End-to-end testing of all features",
+      "status": "Pending"
+    },
+    {
+      "step": 7,
+      "task": "Production launch",
+      "timeline": "Next week"
+    }
+  ],
+  "userFeedback": [
+    {
+      "feedback": "quando fizer o ship, que não tenhmaos esse problema, vai descredibilizar o saas",
+      "translation": "When you ship and we don't have this problem, it will discredit the SaaS",
+      "implication": "Quality is critical for credibility",
+      "sentiment": "Critical concern"
+    },
+    {
+      "feedback": "se todas as features novas forem assim, esse saas terá muitos problemas futuros, da próxima vez, selecione o opus para incluir sem problemas",
+      "translation": "If all new features are like this, this SaaS will have many future problems. Next time, select Opus to include without problems",
+      "implication": "Use Claude Opus for complex implementations",
+      "sentiment": "Directive for future work"
+    }
+  ],
+  "modelSelection": {
+    "current": "Claude Haiku 4.5",
+    "recommendation": "Claude Opus 4.6",
+    "reason": "Complex feature implementations require higher code quality to avoid bugs that cascade with other systems"
+  }
+}
