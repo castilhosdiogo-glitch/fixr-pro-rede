@@ -22,8 +22,8 @@ export async function signIn(formData: FormData) {
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", data.user.id)
-    .single();
+    .eq("user_id", data.user.id)
+    .maybeSingle();
 
   const isAdmin = profile?.role === "admin" || profile?.role === "superadmin";
   if (!isAdmin) {

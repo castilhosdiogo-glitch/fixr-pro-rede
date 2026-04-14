@@ -43,8 +43,8 @@ export async function updateSession(request: NextRequest) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", user.id)
-      .single();
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     const isAdmin = profile?.role === "admin" || profile?.role === "superadmin";
     if (!isAdmin) {
