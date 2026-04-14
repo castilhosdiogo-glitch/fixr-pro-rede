@@ -103,6 +103,34 @@ async function fetchPayments(tab: Tab): Promise<PaymentRow[]> {
   return data ?? [];
 }
 
+type ProWithoutRecipient = { id: string; user_id: string; full_name: string; plan_name: string };
+
+async function fetchProsWithoutRecipient(): Promise<ProWithoutRecipient[]> {
+  const supabase = createServiceRoleClient();
+  const { data: pros } = await supabase
+    .from("professional_profiles")
+    .select("id, user_id, plan_name")
+    .is("pagarme_recipient_id", null)
+    .limit(25);
+
+  if (!pros || pros.length === 0) return [];
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("user_id, full_name")
+    .in("user_id", pros.map((p) => p.user_id));
+
+  const nameMap: Record<string, string> = {};
+  for (const p of profiles ?? []) nameMap[p.user_id] = p.full_name ?? "(sem nome)";
+
+  return pros.map((p) => ({
+    id: p.id,
+    user_id: p.user_id,
+    full_name: nameMap[p.user_id] ?? "(sem nome)",
+    plan_name: p.plan_name ?? "explorador",
+  }));
+}
+
 async function fetchNames(userIds: string[]): Promise<Record<string, string>> {
   if (userIds.length === 0) return {};
   const supabase = createServiceRoleClient();
@@ -123,7 +151,11 @@ export default async function FinanceiroPage({
   const params = await searchParams;
   const tab = (params.tab ?? "pending") as Tab;
 
-  const [totals, payments] = await Promise.all([fetchTotals(), fetchPayments(tab)]);
+  const [totals, payments, prosWithoutRecipient] = await Promise.all([
+    fetchTotals(),
+    fetchPayments(tab),
+    fetchProsWithoutRecipient(),
+  ]);
 
   const userIds = new Set<string>();
   for (const p of payments) {
@@ -171,6 +203,37 @@ export default async function FinanceiroPage({
           tone="neutral"
         />
       </section>
+
+      {prosWithoutRecipient.length > 0 && (
+        <section className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+              <AlertTriangle size={14} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm font-semibold text-amber-900">
+                Profissionais sem recebedor Pagar.me ({prosWithoutRecipient.length})
+              </h2>
+              <p className="text-xs text-amber-800 mt-0.5">
+                Estes profissionais ainda não registraram conta bancária. Não recebem split de pagamentos até concluir o cadastro.
+              </p>
+              <ul className="mt-3 grid grid-cols-2 gap-1.5">
+                {prosWithoutRecipient.map((p) => (
+                  <li key={p.id}>
+                    <Link
+                      href={`/usuarios/${p.user_id}`}
+                      className="inline-flex items-center gap-2 text-xs text-amber-900 hover:text-amber-950 hover:underline"
+                    >
+                      <span className="truncate">{p.full_name}</span>
+                      <Badge tone="neutral">{p.plan_name}</Badge>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
 
       <nav className="flex items-center gap-1 flex-wrap">
         <TabLink current={tab} value="pending" label="Aguardando liberação" />
