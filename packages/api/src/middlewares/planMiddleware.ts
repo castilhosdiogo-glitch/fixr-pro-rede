@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 
 // Estender express Request para incluir dados do usuário
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: {

@@ -35,15 +35,12 @@ async function fetchDisputes({ filter, page }: { filter: Filter; page: number })
   const userIds = new Set<string>();
   for (const d of disputes) userIds.add(d.raised_by);
 
-  const [servicesRes, profilesRes] = await Promise.all([
-    srIds.length
-      ? supabase
-          .from("service_requests")
-          .select("id, description, client_id, professional_id")
-          .in("id", srIds)
-      : Promise.resolve({ data: [] as { id: string; description: string | null; client_id: string; professional_id: string }[] }),
-    Promise.resolve(null),
-  ]);
+  const servicesRes = srIds.length
+    ? await supabase
+        .from("service_requests")
+        .select("id, description, client_id, professional_id")
+        .in("id", srIds)
+    : { data: [] as { id: string; description: string | null; client_id: string; professional_id: string }[] };
 
   for (const s of servicesRes.data ?? []) {
     userIds.add(s.client_id);

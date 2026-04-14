@@ -77,7 +77,6 @@ function MessageBody({ message }: { message: Message }) {
           <span>Foto</span>
         </div>
         {message.arquivo_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={message.arquivo_url}
             alt="Anexo"

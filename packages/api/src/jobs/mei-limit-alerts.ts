@@ -158,7 +158,7 @@ async function dispararAlerta(
           ? "limite_mei_alerta_90_enviado"
           : "limite_mei_alerta_100_enviado";
 
-    // @ts-ignore
+    // @ts-expect-error dynamic field key
     if (profissional[campo_alerta]) {
       console.log(
         `[MEI ALERTS] Alerta ${percentual_tipo}% já foi enviado para ${profissional.user.nome}`
