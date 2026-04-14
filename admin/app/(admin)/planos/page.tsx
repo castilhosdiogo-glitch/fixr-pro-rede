@@ -7,10 +7,11 @@ import {
   Ban,
   Crown,
   Sparkles,
-  Info,
+  XCircle,
 } from "lucide-react";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/Badge";
+import { formatDateTime } from "@/lib/format";
 import { forceUpgrade, cancelSubscription } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +49,47 @@ async function fetchStats() {
     totalParceiros: parceiros.length,
     nearLimitCount: nearLimit.length,
   };
+}
+
+type FailedSub = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  status: string;
+  failure_count: number;
+  failure_reason: string | null;
+  last_failed_at: string | null;
+};
+
+async function fetchFailedSubs(): Promise<FailedSub[]> {
+  const supabase = createServiceRoleClient();
+  const { data: subs } = await supabase
+    .from("subscriptions")
+    .select("id, user_id, status, failure_count, failure_reason, last_failed_at")
+    .in("status", ["past_due", "failed"])
+    .order("last_failed_at", { ascending: false })
+    .limit(20);
+
+  if (!subs || subs.length === 0) return [];
+
+  const userIds = subs.map((s) => s.user_id);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("user_id, full_name")
+    .in("user_id", userIds);
+
+  const nameMap: Record<string, string> = {};
+  for (const p of profiles ?? []) nameMap[p.user_id] = p.full_name ?? "(sem nome)";
+
+  return subs.map((s) => ({
+    id: s.id,
+    user_id: s.user_id,
+    full_name: nameMap[s.user_id] ?? "(sem nome)",
+    status: s.status,
+    failure_count: s.failure_count ?? 0,
+    failure_reason: s.failure_reason,
+    last_failed_at: s.last_failed_at,
+  }));
 }
 
 async function fetchPros(tab: Tab): Promise<ProRow[]> {
@@ -98,7 +140,11 @@ export default async function PlanosPage({
   const params = await searchParams;
   const tab = (params.tab ?? "near_limit") as Tab;
 
-  const [stats, pros] = await Promise.all([fetchStats(), fetchPros(tab)]);
+  const [stats, pros, failedSubs] = await Promise.all([
+    fetchStats(),
+    fetchPros(tab),
+    fetchFailedSubs(),
+  ]);
 
   return (
     <div className="space-y-5">
@@ -133,14 +179,48 @@ export default async function PlanosPage({
         />
       </section>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
-        <Info size={14} className="text-amber-600 mt-0.5 shrink-0" />
-        <p className="text-xs text-amber-900 leading-relaxed">
-          <strong>Integração Stripe pendente.</strong> Listagem de assinaturas falhadas,
-          histórico de cobranças e retry automático ficarão disponíveis após a
-          integração com Stripe Subscriptions.
-        </p>
-      </div>
+      {failedSubs.length > 0 && (
+        <section className="bg-white rounded-xl border border-red-200">
+          <header className="px-5 py-3 border-b border-red-100 flex items-center gap-2 bg-red-50/50">
+            <XCircle size={14} className="text-red-600" />
+            <h2 className="text-sm font-semibold text-slate-900">
+              Assinaturas com falha ({failedSubs.length})
+            </h2>
+          </header>
+          <ul className="divide-y divide-slate-100">
+            {failedSubs.map((s) => (
+              <li key={s.id} className="px-5 py-3 flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Link
+                      href={`/usuarios?q=${encodeURIComponent(s.full_name)}`}
+                      className="text-sm font-medium text-slate-900 hover:text-brand-700 truncate"
+                    >
+                      {s.full_name}
+                    </Link>
+                    <Badge tone={s.status === "failed" ? "danger" : "warning"}>
+                      {s.status === "failed" ? "Falhou" : "Em atraso"}
+                    </Badge>
+                    {s.failure_count > 0 && (
+                      <span className="text-[10px] text-slate-400">
+                        {s.failure_count} tentativa(s)
+                      </span>
+                    )}
+                  </div>
+                  {s.failure_reason && (
+                    <p className="text-xs text-slate-600 mt-1">{s.failure_reason}</p>
+                  )}
+                  {s.last_failed_at && (
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      Última falha: {formatDateTime(s.last_failed_at)}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <nav className="flex items-center gap-1 flex-wrap">
         <TabLink current={tab} value="near_limit" label="Próximos do limite" />
