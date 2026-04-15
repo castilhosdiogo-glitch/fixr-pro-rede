@@ -13,7 +13,7 @@ import { useSlotOccupancy } from "@/hooks/useSupplyControl";
 import { SlotIndicator } from "@/components/supply/SlotIndicator";
 
 const SearchPage = () => {
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryFilter = searchParams.get("categoria") || "";
   const cityParam = searchParams.get("cidade") || "";
@@ -37,75 +37,62 @@ const SearchPage = () => {
 
   const { data: categories = [] } = useCategories();
 
-  // Fetch Professionals from Supabase
-  const { data: professionals = [], isLoading: isProsLoading } = useQuery({
-    queryKey: ["professionals", categoryFilter],
+  // Fetch Professionals via RPC com ranking Fixr Score
+  const { data: searchResult, isLoading: isProsLoading } = useQuery({
+    queryKey: ["professionals", categoryFilter, cityFilter, query, user?.id],
     queryFn: async () => {
-      let query = supabase
-        .from("professional_profiles")
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            avatar_url,
-            city,
-            state,
-            phone
-          )
-        `);
-
-      if (categoryFilter) {
-        query = query.eq("category_id", categoryFilter);
-      }
-
-      const { data, error } = await query;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any).rpc("search_professionals", {
+        _category: categoryFilter || null,
+        _city: cityFilter || null,
+        _query: query || null,
+        _client_id: user?.id || null,
+        _limit: 50,
+        _offset: 0,
+      });
       if (error) throw error;
 
-      // Map Supabase data to the interface expected by ProfessionalCard
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (data || []).map((pro: Record<string, any>) => ({
+      const mapped = (data || []).map((pro: Record<string, any>) => ({
         id: pro.id,
-        name: pro.profiles?.full_name || "Profissional",
-        photo: pro.profiles?.avatar_url || "",
+        name: pro.full_name || "Profissional",
+        photo: pro.avatar_url || "",
         categoryId: pro.category_id,
         category: pro.category_name,
-        city: pro.profiles?.city || "Local não definido",
-        state: pro.profiles?.state || "RS",
+        city: pro.city || "Local não definido",
+        state: pro.state || "RS",
         rating: pro.rating || 0,
         reviewCount: pro.review_count || 0,
         verified: pro.verified || false,
-        premium: pro.premium || false,
+        premium: pro.plan_name === "parceiro",
         description: pro.description || "",
         experience: pro.experience || "N/A",
-        phone: pro.profiles?.phone || "",
-        reviews: [], // Placeholder for now
-        plan_name: pro.plan_name || "explorador"
+        phone: pro.phone || "",
+        reviews: [],
+        plan_name: pro.plan_name || "explorador",
+        nivel_curadoria: pro.nivel_curadoria || "fixr_explorador",
+        fixr_score: Number(pro.fixr_score || 0),
       }));
+
+      const isFirstTime = Boolean(data?.[0]?.is_first_time);
+      return { professionals: mapped, isFirstTime };
     },
   });
+
+  const isFirstTime = searchResult?.isFirstTime ?? false;
 
   // Permite acesso público à busca
   /* useEffect(() => {
     if (!loading && !user) navigate("/auth");
   }, [user, loading, navigate]); */
 
+  // Server já ranqueia via RPC; cidade só refina client-side pois RPC usa para proximity score.
   const filtered = useMemo(() => {
-    return professionals
-      .filter((p) => {
-        const matchesCity = cityFilter ? p.city.toLowerCase() === cityFilter.toLowerCase() : true;
-        const matchesQuery = query
-          ? p.name.toLowerCase().includes(query.toLowerCase()) ||
-            p.category.toLowerCase().includes(query.toLowerCase()) ||
-            p.city.toLowerCase().includes(query.toLowerCase())
-          : true;
-        return matchesQuery && matchesCity;
-      })
-      .sort((a, b) => {
-        const scoreA = a.rating * 10 + a.reviewCount * 0.1 + (a.premium ? 5 : 0);
-        const scoreB = b.rating * 10 + b.reviewCount * 0.1 + (b.premium ? 5 : 0);
-        return scoreB - scoreA;
-      });
-  }, [professionals, query, cityFilter]);
+    const list = searchResult?.professionals ?? [];
+    return list.filter((p) =>
+      cityFilter ? p.city.toLowerCase() === cityFilter.toLowerCase() : true
+    );
+  }, [searchResult, cityFilter]);
 
   // Slot occupancy for the active category+city filter combination
   const { data: slotData = [] } = useSlotOccupancy(
@@ -201,8 +188,18 @@ const SearchPage = () => {
           </div>
         )}
 
+        {isFirstTime && (
+          <div className="mb-4 rounded-2xl border border-amber-300/60 bg-amber-50 p-4">
+            <p className="text-[9px] font-black uppercase tracking-widest text-amber-900">
+              Sua primeira busca · mostrando apenas Fixr Select
+            </p>
+            <p className="text-[10px] text-amber-800 mt-1 leading-relaxed">
+              Os profissionais mais confiáveis da plataforma, verificados manualmente.
+            </p>
+          </div>
+        )}
         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-6 pl-1">
-          {filtered.length} PROFISSIONAIS ENCONTRADOS · POR MELHOR AVALIAÇÃO
+          {filtered.length} PROFISSIONAIS ENCONTRADOS · RANQUEADO POR FIXR SCORE
         </p>
         <div className="flex flex-col gap-4">
           {filtered.map((prof, i) => (

@@ -9,38 +9,30 @@ const ProfessionalsSection = () => {
   const { data: professionals = [], isLoading } = useQuery({
     queryKey: ["professionals-top"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("professional_profiles")
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            avatar_url,
-            city,
-            state,
-            phone
-          )
-        `)
-        .order("rating", { ascending: false })
-        .limit(4);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any).rpc("top_professionals", { _limit: 4 });
 
       if (error) throw error;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (data || []).map((pro: any) => ({
         id: pro.id,
-        name: pro.profiles?.full_name || "Profissional",
-        photo: pro.profiles?.avatar_url || "",
+        name: pro.full_name || "Profissional",
+        photo: pro.avatar_url || "",
         categoryId: pro.category_id,
         category: pro.category_name,
-        city: pro.profiles?.city || "Local não definido",
-        state: pro.profiles?.state || "RS",
+        city: pro.city || "Local não definido",
+        state: pro.state || "RS",
         rating: pro.rating || 0,
         reviewCount: pro.review_count || 0,
         verified: pro.verified || false,
-        premium: pro.premium || false,
+        premium: pro.plan_name === "parceiro",
         description: pro.description || "",
         experience: pro.experience || "N/A",
-        phone: pro.profiles?.phone || "",
+        phone: pro.phone || "",
+        plan_name: pro.plan_name || "explorador",
+        nivel_curadoria: pro.nivel_curadoria || "fixr_explorador",
+        fixr_score: Number(pro.fixr_score || 0),
         reviews: [],
       }));
     },
