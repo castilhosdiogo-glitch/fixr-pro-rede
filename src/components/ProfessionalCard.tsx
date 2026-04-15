@@ -1,4 +1,4 @@
-import { Star, MapPin, MessageSquare, Crown } from "lucide-react";
+import { Star, MapPin, MessageSquare, Crown, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { memo } from "react";
@@ -20,6 +20,8 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
   const initials = (professional.name || "P")
     .split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
 
+  const isSelect = professional.nivel_curadoria === "fixr_select";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -28,8 +30,23 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
       transition={{ duration: 0.4, delay: index * 0.1 }}
     >
       <div
-        className="block rounded-2xl bg-card border-2 border-border hover:border-primary transition-colors overflow-hidden group shadow-none"
+        className={`block rounded-2xl bg-card border-2 transition-colors overflow-hidden group shadow-none ${
+          isSelect
+            ? "border-amber-400 hover:border-amber-500 ring-1 ring-amber-200"
+            : "border-border hover:border-primary"
+        }`}
       >
+        {isSelect && (
+          <div className="flex items-center justify-between px-4 py-1.5 bg-gradient-to-r from-amber-400 to-amber-500 text-white">
+            <span className="inline-flex items-center gap-1.5">
+              <Award size={10} />
+              <span className="text-[8px] font-black uppercase tracking-[0.25em]">Fixr Select</span>
+            </span>
+            <span className="text-[8px] font-black uppercase tracking-widest opacity-90">
+              Curadoria manual
+            </span>
+          </div>
+        )}
         <Link to={`/profissional/${professional.id}`} className="block">
           <div className="flex gap-4 p-4 pb-2">
             {/* Avatar with trust score overlay */}
@@ -116,5 +133,6 @@ export default memo(ProfessionalCard, (prev, next) =>
   prev.professional.id === next.professional.id &&
   prev.professional.rating === next.professional.rating &&
   prev.professional.reviewCount === next.professional.reviewCount &&
+  prev.professional.nivel_curadoria === next.professional.nivel_curadoria &&
   prev.index === next.index
 );
