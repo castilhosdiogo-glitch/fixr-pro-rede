@@ -1,5 +1,4 @@
-﻿import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+﻿import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ClipboardList, MessageSquare, Star, Search, Clock, ChevronRight, Calendar } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,13 +9,7 @@ import { motion } from "framer-motion";
 import { useCompletedServicesAwaitingReview } from "@/hooks/useServiceCompletion";
 import ReviewRequestCard from "@/components/reputation/ReviewRequestCard";
 import NotificationBell from "@/components/notifications/NotificationBell";
-
-interface ClientStats {
-  totalRequests: number;
-  pendingRequests: number;
-  completedRequests: number;
-  reviewsGiven: number;
-}
+import PendingReviewsBanner from "@/components/reviews/PendingReviewsBanner";
 
 interface RecentRequest {
   id: string;
@@ -124,6 +117,7 @@ const ClientDashboard = () => {
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-5 space-y-5">
+        <PendingReviewsBanner />
         {/* Welcome */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -249,6 +243,7 @@ const ClientDashboard = () => {
               </span>
             </div>
             <div className="space-y-3">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {awaitingReview.map((svc: any) => (
                 <ReviewRequestCard
                   key={svc.id}

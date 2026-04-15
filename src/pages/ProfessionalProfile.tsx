@@ -1,5 +1,5 @@
 ﻿import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, Clock, MessageSquare } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Clock, MessageSquare, Award, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import ReviewItem from "@/components/ReviewItem";
@@ -27,7 +27,7 @@ const ProfessionalProfile = () => {
       if (proError) throw proError;
 
       // 2. Get the associated user profile
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", pro.user_id)
@@ -52,6 +52,7 @@ const ProfessionalProfile = () => {
         city: profile?.city || "Local não definido",
         state: profile?.state || "RS",
         phone: profile?.phone || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         reviews: (reviews || []).map((r: any) => ({
           id: r.id,
           clientName: r.client?.full_name || "Cliente Fixr",
@@ -100,6 +101,19 @@ const ProfessionalProfile = () => {
       </header>
 
       <div className="max-w-lg mx-auto">
+        {/* Fixr Select banner */}
+        {professional.nivel_curadoria === "fixr_select" && (
+          <div className="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Award size={16} />
+              <span className="font-display font-black text-xs uppercase tracking-[0.25em]">Fixr Select</span>
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-90">
+              Curadoria manual · Top 10%
+            </span>
+          </div>
+        )}
+
         {/* Profile header */}
         <div className="bg-card border-b border-border p-6">
           <div className="flex gap-6">
@@ -128,6 +142,23 @@ const ProfessionalProfile = () => {
               </div>
             </div>
           </div>
+
+          {/* Fixr Score (se houver) */}
+          {professional.fixr_score != null && professional.fixr_score > 0 && (
+            <div className="mt-4 flex items-center gap-3 bg-secondary/20 border border-border rounded-xl px-4 py-3">
+              <TrendingUp size={14} className="text-primary flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Fixr Score</p>
+                <p className="text-lg font-display font-black text-foreground tracking-tighter">
+                  {Number(professional.fixr_score).toFixed(0)}
+                  <span className="text-[9px] font-black text-muted-foreground ml-1">/100</span>
+                </p>
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-widest text-primary">
+                {professional.total_concluidos ?? 0} serviços
+              </span>
+            </div>
+          )}
 
           {/* Trust Score Card */}
           {reputation && (

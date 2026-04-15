@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { Clock, MapPin, Tag, CheckCircle, XCircle, AlertTriangle, ChevronRight } from "lucide-react";
+import { Clock, MapPin, Tag, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { Dispatch, useRespondToDispatch } from "@/hooks/useDispatches";
 import { useCategories } from "@/hooks/useCategories";
+import { useIsProBlockedByPending } from "@/hooks/usePendingReviews";
 import { toast } from "sonner";
 
 interface IncomingRequestCardProps {
@@ -28,6 +29,7 @@ const formatCountdown = (secs: number): string => {
 export const IncomingRequestCard = ({ dispatch: d }: IncomingRequestCardProps) => {
   const { data: categories = [] } = useCategories();
   const { mutateAsync: respond, isPending } = useRespondToDispatch();
+  const { data: blockedByPending = false } = useIsProBlockedByPending();
   const [responded, setResponded] = useState<"accepted" | "declined" | null>(null);
 
   // ── Countdown ────────────────────────────────────────────────
@@ -55,6 +57,10 @@ export const IncomingRequestCard = ({ dispatch: d }: IncomingRequestCardProps) =
 
   // ── Respond ──────────────────────────────────────────────────
   const handleRespond = async (response: "accepted" | "declined") => {
+    if (response === "accepted" && blockedByPending) {
+      toast.error("Você precisa avaliar os clientes pendentes antes de aceitar novos pedidos.");
+      return;
+    }
     try {
       await respond({ dispatchId: d.id, response });
       setResponded(response);
@@ -182,11 +188,12 @@ export const IncomingRequestCard = ({ dispatch: d }: IncomingRequestCardProps) =
           </button>
           <button
             onClick={() => handleRespond("accepted")}
-            disabled={isPending}
+            disabled={isPending || blockedByPending}
+            title={blockedByPending ? "Avalie as pendências antes de aceitar novos pedidos" : undefined}
             className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-40"
           >
             <CheckCircle size={14} />
-            Aceitar
+            {blockedByPending ? "Bloqueado" : "Aceitar"}
           </button>
         </div>
       )}

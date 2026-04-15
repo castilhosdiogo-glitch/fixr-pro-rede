@@ -16,6 +16,7 @@ import { useActiveServices } from "@/hooks/useServiceCompletion";
 import ActiveServiceCard from "@/components/ActiveServiceCard";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { PushToggle } from "@/components/notifications/PushToggle";
+import PendingReviewsBanner from "@/components/reviews/PendingReviewsBanner";
 
 
 interface RecentRequest {
@@ -125,6 +126,7 @@ const DashboardPage = () => {
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-5 space-y-5">
+        <PendingReviewsBanner />
         {/* Profile summary */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
