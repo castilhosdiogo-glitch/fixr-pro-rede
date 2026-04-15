@@ -12,6 +12,7 @@ import {
   CreditCard,
   LogOut,
   ShieldCheck,
+  Award,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { signOut } from "@/app/login/actions";
@@ -22,6 +23,7 @@ const nav = [
   { href: "/servicos", label: "Serviços", icon: Briefcase },
   { href: "/financeiro", label: "Financeiro", icon: Wallet },
   { href: "/disputas", label: "Disputas", icon: Gavel },
+  { href: "/curadoria", label: "Curadoria", icon: Award },
   { href: "/hub-fiscal", label: "Hub Fiscal", icon: Receipt },
   { href: "/planos", label: "Planos", icon: CreditCard },
 ];
