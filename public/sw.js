@@ -1,6 +1,10 @@
-// FIXR Service Worker v2 — Network-first para HTML, cache-first para assets com hash
-const CACHE_VERSION = 2;
+// FIXR Service Worker v3 — Network-first para HTML, cache-first para assets com hash
+const CACHE_VERSION = 3;
 const CACHE_NAME = `fixr-v${CACHE_VERSION}`;
+
+// Garante que respondWith sempre recebe uma Response válida
+const FALLBACK_RESPONSE = () =>
+  new Response('', { status: 504, statusText: 'Gateway Timeout' });
 
 self.addEventListener('install', () => {
   // Skip waiting para ativar imediatamente
@@ -39,7 +43,13 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          const root = await caches.match('/');
+          if (root) return root;
+          return FALLBACK_RESPONSE();
+        })
     );
     return;
   }
@@ -74,7 +84,7 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(request))
+      .catch(async () => (await caches.match(request)) || FALLBACK_RESPONSE())
   );
 });
 
