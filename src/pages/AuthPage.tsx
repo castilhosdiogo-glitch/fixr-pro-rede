@@ -185,13 +185,14 @@ const AuthPage = () => {
 
     // ── Save LGPD consent ──────────────────────────────────────
     if (authData.user?.id) {
-      await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: consentErr } = await (supabase as any)
         .from("user_consents")
         .upsert({
           user_id: authData.user.id,
           privacy_accepted: privacyAccepted,
-        }, { onConflict: "user_id" })
-        .catch((err) => console.warn("Could not save consent:", err));
+        }, { onConflict: "user_id" });
+      if (consentErr) console.warn("Could not save consent:", consentErr);
     }
 
     // ── Apply referral code if one was captured ──────────────
