@@ -18,21 +18,16 @@ ALTER TABLE public.broadcast_requests
   ADD COLUMN IF NOT EXISTS max_retries INT         NOT NULL DEFAULT 3;
 
 -- Estende o status check pra aceitar 'sem_profissional'.
--- Converte legado 'no_pros_available' (migration 010_apply_missing) pro novo
--- nome canônico antes de aplicar o novo CHECK.
+-- Ordem: primeiro dropa o CHECK antigo, depois converte legado
+-- 'no_pros_available' (migration 010_apply_missing) pro novo nome
+-- canônico, e só então aplica o CHECK novo. Fazer na ordem inversa
+-- falha porque o UPDATE violaria o CHECK ainda vigente.
+ALTER TABLE public.broadcast_requests
+  DROP CONSTRAINT IF EXISTS broadcast_requests_status_check;
+
 UPDATE public.broadcast_requests
    SET status = 'sem_profissional'
  WHERE status = 'no_pros_available';
-
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM pg_constraint
-    WHERE conname = 'broadcast_requests_status_check'
-  ) THEN
-    ALTER TABLE public.broadcast_requests DROP CONSTRAINT broadcast_requests_status_check;
-  END IF;
-END $$;
 
 ALTER TABLE public.broadcast_requests
   ADD CONSTRAINT broadcast_requests_status_check
