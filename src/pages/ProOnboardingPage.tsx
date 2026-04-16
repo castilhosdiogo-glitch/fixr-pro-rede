@@ -8,6 +8,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCategories } from "@/hooks/useCategories";
+import { isValidCNPJ, formatCNPJ } from "@/schemas/mei-validation";
 import {
   useOnboardingState,
   useSetProOnboardingStep,
@@ -325,6 +326,8 @@ function StepBio({
 }: { userId: string; onBack: () => void; onNext: () => void }) {
   const [bio, setBio] = useState("");
   const [esp, setEsp] = useState("");
+  const [tipoPessoa, setTipoPessoa] = useState<"pf" | "pj">("pf");
+  const [cnpj, setCnpj] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -332,25 +335,36 @@ function StepBio({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data } = await (supabase as any)
         .from("professional_profiles")
-        .select("description, especialidades")
+        .select("description, especialidades, tipo_pessoa, cnpj")
         .eq("user_id", userId)
         .maybeSingle();
       if (data) {
         setBio(data.description ?? "");
         const e = data.especialidades as string[] | null;
         setEsp(Array.isArray(e) ? e.join(", ") : "");
+        if (data.tipo_pessoa === "pj") setTipoPessoa("pj");
+        if (data.cnpj) setCnpj(formatCNPJ(data.cnpj));
       }
     })();
   }, [userId]);
 
+  const cnpjDigits = cnpj.replace(/\D/g, "");
+  const cnpjValid = tipoPessoa === "pf" || isValidCNPJ(cnpjDigits);
+
   const save = async () => {
     if (bio.trim().length < 20) { toast.error("Escreva pelo menos 20 caracteres na bio."); return; }
+    if (tipoPessoa === "pj" && !isValidCNPJ(cnpjDigits)) { toast.error("CNPJ inválido."); return; }
     setSaving(true);
     const especialidades = esp.split(",").map((s) => s.trim()).filter(Boolean);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from("professional_profiles")
-      .update({ description: bio.trim(), especialidades })
+      .update({
+        description: bio.trim(),
+        especialidades,
+        tipo_pessoa: tipoPessoa,
+        cnpj: tipoPessoa === "pj" ? cnpjDigits : null,
+      })
       .eq("user_id", userId);
     setSaving(false);
     if (error) { toast.error("Erro ao salvar."); console.error(error); return; }
@@ -358,6 +372,7 @@ function StepBio({
   };
 
   const count = bio.trim().length;
+  const disabled = count < 20 || !cnpjValid;
 
   return (
     <div className="space-y-5">
@@ -382,7 +397,49 @@ function StepBio({
           className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm"
         />
       </div>
-      <StepNav onBack={onBack} onNext={save} loading={saving} disabled={count < 20} />
+      <div>
+        <Label>Tipo de pessoa</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {([
+            { value: "pf", label: "Autônomo (PF)" },
+            { value: "pj", label: "Pessoa Jurídica" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setTipoPessoa(opt.value)}
+              className={[
+                "rounded-xl border px-3 py-2.5 text-xs font-bold transition",
+                tipoPessoa === opt.value
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-border hover:border-primary/50",
+              ].join(" ")}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {tipoPessoa === "pj" && (
+        <div>
+          <Label>CNPJ</Label>
+          <input
+            type="text"
+            value={cnpj}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, "").slice(0, 14);
+              setCnpj(digits.length === 14 ? formatCNPJ(digits) : digits);
+            }}
+            placeholder="00.000.000/0000-00"
+            inputMode="numeric"
+            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm"
+          />
+          {cnpjDigits.length === 14 && !isValidCNPJ(cnpjDigits) && (
+            <p className="text-[11px] text-red-500 mt-1">CNPJ inválido.</p>
+          )}
+        </div>
+      )}
+      <StepNav onBack={onBack} onNext={save} loading={saving} disabled={disabled} />
     </div>
   );
 }
