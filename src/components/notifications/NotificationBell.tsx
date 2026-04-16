@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   useNotifications,
+  useNotificationsRealtime,
   useUnreadCount,
   useMarkNotificationRead,
   useMarkAllRead,
@@ -60,6 +61,7 @@ function NotificationItem({ n, onRead }: { n: AppNotification; onRead: (id: stri
 }
 
 export default function NotificationBell() {
+  useNotificationsRealtime();
   const [open, setOpen] = useState(false);
   const { data: notifications = [] } = useNotifications();
   const unread = useUnreadCount();

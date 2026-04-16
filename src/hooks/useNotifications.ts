@@ -18,15 +18,14 @@ export interface AppNotification {
   title: string;
   body: string;
   data: Json | null;
-  read: boolean;
+  read_at: string | null;
   created_at: string;
 }
 
 export function useNotifications() {
   const { user } = useAuth();
-  const qc = useQueryClient();
 
-  const query = useQuery({
+  return useQuery({
     queryKey: ["notifications", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,11 +40,23 @@ export function useNotifications() {
     enabled: !!user,
     staleTime: 30_000,
   });
+}
+
+/**
+ * Subscription realtime para notificações. Deve ser chamado UMA
+ * única vez na árvore (ex.: dentro do NotificationBell), senão o
+ * supabase-js reusa o mesmo channel name e falha ao tentar
+ * registrar callbacks após o subscribe inicial.
+ */
+export function useNotificationsRealtime() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
 
   useEffect(() => {
     if (!user) return;
+    const channelName = `notifications:${user.id}:${Math.random().toString(36).slice(2, 8)}`;
     const channel = supabase
-      .channel(`notifications:${user.id}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -56,18 +67,16 @@ export function useNotifications() {
         },
         () => {
           qc.invalidateQueries({ queryKey: ["notifications", user.id] });
-        }
+        },
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, qc]);
-
-  return query;
 }
 
 export function useUnreadCount() {
   const { data } = useNotifications();
-  return (data ?? []).filter((n) => !n.read).length;
+  return (data ?? []).filter((n) => !n.read_at).length;
 }
 
 export function useMarkNotificationRead() {
@@ -77,7 +86,7 @@ export function useMarkNotificationRead() {
     mutationFn: async (notificationId: string) => {
       const { error } = await supabase
         .from("notifications")
-        .update({ read: true })
+        .update({ read_at: new Date().toISOString() })
         .eq("id", notificationId);
       if (error) throw error;
     },
@@ -94,9 +103,9 @@ export function useMarkAllRead() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("notifications")
-        .update({ read: true })
+        .update({ read_at: new Date().toISOString() })
         .eq("user_id", user!.id)
-        .eq("read", false);
+        .is("read_at", null);
       if (error) throw error;
     },
     onSuccess: () => {

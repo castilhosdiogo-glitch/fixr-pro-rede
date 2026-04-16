@@ -34,17 +34,31 @@ export function useActiveServices() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("service_requests")
-        .select(`
-          id, description, status, scheduled_date, created_at, updated_at,
-          client_id, professional_id,
-          profiles!service_requests_client_id_fkey (full_name, city)
-        `)
+        .select(
+          "id, description, status, scheduled_date, created_at, updated_at, client_id, professional_id",
+        )
         .eq("professional_id", user!.id)
         .in("status", ["accepted", "scheduled"])
         .order("created_at", { ascending: false });
       if (error) throw error;
+
+      const clientIds = Array.from(new Set((data ?? []).map((r) => r.client_id)));
+      const profilesMap = new Map<string, { full_name: string | null; city: string | null }>();
+      if (clientIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, city")
+          .in("user_id", clientIds);
+        for (const p of profs ?? []) {
+          profilesMap.set(p.user_id as string, {
+            full_name: p.full_name,
+            city: p.city,
+          });
+        }
+      }
+
       return (data ?? []).map((r) => {
-        const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
+        const p = profilesMap.get(r.client_id);
         return {
           id: r.id,
           description: r.description,
@@ -54,8 +68,8 @@ export function useActiveServices() {
           updated_at: r.updated_at,
           client_id: r.client_id,
           professional_id: r.professional_id,
-          client_name: profile?.full_name ?? "Cliente",
-          client_city: profile?.city ?? "",
+          client_name: p?.full_name ?? "Cliente",
+          client_city: p?.city ?? "",
         } satisfies ActiveService;
       });
     },
