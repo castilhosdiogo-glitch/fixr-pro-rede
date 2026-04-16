@@ -17,7 +17,13 @@ ALTER TABLE public.broadcast_requests
   ADD COLUMN IF NOT EXISTS retry_after TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS max_retries INT         NOT NULL DEFAULT 3;
 
--- Estende o status check pra aceitar 'sem_profissional'
+-- Estende o status check pra aceitar 'sem_profissional'.
+-- Converte legado 'no_pros_available' (migration 010_apply_missing) pro novo
+-- nome canônico antes de aplicar o novo CHECK.
+UPDATE public.broadcast_requests
+   SET status = 'sem_profissional'
+ WHERE status = 'no_pros_available';
+
 DO $$
 BEGIN
   IF EXISTS (
