@@ -21,13 +21,25 @@ if (sentryDsn) {
   });
 }
 
-// Registra o Service Worker do PWA com auto-update
+// Registra o Service Worker do PWA com auto-update agressivo.
+// Quando um SW novo assume controle, recarrega a página para pegar
+// bundles novos (evita ficar preso em cache antigo após deploy).
 if ("serviceWorker" in navigator) {
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js");
-      // Verifica atualizações a cada 30 min
-      setInterval(() => reg.update(), 30 * 60 * 1000);
+      const reg = await navigator.serviceWorker.register("/sw.js", {
+        updateViaCache: "none",
+      });
+      reg.update();
+      setInterval(() => reg.update(), 5 * 60 * 1000);
+      window.addEventListener("focus", () => reg.update());
     } catch (err) {
       console.error("SW registration failed:", err);
     }
