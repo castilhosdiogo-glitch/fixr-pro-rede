@@ -16,6 +16,7 @@ import { useActiveServices } from "@/hooks/useServiceCompletion";
 import ActiveServiceCard from "@/components/ActiveServiceCard";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { PushToggle } from "@/components/notifications/PushToggle";
+import { DisponibilidadeCard } from "@/components/pro/DisponibilidadeCard";
 import PendingReviewsBanner from "@/components/reviews/PendingReviewsBanner";
 
 
@@ -256,6 +257,18 @@ const DashboardPage = () => {
             <ShieldCheck size={14} className="text-primary" />
           </div>
           <MyReputationPanel />
+        </motion.div>
+
+        {/* Disponibilidade + raio de atendimento */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <div className="flex items-center gap-2 mb-3 border-l-2 border-primary pl-4">
+            <span className="text-[10px] font-black text-foreground uppercase tracking-[0.3em]">Atendimento</span>
+          </div>
+          <DisponibilidadeCard />
         </motion.div>
 
         {/* Push notifications toggle */}
