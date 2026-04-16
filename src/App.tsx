@@ -36,7 +36,8 @@ const MeiRevenuePage = lazy(() => import("./pages/MeiRevenuePage"));
 const HubFiscalPage  = lazy(() => import("./pages/HubFiscalPage"));
 
 // Onboarding
-const ProOnboardingPage = lazy(() => import("./pages/ProOnboardingPage"));
+const ProOnboardingPage    = lazy(() => import("./pages/ProOnboardingPage"));
+const ClientOnboardingPage = lazy(() => import("./pages/ClientOnboardingPage"));
 
 // Legal pages — lazy loaded
 const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
@@ -102,6 +103,7 @@ const App = () => (
 
                     {/* Onboarding */}
                     <Route path="/onboarding-pro" element={<ProtectedRoute><ProOnboardingPage /></ProtectedRoute>} />
+                    <Route path="/onboarding-cliente" element={<ProtectedRoute><ClientOnboardingPage /></ProtectedRoute>} />
 
                     <Route path="*" element={<NotFound />} />
                   </Routes>
