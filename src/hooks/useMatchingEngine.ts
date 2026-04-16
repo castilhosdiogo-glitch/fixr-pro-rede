@@ -54,8 +54,18 @@ export const useCreateBroadcastRequest = () => {
       category_id: string;
       city: string;
       description: string;
+      endereco?: string;
+      latitude?: number | null;
+      longitude?: number | null;
+      urgencia?: "hoje" | "semana" | "sem_pressa";
     }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as unknown as {
+        from: (t: string) => {
+          insert: (row: Record<string, unknown>) => {
+            select: () => { single: () => Promise<{ data: BroadcastRequest; error: Error | null }> };
+          };
+        };
+      })
         .from("broadcast_requests")
         .insert({ ...input, client_id: user!.id })
         .select()

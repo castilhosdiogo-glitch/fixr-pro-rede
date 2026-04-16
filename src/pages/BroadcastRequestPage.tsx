@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from "react";
-import { ArrowLeft, Send, Zap, CheckCircle } from "lucide-react";
+import { ArrowLeft, Send, Zap, CheckCircle, MapPin, Loader2 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCategories } from "@/hooks/useCategories";
@@ -9,6 +9,13 @@ import { DispatchStatusBadge } from "@/components/matching/DispatchStatusBadge";
 import { SEO } from "@/components/SEO";
 import { toast } from "sonner";
 import BottomNav from "@/components/BottomNav";
+
+type Urgencia = "hoje" | "semana" | "sem_pressa";
+const URGENCIA_OPTS: { value: Urgencia; label: string; hint: string }[] = [
+  { value: "hoje", label: "Hoje", hint: "Urgente, o quanto antes" },
+  { value: "semana", label: "Esta semana", hint: "Sem pressa imediata" },
+  { value: "sem_pressa", label: "Sem pressa", hint: "Posso esperar o melhor pro" },
+];
 
 /**
  * BroadcastRequestPage — /solicitar
@@ -25,7 +32,7 @@ const BroadcastRequestPage = () => {
   const preselectedPro = searchParams.get("pro") ?? "";
   const preselectedCat = searchParams.get("cat") ?? "";
 
-  const { user, profile, loading } = useAuth();
+  const { profile, loading } = useAuth();
   const { data: categories = [] } = useCategories();
   const { mutateAsync: createRequest, isPending } = useCreateBroadcastRequest();
 
@@ -33,7 +40,11 @@ const BroadcastRequestPage = () => {
     categoryId: preselectedCat,
     city: AVAILABLE_CITIES[0],
     description: "",
+    endereco: "",
+    urgencia: "semana" as Urgencia,
   });
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
   const [broadcastId, setBroadcastId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -48,14 +59,53 @@ const BroadcastRequestPage = () => {
         categoryId: match ? match.id : categories[0].id,
       }));
     }
-  }, [categories]);
 
-  // Pre-fill city from profile
+  }, [categories, preselectedCat, form.categoryId]);
+
+  // Pre-fill city + endereço from profile
   useEffect(() => {
-    if (profile?.city) {
-      setForm((prev) => ({ ...prev, city: profile.city }));
+    if (!profile) return;
+    const p = profile as typeof profile & {
+      endereco_principal?: string | null;
+      endereco_lat?: number | null;
+      endereco_lng?: number | null;
+    };
+    setForm((prev) => ({
+      ...prev,
+      city: p.city ?? prev.city,
+      endereco: p.endereco_principal ?? prev.endereco,
+    }));
+    if (p.endereco_lat != null && p.endereco_lng != null) {
+      setCoords({ lat: Number(p.endereco_lat), lng: Number(p.endereco_lng) });
     }
   }, [profile]);
+
+  const captureCoords = () => {
+    if (!("geolocation" in navigator)) {
+      toast.error("Geolocalização não suportada");
+      return;
+    }
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({
+          lat: Number(pos.coords.latitude.toFixed(6)),
+          lng: Number(pos.coords.longitude.toFixed(6)),
+        });
+        setGeoLoading(false);
+        toast.success("Localização capturada");
+      },
+      (err) => {
+        setGeoLoading(false);
+        toast.error(
+          err.code === err.PERMISSION_DENIED
+            ? "Permissão negada"
+            : "Não foi possível obter localização",
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10_000 },
+    );
+  };
 
   const update = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -75,6 +125,10 @@ const BroadcastRequestPage = () => {
         category_id: form.categoryId,
         city: form.city,
         description: form.description.trim(),
+        endereco: form.endereco.trim() || undefined,
+        latitude: coords?.lat ?? null,
+        longitude: coords?.lng ?? null,
+        urgencia: form.urgencia,
       });
       setBroadcastId(result.id);
       setSubmitted(true);
@@ -217,6 +271,67 @@ const BroadcastRequestPage = () => {
               <p className="text-[8px] font-bold text-muted-foreground text-right tabular-nums">
                 {form.description.length}/500
               </p>
+            </div>
+
+            {/* Endereço */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block">
+                Endereço do serviço
+              </label>
+              <input
+                type="text"
+                value={form.endereco}
+                onChange={(e) => update("endereco", e.target.value)}
+                placeholder="Rua, número, bairro"
+                className="w-full bg-secondary/20 border border-border rounded-2xl px-4 py-4 text-sm font-medium text-foreground focus:border-primary placeholder:text-muted-foreground/30 outline-none"
+              />
+              <button
+                type="button"
+                onClick={captureCoords}
+                disabled={geoLoading}
+                className="w-full mt-2 rounded-xl border border-border bg-secondary/10 px-3 py-2.5 flex items-center gap-2 hover:border-primary/60 transition-all disabled:opacity-50"
+              >
+                {geoLoading ? (
+                  <Loader2 size={12} className="animate-spin text-primary flex-shrink-0" />
+                ) : (
+                  <MapPin size={12} className={`${coords ? "text-emerald-500" : "text-primary"} flex-shrink-0`} />
+                )}
+                <span className="text-[9px] font-black uppercase tracking-widest text-foreground">
+                  {coords
+                    ? `Localização pronta (${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)})`
+                    : "Usar minha localização atual"}
+                </span>
+              </button>
+            </div>
+
+            {/* Urgência */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block">
+                Urgência
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {URGENCIA_OPTS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => update("urgencia", opt.value)}
+                    className={`rounded-2xl border px-3 py-3 text-left transition-all ${
+                      form.urgencia === opt.value
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-secondary/10 hover:border-primary/60"
+                    }`}
+                  >
+                    <p className={`text-[9px] font-black uppercase tracking-widest ${
+                      form.urgencia === opt.value ? "text-primary" : "text-foreground"
+                    }`}>
+                      {opt.label}
+                    </p>
+                    <p className="text-[8px] font-medium text-muted-foreground mt-1 leading-tight">
+                      {opt.hint}
+                    </p>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Submit */}

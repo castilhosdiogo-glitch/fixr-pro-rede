@@ -8,7 +8,16 @@ interface DispatchStatusBadgeProps {
   showBreakdown?: boolean;
 }
 
-const STATUS_CONFIG = {
+type StatusCfg = {
+  label: string;
+  icon: typeof Clock;
+  color: string;
+  bg: string;
+  border: string;
+  spin: boolean;
+};
+
+const STATUS_CONFIG: Record<string, StatusCfg> = {
   dispatching: {
     label: "Buscando profissionais...",
     icon: Loader2,
@@ -31,6 +40,14 @@ const STATUS_CONFIG = {
     color: "text-green-400",
     bg: "bg-green-500/10",
     border: "border-green-500/30",
+    spin: false,
+  },
+  sem_profissional: {
+    label: "Tentaremos novamente em 1h",
+    icon: Clock,
+    color: "text-yellow-400",
+    bg: "bg-yellow-500/10",
+    border: "border-yellow-500/30",
     spin: false,
   },
   expired: {
@@ -133,6 +150,19 @@ export const DispatchStatusBadge = ({ broadcastId, showBreakdown = false }: Disp
             ou{" "}
             <a href="/buscar" className="text-primary font-bold hover:underline">
               busque manualmente
+            </a>
+            .
+          </p>
+        </div>
+      )}
+
+      {/* Sem profissional — retry agendado */}
+      {(broadcast.status as string) === "sem_profissional" && (
+        <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 px-4 py-3">
+          <p className="text-[9px] font-medium text-muted-foreground">
+            Não encontramos profissionais disponíveis agora. Vamos tentar novamente automaticamente em 1 hora. Você também pode{" "}
+            <a href="/buscar" className="text-primary font-bold hover:underline">
+              buscar manualmente
             </a>
             .
           </p>
