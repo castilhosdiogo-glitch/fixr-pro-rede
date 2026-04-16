@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { HelmetProvider } from "react-helmet-async";
 import { InstallPrompt } from "./components/InstallPrompt";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { OnboardingGate } from "./components/OnboardingGate";
 import { AppLayout } from "./components/AppLayout";
 
 // Critical path — loaded eagerly (always needed)
@@ -33,6 +34,9 @@ const QuotesPage     = lazy(() => import("./pages/QuotesPage"));
 const TeamPage       = lazy(() => import("./pages/TeamPage"));
 const MeiRevenuePage = lazy(() => import("./pages/MeiRevenuePage"));
 const HubFiscalPage  = lazy(() => import("./pages/HubFiscalPage"));
+
+// Onboarding
+const ProOnboardingPage = lazy(() => import("./pages/ProOnboardingPage"));
 
 // Legal pages — lazy loaded
 const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
@@ -67,6 +71,7 @@ const App = () => (
               <div className="pb-20 sm:pb-0">
                 <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
+                  <OnboardingGate>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/buscar" element={<SearchPage />} />
@@ -95,8 +100,12 @@ const App = () => (
                     <Route path="/mei-receitas" element={<ProtectedRoute><MeiRevenuePage /></ProtectedRoute>} />
                     <Route path="/hub-fiscal" element={<ProtectedRoute><HubFiscalPage /></ProtectedRoute>} />
 
+                    {/* Onboarding */}
+                    <Route path="/onboarding-pro" element={<ProtectedRoute><ProOnboardingPage /></ProtectedRoute>} />
+
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  </OnboardingGate>
                 </Suspense>
                 </ErrorBoundary>
                 <InstallPrompt />
