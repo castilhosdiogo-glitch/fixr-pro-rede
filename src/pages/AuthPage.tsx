@@ -17,21 +17,21 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile } = useAuth();
   const { data: categories = [] } = useCategories();
   const [mode, setMode] = useState<AuthMode>((location.state as { mode?: AuthMode } | null)?.mode || "login");
   const [waitingListDone, setWaitingListDone] = useState(false);
 
-  // ── Redirect reativo: qualquer caminho de login (password, OAuth, sessão
-  //    restaurada, re-login após logout) redireciona via context em vez de
-  //    navigate manual dentro de handler async. Elimina race de re-login.
+  // ── Redirect reativo: redireciona assim que `user` aparece no context.
+  //    Não espera authLoading nem profile — se profile ainda não carregou,
+  //    cai no metadata do JWT. Evita travar em caso de fetchProfile lento.
   useEffect(() => {
-    if (authLoading || !user) return;
+    if (!user) return;
     const userType =
       profile?.user_type ||
       (user.user_metadata?.user_type as string | undefined);
     navigate(userType === "professional" ? "/dashboard" : "/meu-painel", { replace: true });
-  }, [user, profile, authLoading, navigate]);
+  }, [user, profile, navigate]);
 
   // ── Referral code: read from ?ref= URL param + persist to sessionStorage ──
   const refFromUrl = searchParams.get("ref");
@@ -98,10 +98,19 @@ const AuthPage = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // Timeout defensivo: se a chamada travar no mobile (rede/PWA),
+      // libera o botão em 12s em vez de ficar eterno em "Processando...".
+      const timeout = new Promise<{ data: null; error: Error }>((resolve) =>
+        setTimeout(
+          () => resolve({ data: null, error: new Error("Tempo esgotado. Verifique sua internet e tente de novo.") }),
+          12000
+        )
+      );
+      const signInCall = supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password,
       });
+      const { error } = await Promise.race([signInCall, timeout]);
 
       if (error) {
         toast.error(error.message);

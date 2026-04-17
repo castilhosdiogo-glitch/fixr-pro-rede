@@ -38,14 +38,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
+    // Timeout defensivo: se a query travar (rede instável em mobile),
+    // não deixa o authLoading eterno quebrando todas as rotas protegidas.
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000));
+    const query = supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
-      .single();
+      .single()
+      .then(({ data, error }) => (error ? null : data));
 
-    if (!error && data) {
-      setProfile(data);
+    try {
+      const data = await Promise.race([query, timeout]);
+      if (data) setProfile(data as UserProfile);
+    } catch {
+      // silencioso — profile fica null, UI usa metadata como fallback
     }
   };
 
@@ -86,4 +93,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
