@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import { useCategories } from "@/hooks/useCategories";
 import { AVAILABLE_CITIES } from "@/data/mock";
 import { useSlotOccupancy } from "@/hooks/useSupplyControl";
@@ -16,9 +17,21 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { user, profile, loading: authLoading } = useAuth();
   const { data: categories = [] } = useCategories();
   const [mode, setMode] = useState<AuthMode>((location.state as { mode?: AuthMode } | null)?.mode || "login");
   const [waitingListDone, setWaitingListDone] = useState(false);
+
+  // ── Redirect reativo: qualquer caminho de login (password, OAuth, sessão
+  //    restaurada, re-login após logout) redireciona via context em vez de
+  //    navigate manual dentro de handler async. Elimina race de re-login.
+  useEffect(() => {
+    if (authLoading || !user) return;
+    const userType =
+      profile?.user_type ||
+      (user.user_metadata?.user_type as string | undefined);
+    navigate(userType === "professional" ? "/dashboard" : "/meu-painel", { replace: true });
+  }, [user, profile, authLoading, navigate]);
 
   // ── Referral code: read from ?ref= URL param + persist to sessionStorage ──
   const refFromUrl = searchParams.get("ref");
@@ -85,7 +98,7 @@ const AuthPage = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password,
       });
@@ -96,29 +109,7 @@ const AuthPage = () => {
       }
 
       toast.success("Login realizado!");
-
-      // user_type vem no metadata do auth.users — evita query extra em profiles
-      // (query de profiles trava em mobile com rede instável).
-      let userType = data?.user?.user_metadata?.user_type as string | undefined;
-
-      // Fallback pra contas antigas sem metadata: tenta profiles com timeout curto
-      if (!userType && data?.user) {
-        try {
-          const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
-          const profileQuery = supabase
-            .from("profiles")
-            .select("user_type")
-            .eq("user_id", data.user.id)
-            .maybeSingle()
-            .then((r) => r.data);
-          const profile = await Promise.race([profileQuery, timeout]);
-          userType = (profile as { user_type?: string } | null)?.user_type;
-        } catch {
-          // silencioso — cai no default abaixo
-        }
-      }
-
-      navigate(userType === "professional" ? "/dashboard" : "/meu-painel");
+      // Redirect é feito pelo useEffect acima quando o context atualizar user.
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao fazer login. Tente novamente.");
     } finally {
@@ -249,8 +240,7 @@ const AuthPage = () => {
       });
     } else {
       toast.success("Conta criada com sucesso!");
-      const destination = isProfessional ? "/dashboard" : "/meu-painel";
-      navigate(destination);
+      // Redirect é feito pelo useEffect acima quando o context atualizar user.
     }
   };
 
