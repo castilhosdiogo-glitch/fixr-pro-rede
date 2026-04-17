@@ -30,28 +30,55 @@ export function DisponibilidadeCard() {
     }
     setGeoError(null);
     setGeoLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        update(
-          {
-            latitude: Number(pos.coords.latitude.toFixed(6)),
-            longitude: Number(pos.coords.longitude.toFixed(6)),
-          },
-          {
-            onSettled: () => setGeoLoading(false),
-          },
-        );
-      },
-      (err) => {
+
+    // Tenta 2x: primeiro rede (rápido, indoor OK), fallback pra GPS alta precisão.
+    // enableHighAccuracy:false usa Wi-Fi/torre celular — precisão 20-100m, suficiente pro raio.
+    const tryLowAccuracy = () =>
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        onLowFail,
+        { enableHighAccuracy: false, timeout: 15_000, maximumAge: 60_000 },
+      );
+
+    const tryHighAccuracy = () =>
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        onHighFail,
+        { enableHighAccuracy: true, timeout: 20_000, maximumAge: 0 },
+      );
+
+    const onSuccess = (pos: GeolocationPosition) => {
+      update(
+        {
+          latitude: Number(pos.coords.latitude.toFixed(6)),
+          longitude: Number(pos.coords.longitude.toFixed(6)),
+        },
+        { onSettled: () => setGeoLoading(false) },
+      );
+    };
+
+    const onLowFail = (err: GeolocationPositionError) => {
+      if (err.code === err.PERMISSION_DENIED) {
         setGeoLoading(false);
-        setGeoError(
-          err.code === err.PERMISSION_DENIED
-            ? "Permissão negada — libere localização nas configurações"
-            : "Não foi possível obter sua localização",
-        );
-      },
-      { enableHighAccuracy: true, timeout: 10_000 },
-    );
+        setGeoError("Permissão negada — libere a localização no Chrome e nas Configurações do Android");
+        return;
+      }
+      // Rede não achou → tenta GPS
+      tryHighAccuracy();
+    };
+
+    const onHighFail = (err: GeolocationPositionError) => {
+      setGeoLoading(false);
+      if (err.code === err.PERMISSION_DENIED) {
+        setGeoError("Permissão negada — libere a localização nas configurações");
+      } else if (err.code === err.TIMEOUT) {
+        setGeoError("Tempo esgotado — ative o GPS e tente de novo em local aberto");
+      } else {
+        setGeoError("Localização indisponível — verifique se o GPS está ativado no Android");
+      }
+    };
+
+    tryLowAccuracy();
   };
 
   const commitRaio = () => {

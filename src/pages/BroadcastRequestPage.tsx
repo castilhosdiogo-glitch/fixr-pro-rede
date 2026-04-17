@@ -86,24 +86,40 @@ const BroadcastRequestPage = () => {
       return;
     }
     setGeoLoading(true);
+
+    const onSuccess = (pos: GeolocationPosition) => {
+      setCoords({
+        lat: Number(pos.coords.latitude.toFixed(6)),
+        lng: Number(pos.coords.longitude.toFixed(6)),
+      });
+      setGeoLoading(false);
+      toast.success("Localização capturada");
+    };
+
+    const tryHighAccuracy = () =>
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        (err) => {
+          setGeoLoading(false);
+          if (err.code === err.PERMISSION_DENIED) toast.error("Permissão negada");
+          else if (err.code === err.TIMEOUT) toast.error("Ative o GPS e tente em local aberto");
+          else toast.error("Localização indisponível — verifique o GPS no Android");
+        },
+        { enableHighAccuracy: true, timeout: 20_000, maximumAge: 0 },
+      );
+
+    // 2 tentativas: rede primeiro (rápido, indoor OK), GPS como fallback.
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({
-          lat: Number(pos.coords.latitude.toFixed(6)),
-          lng: Number(pos.coords.longitude.toFixed(6)),
-        });
-        setGeoLoading(false);
-        toast.success("Localização capturada");
-      },
+      onSuccess,
       (err) => {
-        setGeoLoading(false);
-        toast.error(
-          err.code === err.PERMISSION_DENIED
-            ? "Permissão negada"
-            : "Não foi possível obter localização",
-        );
+        if (err.code === err.PERMISSION_DENIED) {
+          setGeoLoading(false);
+          toast.error("Permissão negada — libere a localização no Chrome");
+          return;
+        }
+        tryHighAccuracy();
       },
-      { enableHighAccuracy: true, timeout: 10_000 },
+      { enableHighAccuracy: false, timeout: 15_000, maximumAge: 60_000 },
     );
   };
 
