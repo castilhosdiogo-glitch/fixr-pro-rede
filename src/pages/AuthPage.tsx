@@ -522,7 +522,7 @@ const AuthPage = () => {
         {!(mode === "register-professional" && slotAvailable === false) && (
           <button
             type="submit"
-            disabled={loading || checkingSlot || (mode !== "login" && !privacyAccepted)}
+            disabled={loading || (mode !== "login" && (checkingSlot || !privacyAccepted))}
             className="w-full mt-10 py-6 bg-primary text-primary-foreground font-display font-black text-xs uppercase tracking-[0.3em] rounded-2xl hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
           >
             {loading ? "Processando..." : checkingSlot && mode === "register-professional" ? "Verificando vagas..." : mode === "login" ? "Entrar" : "Criar Minha Conta"}
