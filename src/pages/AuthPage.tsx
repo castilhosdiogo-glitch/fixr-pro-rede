@@ -84,30 +84,45 @@ const AuthPage = () => {
     }
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password,
-    });
-    setLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      });
 
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Login realizado!");
-      // Use metadata to determine redirection if possible, or fetch from profile
-      if (data?.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("user_type")
-          .eq("user_id", data.user.id)
-          .single();
-
-        const destination = profile?.user_type === "professional" ? "/dashboard" : "/meu-painel";
-        navigate(destination);
-      } else {
-        // Fallback if user data is not immediately available (shouldn't happen with signInWithPassword)
-        navigate("/perfil");
+      if (error) {
+        toast.error(error.message);
+        return;
       }
+
+      toast.success("Login realizado!");
+
+      // user_type vem no metadata do auth.users — evita query extra em profiles
+      // (query de profiles trava em mobile com rede instável).
+      let userType = data?.user?.user_metadata?.user_type as string | undefined;
+
+      // Fallback pra contas antigas sem metadata: tenta profiles com timeout curto
+      if (!userType && data?.user) {
+        try {
+          const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+          const profileQuery = supabase
+            .from("profiles")
+            .select("user_type")
+            .eq("user_id", data.user.id)
+            .maybeSingle()
+            .then((r) => r.data);
+          const profile = await Promise.race([profileQuery, timeout]);
+          userType = (profile as { user_type?: string } | null)?.user_type;
+        } catch {
+          // silencioso — cai no default abaixo
+        }
+      }
+
+      navigate(userType === "professional" ? "/dashboard" : "/meu-painel");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao fazer login. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
