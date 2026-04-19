@@ -186,8 +186,8 @@ CREATE POLICY "city_settings_select"
 
 CREATE POLICY "city_settings_admin_all"
   ON public.city_settings FOR ALL
-  USING      (has_role(auth.uid(), 'admin'::app_role))
-  WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
+  USING      (has_role('admin'::app_role, auth.uid()))
+  WITH CHECK (has_role('admin'::app_role, auth.uid()));
 
 -- ─── 5. account_type em profiles ────────────────────────────
 -- Preparação pra fase B2B. Hoje todos começam B2C.
