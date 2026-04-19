@@ -13,9 +13,11 @@ import {
   X,
   Zap,
   ShieldCheck,
+  BarChart3,
 } from "lucide-react";
 import { MatchingConfigPanel } from "@/components/matching/MatchingConfigPanel";
 import { KycAdminPanel } from "@/components/kyc/KycAdminPanel";
+import { WeeklyReportsSection } from "@/components/admin/WeeklyReportsSection";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -258,7 +260,7 @@ const SlotCard = ({ slot }: SlotCardProps) => {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { data: isAdmin, isLoading: checkingRole } = useIsAdmin();
-  const [activeTab, setActiveTab] = useState<"supply" | "matching" | "kyc">("supply");
+  const [activeTab, setActiveTab] = useState<"supply" | "matching" | "kyc" | "reports">("supply");
   const [cityFilter, setCityFilter] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
 
@@ -379,6 +381,13 @@ const AdminDashboard = () => {
             <ShieldCheck size={13} />
             KYC
           </button>
+          <button
+            onClick={() => setActiveTab("reports")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "reports" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <BarChart3 size={13} />
+            Relatórios
+          </button>
         </div>
       </header>
 
@@ -388,6 +397,9 @@ const AdminDashboard = () => {
 
         {/* KYC tab */}
         {activeTab === "kyc" && <KycAdminPanel />}
+
+        {/* Weekly reports tab */}
+        {activeTab === "reports" && <WeeklyReportsSection />}
 
         {/* ── Supply control tab ── */}
         {activeTab === "supply" && <>
