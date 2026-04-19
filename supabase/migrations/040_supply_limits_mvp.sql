@@ -128,26 +128,23 @@ INSERT INTO public.supply_limits (category_id, city, max_professionals) VALUES
   ('tecnico-geral',   'Cachoeirinha',  0);
 
 -- Sanity check: confirma que inserimos exatamente 140 vagas
-DO $$
-DECLARE
-  v_total INT;
+DO $sanity$
 BEGIN
-  SELECT SUM(max_professionals) INTO v_total FROM public.supply_limits;
-  IF v_total != 140 THEN
-    RAISE EXCEPTION 'Seed de supply_limits errado: total=%, esperado=140', v_total;
+  IF (SELECT SUM(max_professionals) FROM public.supply_limits) != 140 THEN
+    RAISE EXCEPTION 'Seed de supply_limits errado: esperado 140, verifique os inserts acima';
   END IF;
-END $$;
+END $sanity$;
 
 -- ─── 4. Growth phase por cidade ─────────────────────────────
 -- LAUNCH → EXPANSION → B2B_ENTRY → SCALE.
 -- Admin avança manualmente pelo painel. Cron de expansão
 -- (fase 2) vai ler esse campo pra decidir se age ou fica quieto.
-DO $$
+DO $type_growth$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'growth_phase') THEN
     CREATE TYPE growth_phase AS ENUM ('LAUNCH', 'EXPANSION', 'B2B_ENTRY', 'SCALE');
   END IF;
-END $$;
+END $type_growth$;
 
 CREATE TABLE IF NOT EXISTS public.city_settings (
   city         TEXT         PRIMARY KEY,
@@ -166,12 +163,12 @@ INSERT INTO public.city_settings (city) VALUES
 ON CONFLICT (city) DO NOTHING;
 
 CREATE OR REPLACE FUNCTION _city_settings_set_updated_at()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER LANGUAGE plpgsql AS $fn_city_updated$
 BEGIN
   NEW.updated_at = now();
   RETURN NEW;
 END;
-$$;
+$fn_city_updated$;
 
 DROP TRIGGER IF EXISTS city_settings_updated_at ON public.city_settings;
 CREATE TRIGGER city_settings_updated_at
@@ -191,12 +188,12 @@ CREATE POLICY "city_settings_admin_all"
 
 -- ─── 5. account_type em profiles ────────────────────────────
 -- Preparação pra fase B2B. Hoje todos começam B2C.
-DO $$
+DO $type_account$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'account_type') THEN
     CREATE TYPE account_type AS ENUM ('B2C', 'B2B_SMALL', 'B2B_LARGE');
   END IF;
-END $$;
+END $type_account$;
 
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS account_type account_type NOT NULL DEFAULT 'B2C';
