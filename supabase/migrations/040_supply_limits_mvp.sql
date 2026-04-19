@@ -178,6 +178,9 @@ CREATE TRIGGER city_settings_updated_at
 -- RLS: leitura pública, escrita só admin
 ALTER TABLE public.city_settings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "city_settings_select"    ON public.city_settings;
+DROP POLICY IF EXISTS "city_settings_admin_all" ON public.city_settings;
+
 CREATE POLICY "city_settings_select"
   ON public.city_settings FOR SELECT USING (true);
 
