@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, Receipt, TrendingUp, Lock, ExternalLink, AlertTriangle } from "lucide-react";
+import { ArrowLeft, FileText, Receipt, TrendingUp, Lock, ExternalLink, AlertTriangle, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -81,6 +81,37 @@ const HubFiscalPage = () => {
       </header>
 
       <div className="max-w-lg mx-auto p-4 space-y-4">
+        {/* MEI Formalization — Parceiro+ */}
+        <Section title="FORMALIZE-SE COMO MEI" locked={!planGate.isParceiro}>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-secondary/10">
+              <UserPlus size={16} className="text-primary flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-bold text-foreground">Ainda não é MEI?</p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Formalização gratuita no Portal do Empreendedor. Leva poucos minutos e libera CNPJ, conta PJ e emissão de NFS-e.
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-primary hover:underline"
+            >
+              <ExternalLink size={12} /> Portal do Empreendedor — Quero ser MEI
+            </a>
+            <a
+              href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei/como-se-tornar-um-mei"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-primary hover:underline"
+            >
+              <ExternalLink size={12} /> Passo a passo da formalização
+            </a>
+          </div>
+        </Section>
+
         {/* NFS-e Section — Parceiro+ */}
         <Section title="NOTA FISCAL DE SERVIÇO (NFS-e)" locked={!planGate.isParceiro}>
           <div className="space-y-3">
