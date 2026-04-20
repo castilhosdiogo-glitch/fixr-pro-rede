@@ -1,6 +1,6 @@
 ﻿import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, LayoutDashboard, ChevronRight, Settings, User } from "lucide-react";
+import { LogOut, LayoutDashboard, ChevronRight, User, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -20,22 +20,11 @@ const ProfilePage = () => {
         .eq("user_id", user!.id)
         .single();
         
-      let professionalProfile = null;
-      if (profile?.user_type === "professional") {
-        const { data: pp } = await supabase
-          .from("professional_profiles")
-          .select("id, category_name, description, experience, verified")
-          .eq("user_id", user!.id)
-          .single();
-        professionalProfile = pp;
-      }
-      
-      return { profile, professionalProfile };
+      return { profile };
     },
   });
 
   const profile = data?.profile;
-  const professionalProfile = data?.professionalProfile;
 
   const handleSignOut = async () => {
     await signOut();
@@ -133,6 +122,13 @@ const ProfilePage = () => {
               {isProfessional ? "PROFISSIONAL" : "CLIENTE"}
             </p>
           </div>
+          <Link
+            to="/perfil/editar"
+            aria-label="Editar perfil"
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Pencil size={16} />
+          </Link>
         </motion.div>
 
         {/* Menu */}

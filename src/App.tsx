@@ -22,6 +22,7 @@ const SearchPage           = lazy(() => import("./pages/SearchPage"));
 const ProfessionalProfile  = lazy(() => import("./pages/ProfessionalProfile"));
 const MessagesPage         = lazy(() => import("./pages/MessagesPage"));
 const ProfilePage          = lazy(() => import("./pages/ProfilePage"));
+const EditProfilePage      = lazy(() => import("./pages/EditProfilePage"));
 const DashboardPage        = lazy(() => import("./pages/DashboardPage"));
 const ClientDashboard      = lazy(() => import("./pages/ClientDashboard"));
 const AdminDashboard       = lazy(() => import("./pages/AdminDashboard"));
@@ -88,6 +89,7 @@ const App = () => (
                     <Route path="/orcamento/:id" element={<OrcamentoRedirect />} />
                     <Route path="/mensagens" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
                     <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                    <Route path="/perfil/editar" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
                     <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                     <Route path="/meu-painel" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
