@@ -53,7 +53,7 @@ const HubFiscalPage = () => {
       </div>
       {locked ? (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">Disponível a partir do plano Parceiro.</p>
+          <p className="text-xs text-muted-foreground">Disponível a partir do plano Profissional.</p>
           <button
             onClick={() => navigate("/planos")}
             className="text-[9px] font-black uppercase tracking-widest text-primary hover:underline"

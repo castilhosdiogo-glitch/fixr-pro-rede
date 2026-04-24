@@ -349,7 +349,7 @@ const MessagesPage = () => {
                 onClick={() => navigate("/planos")}
                 className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
               >
-                <Lock size={10} /> PARCEIRO P/ ÁUDIO E VÍDEO
+                <Lock size={10} /> PROFISSIONAL P/ ÁUDIO E VÍDEO
               </button>
             )}
           </div>

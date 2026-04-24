@@ -4,10 +4,10 @@ import { CheckCircle, TrendingUp, Zap, Sparkles, Mic, Camera, Video, X as XIcon 
 
 const plans = [
   {
-    name: "Explorador",
+    name: "Parceiro",
     icon: TrendingUp,
     price: "Grátis",
-    subtitle: "Estou testando o Fixr",
+    subtitle: "Começo como parceiro Fixr",
     badge: null,
     featured: false,
     commission: "15%",
@@ -24,14 +24,14 @@ const plans = [
       { text: "Gestão de equipe", included: false },
       { text: "Portfólio de fotos", included: false },
     ],
-    cta: "Começar Grátis",
+    cta: "Começar como Parceiro",
   },
   {
-    name: "Parceiro",
+    name: "Profissional",
     icon: Zap,
     price: "R$ 29,90",
-    subtitle: "Faço parte do Fixr",
-    badge: "Parceiro Fixr",
+    subtitle: "Uso o Fixr sem limites",
+    badge: "Profissional Fixr",
     featured: true,
     commission: "10%",
     benefits: [
@@ -45,10 +45,10 @@ const plans = [
       { text: "Gestão de equipe (até 3)", included: true },
       { text: "Portfólio com até 20 fotos", included: true },
       { text: "Relatório mensal de faturamento", included: true },
-      { text: "Selo Parceiro Verificado", included: true },
+      { text: "Selo Profissional Verificado", included: true },
       { text: "Suporte prioritário", included: true },
     ],
-    cta: "Quero ser Parceiro",
+    cta: "Quero ser Profissional",
   },
 ];
 
@@ -165,8 +165,8 @@ const PricingSection = () => (
       <div className="grid grid-cols-3 gap-4">
         {[
           { icon: Camera, label: "FOTOS", desc: "Todos os planos", highlight: false },
-          { icon: Mic, label: "ÁUDIO", desc: "Plano Parceiro", highlight: true },
-          { icon: Video, label: "VÍDEO", desc: "Plano Parceiro", highlight: true },
+          { icon: Mic, label: "ÁUDIO", desc: "Plano Profissional", highlight: true },
+          { icon: Video, label: "VÍDEO", desc: "Plano Profissional", highlight: true },
         ].map((item) => (
           <div
             key={item.label}

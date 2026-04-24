@@ -164,7 +164,7 @@ const DashboardPage = () => {
                 <Crown size={18} className="text-warning" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-warning">PLANO EXPLORADOR</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-warning">PLANO PARCEIRO</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
                   {planGate.requestsRemaining !== null
                     ? `${planGate.requestsRemaining} solicitações restantes este mês`
@@ -185,7 +185,7 @@ const DashboardPage = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-black uppercase tracking-widest text-primary">
-                  PLANO PARCEIRO
+                  PLANO PROFISSIONAL
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">Solicitações ilimitadas · Comissão 10%</p>
               </div>
@@ -193,7 +193,7 @@ const DashboardPage = () => {
           )}
         </motion.div>
 
-        {/* Quick shortcuts — Parceiro features */}
+        {/* Quick shortcuts — paid plan features */}
         {planGate.isParceiro && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}

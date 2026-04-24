@@ -98,13 +98,13 @@ const MeiRevenuePage = () => {
           <DollarSign size={48} className="mx-auto text-muted-foreground" />
           <h2 className="font-display font-black text-sm uppercase tracking-[0.2em]">CONTROLE MEI</h2>
           <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-            Acompanhe sua receita MEI e evite ultrapassar o limite. Exclusivo do plano Parceiro.
+            Acompanhe sua receita MEI e evite ultrapassar o limite. Exclusivo do plano Profissional.
           </p>
           <button
             onClick={() => navigate("/planos")}
             className="px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest"
           >
-            SER PARCEIRO
+            SER PROFISSIONAL
           </button>
         </div>
         <BottomNav />

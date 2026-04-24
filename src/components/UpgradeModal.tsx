@@ -25,7 +25,7 @@ const UpgradeModal = ({ open, onClose, feature, description }: UpgradeModalProps
               <Zap size={18} className="text-primary" />
             </div>
             <h2 className="font-display font-black text-sm uppercase tracking-widest text-foreground">
-              RECURSO PARCEIRO
+              RECURSO PROFISSIONAL
             </h2>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
@@ -54,14 +54,14 @@ const UpgradeModal = ({ open, onClose, feature, description }: UpgradeModalProps
           }}
           className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
         >
-          SER PARCEIRO POR R$ 29,90/MÊS
+          SER PROFISSIONAL POR R$ 29,90/MÊS
         </button>
 
         <button
           onClick={onClose}
           className="w-full py-2 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
         >
-          CONTINUAR COMO EXPLORADOR
+          CONTINUAR COMO PARCEIRO
         </button>
       </div>
     </div>

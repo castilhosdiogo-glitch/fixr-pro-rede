@@ -75,7 +75,7 @@ const ProfessionalCard = ({ professional, index = 0 }: ProfessionalCardProps) =>
                 {(professional.plan_name === "parceiro" || professional.plan_name === "elite") && (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/15 text-primary">
                     <Crown size={10} />
-                    <span className="text-[8px] font-black uppercase tracking-widest">PARCEIRO</span>
+                    <span className="text-[8px] font-black uppercase tracking-widest">PROFISSIONAL</span>
                   </span>
                 )}
                 {reputation && (

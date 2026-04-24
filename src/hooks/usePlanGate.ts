@@ -8,7 +8,7 @@ export type PlanFeature = keyof typeof PLAN_LIMITS.explorador;
 
 export const PLAN_LIMITS = {
   explorador: {
-    label: "Explorador",
+    label: "Parceiro",
     monthlyRequests: 8,
     commissionRate: 15,
     chatText: true,
@@ -27,7 +27,7 @@ export const PLAN_LIMITS = {
     price: 0,
   },
   parceiro: {
-    label: "Parceiro",
+    label: "Profissional",
     monthlyRequests: Infinity,
     commissionRate: 10,
     chatText: true,
@@ -100,9 +100,9 @@ export function usePlanGate(): PlanGate {
   let upgradeMessage: string | null = null;
   if (plan === "explorador") {
     if (requestsRemaining === 0) {
-      upgradeMessage = "Você atingiu o limite de 8 solicitações este mês. Seja Parceiro e tenha pedidos ilimitados por R$ 29,90/mês.";
+      upgradeMessage = "Você atingiu o limite de 8 solicitações este mês. Seja Profissional e tenha pedidos ilimitados por R$ 29,90/mês.";
     } else if (requestsRemaining !== null && requestsRemaining <= 2) {
-      upgradeMessage = `Restam apenas ${requestsRemaining} solicitações este mês. Seja Parceiro para não ter limites.`;
+      upgradeMessage = `Restam apenas ${requestsRemaining} solicitações este mês. Seja Profissional para não ter limites.`;
     }
   }
 
