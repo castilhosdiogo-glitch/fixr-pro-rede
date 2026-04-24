@@ -10,17 +10,17 @@ export const Logo = ({ className = "w-10 h-10" }: { className?: string }) => {
       role="img"
       aria-label="Fixr"
     >
-      <circle cx="90" cy="90" r="62" fill="none" stroke="#0B1C33" strokeWidth="2.5" strokeDasharray="4 5" />
-      <line x1="90" y1="90" x2="42" y2="52" stroke="#0B1C33" strokeWidth="2.5" />
-      <line x1="90" y1="90" x2="140" y2="54" stroke="#0B1C33" strokeWidth="2.5" />
-      <line x1="90" y1="90" x2="42" y2="132" stroke="#0B1C33" strokeWidth="2.5" />
-      <line x1="90" y1="90" x2="138" y2="132" stroke="#0B1C33" strokeWidth="2.5" />
+      <circle cx="90" cy="90" r="62" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeDasharray="4 5" />
+      <line x1="90" y1="90" x2="42" y2="52" stroke="#ffffff" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="140" y2="54" stroke="#ffffff" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="42" y2="132" stroke="#ffffff" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="138" y2="132" stroke="#ffffff" strokeWidth="2.5" />
       <circle cx="42" cy="52" r="9" fill="#F15A24" />
       <circle cx="140" cy="54" r="9" fill="#F15A24" />
       <circle cx="42" cy="132" r="9" fill="#F15A24" />
       <circle cx="138" cy="132" r="9" fill="#F15A24" />
       <path d="M90 54 C 74 54, 64 66, 64 80 C 64 96, 78 110, 90 128 C 102 110, 116 96, 116 80 C 116 66, 106 54, 90 54 Z" fill="#F15A24" />
-      <circle cx="90" cy="80" r="9" fill="#0B1C33" />
+      <circle cx="90" cy="80" r="9" fill="#ffffff" />
     </svg>
   );
 };
@@ -35,18 +35,18 @@ export const LogoWordmark = ({ className = "h-10" }: { className?: string }) => 
       role="img"
       aria-label="Fixr"
     >
-      <circle cx="90" cy="90" r="62" fill="none" stroke="#0B1C33" strokeWidth="2.5" strokeDasharray="4 5" />
-      <line x1="90" y1="90" x2="42" y2="52" stroke="#0B1C33" strokeWidth="2.5" />
-      <line x1="90" y1="90" x2="140" y2="54" stroke="#0B1C33" strokeWidth="2.5" />
-      <line x1="90" y1="90" x2="42" y2="132" stroke="#0B1C33" strokeWidth="2.5" />
-      <line x1="90" y1="90" x2="138" y2="132" stroke="#0B1C33" strokeWidth="2.5" />
+      <circle cx="90" cy="90" r="62" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeDasharray="4 5" />
+      <line x1="90" y1="90" x2="42" y2="52" stroke="#ffffff" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="140" y2="54" stroke="#ffffff" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="42" y2="132" stroke="#ffffff" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="138" y2="132" stroke="#ffffff" strokeWidth="2.5" />
       <circle cx="42" cy="52" r="9" fill="#F15A24" />
       <circle cx="140" cy="54" r="9" fill="#F15A24" />
       <circle cx="42" cy="132" r="9" fill="#F15A24" />
       <circle cx="138" cy="132" r="9" fill="#F15A24" />
       <path d="M90 54 C 74 54, 64 66, 64 80 C 64 96, 78 110, 90 128 C 102 110, 116 96, 116 80 C 116 66, 106 54, 90 54 Z" fill="#F15A24" />
-      <circle cx="90" cy="80" r="9" fill="#0B1C33" />
-      <g fontFamily="'Arial Black', 'Helvetica Neue', Helvetica, sans-serif" fontWeight={900} fontStyle="italic" fontSize={108} fill="#0B1C33">
+      <circle cx="90" cy="80" r="9" fill="#ffffff" />
+      <g fontFamily="'Arial Black', 'Helvetica Neue', Helvetica, sans-serif" fontWeight={900} fontStyle="italic" fontSize={108} fill="#ffffff">
         <text x="195" y="122">F</text>
         <text x="262" y="122">i</text>
         <text x="295" y="122" fill="#F15A24">x</text>

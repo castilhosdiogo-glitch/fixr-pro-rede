@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="20 20 140 140" width="140" height="140">
-  <circle cx="90" cy="90" r="62" fill="none" stroke="#0B1C33" stroke-width="2.5" stroke-dasharray="4 5"/>
-  <line x1="90" y1="90" x2="42" y2="52" stroke="#0B1C33" stroke-width="2.5"/>
-  <line x1="90" y1="90" x2="140" y2="54" stroke="#0B1C33" stroke-width="2.5"/>
-  <line x1="90" y1="90" x2="42" y2="132" stroke="#0B1C33" stroke-width="2.5"/>
-  <line x1="90" y1="90" x2="138" y2="132" stroke="#0B1C33" stroke-width="2.5"/>
+  <circle cx="90" cy="90" r="62" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="4 5"/>
+  <line x1="90" y1="90" x2="42" y2="52" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="90" y1="90" x2="140" y2="54" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="90" y1="90" x2="42" y2="132" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="90" y1="90" x2="138" y2="132" stroke="#ffffff" stroke-width="2.5"/>
   <circle cx="42" cy="52" r="9" fill="#F15A24"/>
   <circle cx="140" cy="54" r="9" fill="#F15A24"/>
   <circle cx="42" cy="132" r="9" fill="#F15A24"/>
   <circle cx="138" cy="132" r="9" fill="#F15A24"/>
   <path d="M90 54 C 74 54, 64 66, 64 80 C 64 96, 78 110, 90 128 C 102 110, 116 96, 116 80 C 116 66, 106 54, 90 54 Z" fill="#F15A24"/>
-  <circle cx="90" cy="80" r="9" fill="#0B1C33"/>
+  <circle cx="90" cy="80" r="9" fill="#ffffff"/>
 </svg>
