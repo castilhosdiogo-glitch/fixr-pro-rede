@@ -10,26 +10,27 @@ export const Logo = ({ className = "w-10 h-10" }: { className?: string }) => {
       role="img"
       aria-label="Fixr"
     >
-      <circle cx="50" cy="50" r="42" className="fill-primary" />
-      <circle cx="50" cy="50" r="31" className="stroke-background/90" strokeWidth="5" />
+      <rect x="3" y="3" width="94" height="94" rx="26" className="fill-white" />
+      <circle cx="50" cy="50" r="39" className="fill-primary" />
+      <circle cx="50" cy="50" r="28" className="stroke-white" strokeWidth="5" />
 
       <path
-        d="M50 24c-10.5 0-19 8.4-19 18.8 0 13.3 19 32.2 19 32.2s19-18.9 19-32.2C69 32.4 60.5 24 50 24Z"
-        className="fill-background"
+        d="M50 25c-10.2 0-18.5 8.2-18.5 18.3C31.5 56.2 50 74.7 50 74.7s18.5-18.5 18.5-31.4C68.5 33.2 60.2 25 50 25Z"
+        className="fill-white"
       />
       <circle cx="50" cy="42" r="7.5" className="fill-primary" />
 
       <path
-        d="M30 34 50 42 70 34M31 66 50 42 69 66"
-        className="stroke-background"
+        d="M28 33.5 50 42 72 33.5M29.5 67 50 42 70.5 67"
+        className="stroke-white"
         strokeWidth="5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="30" cy="34" r="6.5" className="fill-background" />
-      <circle cx="70" cy="34" r="6.5" className="fill-background" />
-      <circle cx="31" cy="66" r="6.5" className="fill-background" />
-      <circle cx="69" cy="66" r="6.5" className="fill-background" />
+      <circle cx="28" cy="33.5" r="6.8" className="fill-white" />
+      <circle cx="72" cy="33.5" r="6.8" className="fill-white" />
+      <circle cx="29.5" cy="67" r="6.8" className="fill-white" />
+      <circle cx="70.5" cy="67" r="6.8" className="fill-white" />
     </svg>
   );
 };
