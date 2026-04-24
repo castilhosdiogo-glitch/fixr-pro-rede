@@ -4,33 +4,23 @@ export const Logo = ({ className = "w-10 h-10" }: { className?: string }) => {
   return (
     <svg
       className={className}
-      viewBox="0 0 100 100"
+      viewBox="20 20 140 140"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label="Fixr"
     >
-      <rect x="3" y="3" width="94" height="94" rx="26" className="fill-white" />
-      <circle cx="50" cy="50" r="39" className="fill-primary" />
-      <circle cx="50" cy="50" r="28" className="stroke-white" strokeWidth="5" />
-
-      <path
-        d="M50 25c-10.2 0-18.5 8.2-18.5 18.3C31.5 56.2 50 74.7 50 74.7s18.5-18.5 18.5-31.4C68.5 33.2 60.2 25 50 25Z"
-        className="fill-white"
-      />
-      <circle cx="50" cy="42" r="7.5" className="fill-primary" />
-
-      <path
-        d="M28 33.5 50 42 72 33.5M29.5 67 50 42 70.5 67"
-        className="stroke-white"
-        strokeWidth="5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="28" cy="33.5" r="6.8" className="fill-white" />
-      <circle cx="72" cy="33.5" r="6.8" className="fill-white" />
-      <circle cx="29.5" cy="67" r="6.8" className="fill-white" />
-      <circle cx="70.5" cy="67" r="6.8" className="fill-white" />
+      <circle cx="90" cy="90" r="62" fill="none" stroke="#0B1C33" strokeWidth="2.5" strokeDasharray="4 5" />
+      <line x1="90" y1="90" x2="42" y2="52" stroke="#0B1C33" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="140" y2="54" stroke="#0B1C33" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="42" y2="132" stroke="#0B1C33" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="138" y2="132" stroke="#0B1C33" strokeWidth="2.5" />
+      <circle cx="42" cy="52" r="9" fill="#F15A24" />
+      <circle cx="140" cy="54" r="9" fill="#F15A24" />
+      <circle cx="42" cy="132" r="9" fill="#F15A24" />
+      <circle cx="138" cy="132" r="9" fill="#F15A24" />
+      <path d="M90 54 C 74 54, 64 66, 64 80 C 64 96, 78 110, 90 128 C 102 110, 116 96, 116 80 C 116 66, 106 54, 90 54 Z" fill="#F15A24" />
+      <circle cx="90" cy="80" r="9" fill="#0B1C33" />
     </svg>
   );
 };
@@ -39,24 +29,29 @@ export const LogoWordmark = ({ className = "h-10" }: { className?: string }) => 
   return (
     <svg
       className={className}
-      viewBox="0 0 238 72"
+      viewBox="0 0 520 180"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label="Fixr"
     >
-      <Logo className="h-[72px] w-[72px]" />
-      <text
-        x="88"
-        y="50"
-        className="fill-foreground"
-        fontFamily="Outfit, Arial, sans-serif"
-        fontSize="42"
-        fontWeight="900"
-        letterSpacing="-1"
-      >
-        Fixr
-      </text>
+      <circle cx="90" cy="90" r="62" fill="none" stroke="#0B1C33" strokeWidth="2.5" strokeDasharray="4 5" />
+      <line x1="90" y1="90" x2="42" y2="52" stroke="#0B1C33" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="140" y2="54" stroke="#0B1C33" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="42" y2="132" stroke="#0B1C33" strokeWidth="2.5" />
+      <line x1="90" y1="90" x2="138" y2="132" stroke="#0B1C33" strokeWidth="2.5" />
+      <circle cx="42" cy="52" r="9" fill="#F15A24" />
+      <circle cx="140" cy="54" r="9" fill="#F15A24" />
+      <circle cx="42" cy="132" r="9" fill="#F15A24" />
+      <circle cx="138" cy="132" r="9" fill="#F15A24" />
+      <path d="M90 54 C 74 54, 64 66, 64 80 C 64 96, 78 110, 90 128 C 102 110, 116 96, 116 80 C 116 66, 106 54, 90 54 Z" fill="#F15A24" />
+      <circle cx="90" cy="80" r="9" fill="#0B1C33" />
+      <g fontFamily="'Arial Black', 'Helvetica Neue', Helvetica, sans-serif" fontWeight={900} fontStyle="italic" fontSize={108} fill="#0B1C33">
+        <text x="195" y="122">F</text>
+        <text x="262" y="122">i</text>
+        <text x="295" y="122" fill="#F15A24">x</text>
+        <text x="365" y="122">r</text>
+      </g>
     </svg>
   );
 };

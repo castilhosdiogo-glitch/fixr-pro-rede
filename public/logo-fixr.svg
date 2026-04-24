@@ -1,13 +1,21 @@
-<svg width="238" height="72" viewBox="0 0 238 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fixr">
-  <rect x="2" y="2" width="68" height="68" rx="19" fill="#ffffff"/>
-  <circle cx="36" cy="36" r="28" fill="#ff4d00"/>
-  <circle cx="36" cy="36" r="20" stroke="#ffffff" stroke-width="3.6"/>
-  <path d="M36 18c-7.3 0-13.2 5.9-13.2 13.1 0 9.2 13.2 22.7 13.2 22.7s13.2-13.5 13.2-22.7C49.2 23.9 43.3 18 36 18Z" fill="#ffffff"/>
-  <circle cx="36" cy="30.8" r="5.4" fill="#ff4d00"/>
-  <path d="M20.3 24.2 36 30.8l15.7-6.6M21.1 48.4 36 30.8l14.9 17.6" stroke="#ffffff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="20.3" cy="24.2" r="4.9" fill="#ffffff"/>
-  <circle cx="51.7" cy="24.2" r="4.9" fill="#ffffff"/>
-  <circle cx="21.1" cy="48.4" r="4.9" fill="#ffffff"/>
-  <circle cx="50.9" cy="48.4" r="4.9" fill="#ffffff"/>
-  <text x="88" y="50" fill="#011926" font-family="Outfit, Arial, sans-serif" font-size="42" font-weight="900" letter-spacing="-1">Fixr</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 180" width="520" height="180">
+  <g>
+    <circle cx="90" cy="90" r="62" fill="none" stroke="#0B1C33" stroke-width="2.5" stroke-dasharray="4 5"/>
+    <line x1="90" y1="90" x2="42" y2="52" stroke="#0B1C33" stroke-width="2.5"/>
+    <line x1="90" y1="90" x2="140" y2="54" stroke="#0B1C33" stroke-width="2.5"/>
+    <line x1="90" y1="90" x2="42" y2="132" stroke="#0B1C33" stroke-width="2.5"/>
+    <line x1="90" y1="90" x2="138" y2="132" stroke="#0B1C33" stroke-width="2.5"/>
+    <circle cx="42" cy="52" r="9" fill="#F15A24"/>
+    <circle cx="140" cy="54" r="9" fill="#F15A24"/>
+    <circle cx="42" cy="132" r="9" fill="#F15A24"/>
+    <circle cx="138" cy="132" r="9" fill="#F15A24"/>
+    <path d="M90 54 C 74 54, 64 66, 64 80 C 64 96, 78 110, 90 128 C 102 110, 116 96, 116 80 C 116 66, 106 54, 90 54 Z" fill="#F15A24"/>
+    <circle cx="90" cy="80" r="9" fill="#0B1C33"/>
+  </g>
+  <g font-family="'Arial Black', 'Helvetica Neue', Helvetica, sans-serif" font-weight="900" font-style="italic" font-size="108" fill="#0B1C33">
+    <text x="195" y="122">F</text>
+    <text x="262" y="122">i</text>
+    <text x="295" y="122" fill="#F15A24">x</text>
+    <text x="365" y="122">r</text>
+  </g>
 </svg>
