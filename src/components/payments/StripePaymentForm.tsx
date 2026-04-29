@@ -5,16 +5,15 @@ import { toast } from "sonner";
 interface StripePaymentFormProps {
   clientSecret: string;
   amount: number; // in cents
+  commissionRate?: number; // percent (e.g., 15, 10) — comes from professional_profiles.commission_rate
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-declare const Stripe: any;
-declare const elements: any;
-
 export function StripePaymentForm({
   clientSecret,
   amount,
+  commissionRate = 15,
   onSuccess,
   onCancel,
 }: StripePaymentFormProps) {
@@ -101,7 +100,7 @@ export function StripePaymentForm({
         </p>
         <p className="text-2xl font-black text-foreground">{amountBRL}</p>
         <p className="text-xs text-muted-foreground mt-2">
-          Comissão Fixr (15%): {((amount * 0.15) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          Comissão Fixr ({commissionRate}%): {((amount * (commissionRate / 100)) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
         </p>
       </div>
 
