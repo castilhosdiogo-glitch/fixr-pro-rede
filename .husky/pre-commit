@@ -1,1 +1,21 @@
-npx lint-staged
+#!/usr/bin/env sh
+
+# 1. lint + typecheck nos arquivos staged
+npx lint-staged || exit 1
+
+# 2. gitleaks: scan dos arquivos staged em busca de secrets.
+#    Skip com warning se o binário não estiver instalado, pra não
+#    quebrar o workflow de quem ainda não instalou.
+#    Install: https://github.com/gitleaks/gitleaks#installing
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --no-banner -v || {
+    echo ""
+    echo "✗ gitleaks detectou secrets nos arquivos staged."
+    echo "  Remove antes de commitar. Se for falso positivo, use"
+    echo "  .gitleaksignore ou um allowlist no gitleaks.toml."
+    exit 1
+  }
+else
+  echo "⚠ gitleaks não instalado — pulando scan de secrets."
+  echo "  Instala em https://github.com/gitleaks/gitleaks pra bloquear leaks no commit."
+fi
