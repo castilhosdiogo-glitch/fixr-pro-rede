@@ -74,7 +74,7 @@ export default function FAQ() {
         {
           question: "Quanto custa usar o Fixr?",
           answer:
-            "O cadastro é gratuito no plano Parceiro, com comissão de 15% sobre cada serviço. O plano Profissional (R$ 29,90/mês) reduz a comissão para 10% e libera recursos extras como áudio, vídeo no chat, agenda e hub fiscal.",
+            "O cadastro é gratuito no plano Parceiro, com comissão de 12% sobre cada serviço. O plano Profissional (R$ 29,90/mês) reduz a comissão para 10% e libera recursos extras como áudio, vídeo no chat, agenda e hub fiscal.",
         },
         {
           question: "Como e quando recebo o pagamento?",

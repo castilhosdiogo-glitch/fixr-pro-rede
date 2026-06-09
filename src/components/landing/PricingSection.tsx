@@ -10,7 +10,7 @@ const plans = [
     subtitle: "Começo como parceiro Fixr",
     badge: null,
     featured: false,
-    commission: "15%",
+    commission: "12%",
     benefits: [
       { text: "Criar perfil profissional", included: true },
       { text: "Aparecer nas buscas", included: true },

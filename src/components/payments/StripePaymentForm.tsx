@@ -13,7 +13,7 @@ interface StripePaymentFormProps {
 export function StripePaymentForm({
   clientSecret,
   amount,
-  commissionRate = 15,
+  commissionRate = 12,
   onSuccess,
   onCancel,
 }: StripePaymentFormProps) {

@@ -40,7 +40,7 @@ const UpgradeModal = ({ open, onClose, feature, description }: UpgradeModalProps
 
         <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
           <p className="text-[10px] font-black uppercase tracking-widest text-primary">
-            COMISSÃO DE 10% vs 15%
+            COMISSÃO DE 10% vs 12%
           </p>
           <p className="text-[10px] text-muted-foreground mt-1">
             A economia na comissão já paga a assinatura.

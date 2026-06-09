@@ -10,7 +10,7 @@ export const PLAN_LIMITS = {
   explorador: {
     label: "Parceiro",
     monthlyRequests: 8,
-    commissionRate: 15,
+    commissionRate: 12,
     chatText: true,
     chatAudio: false,
     chatPhoto: true,
