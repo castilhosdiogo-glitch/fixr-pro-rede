@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCategories } from "@/hooks/useCategories";
 import { AVAILABLE_CITIES } from "@/data/mock";
 import { useCreateBroadcastRequest } from "@/hooks/useMatchingEngine";
+import { geocodeAddress } from "@/lib/geocode";
 import { DispatchStatusBadge } from "@/components/matching/DispatchStatusBadge";
 import { SEO } from "@/components/SEO";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ const BroadcastRequestPage = () => {
   });
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
+  const [addrLoading, setAddrLoading] = useState(false);
   const [broadcastId, setBroadcastId] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -121,6 +123,23 @@ const BroadcastRequestPage = () => {
       },
       { enableHighAccuracy: false, timeout: 15_000, maximumAge: 60_000 },
     );
+  };
+
+  const geocodeFromAddress = async () => {
+    const query = [form.endereco.trim(), form.city].filter(Boolean).join(", ");
+    if (form.endereco.trim().length < 4) {
+      toast.error("Digite o endereço do serviço primeiro.");
+      return;
+    }
+    setAddrLoading(true);
+    const point = await geocodeAddress(query);
+    setAddrLoading(false);
+    if (point) {
+      setCoords({ lat: point.lat, lng: point.lng });
+      toast.success("Endereço localizado no mapa.");
+    } else {
+      toast.error("Endereço não encontrado. Tente detalhar mais ou usar o GPS.");
+    }
   };
 
   const update = (field: string, value: string) =>
@@ -301,23 +320,44 @@ const BroadcastRequestPage = () => {
                 placeholder="Rua, número, bairro"
                 className="w-full bg-secondary/20 border border-border rounded-2xl px-4 py-4 text-sm font-medium text-foreground focus:border-primary placeholder:text-muted-foreground/30 outline-none"
               />
-              <button
-                type="button"
-                onClick={captureCoords}
-                disabled={geoLoading}
-                className="w-full mt-2 rounded-xl border border-border bg-secondary/10 px-3 py-2.5 flex items-center gap-2 hover:border-primary/60 transition-all disabled:opacity-50"
-              >
-                {geoLoading ? (
-                  <Loader2 size={12} className="animate-spin text-primary flex-shrink-0" />
-                ) : (
-                  <MapPin size={12} className={`${coords ? "text-emerald-500" : "text-primary"} flex-shrink-0`} />
-                )}
-                <span className="text-[9px] font-black uppercase tracking-widest text-foreground">
-                  {coords
-                    ? `Localização pronta (${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)})`
-                    : "Usar minha localização atual"}
-                </span>
-              </button>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={captureCoords}
+                  disabled={geoLoading || addrLoading}
+                  className="rounded-xl border border-border bg-secondary/10 px-3 py-2.5 flex items-center gap-2 hover:border-primary/60 transition-all disabled:opacity-50"
+                >
+                  {geoLoading ? (
+                    <Loader2 size={12} className="animate-spin text-primary flex-shrink-0" />
+                  ) : (
+                    <MapPin size={12} className="text-primary flex-shrink-0" />
+                  )}
+                  <span className="text-[9px] font-black uppercase tracking-widest text-foreground">
+                    Meu GPS
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={geocodeFromAddress}
+                  disabled={geoLoading || addrLoading}
+                  className="rounded-xl border border-border bg-secondary/10 px-3 py-2.5 flex items-center gap-2 hover:border-primary/60 transition-all disabled:opacity-50"
+                >
+                  {addrLoading ? (
+                    <Loader2 size={12} className="animate-spin text-primary flex-shrink-0" />
+                  ) : (
+                    <MapPin size={12} className="text-primary flex-shrink-0" />
+                  )}
+                  <span className="text-[9px] font-black uppercase tracking-widest text-foreground">
+                    Usar endereço
+                  </span>
+                </button>
+              </div>
+              {coords && (
+                <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500 mt-1.5 flex items-center gap-1">
+                  <MapPin size={10} className="flex-shrink-0" />
+                  Localização pronta ({coords.lat.toFixed(3)}, {coords.lng.toFixed(3)})
+                </p>
+              )}
             </div>
 
             {/* Urgência */}
