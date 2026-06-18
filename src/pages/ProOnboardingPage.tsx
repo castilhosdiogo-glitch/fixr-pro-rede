@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Sparkles, ArrowRight, ArrowLeft, Hammer, Camera, FileText,
-  Landmark, CheckCircle2, Upload,
+  Landmark, CheckCircle2, Upload, MapPin, Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,7 +16,7 @@ import {
 } from "@/hooks/useOnboarding";
 import { KycUploadForm } from "@/components/kyc/KycUploadForm";
 
-const TOTAL = 6;
+const TOTAL = 7;
 
 export default function ProOnboardingPage() {
   const navigate = useNavigate();
@@ -78,22 +78,25 @@ export default function ProOnboardingPage() {
             />
           )}
           {step === 3 && (
+            <StepLocation userId={user.id} onBack={() => go(2)} onNext={() => go(4)} />
+          )}
+          {step === 4 && (
             <StepPhoto
               userId={user.id}
               current={profile?.avatar_url ?? null}
-              onBack={() => go(2)}
-              onNext={() => go(4)}
+              onBack={() => go(3)}
+              onNext={() => go(5)}
             />
           )}
-          {step === 4 && (
-            <StepBio userId={user.id} onBack={() => go(3)} onNext={() => go(5)} />
-          )}
           {step === 5 && (
-            <StepKyc onBack={() => go(4)} onNext={() => go(6)} />
+            <StepBio userId={user.id} onBack={() => go(4)} onNext={() => go(6)} />
           )}
           {step === 6 && (
+            <StepKyc onBack={() => go(5)} onNext={() => go(7)} />
+          )}
+          {step === 7 && (
             <StepBank
-              onBack={() => go(5)}
+              onBack={() => go(6)}
               onFinish={finish}
               finishing={complete.isPending}
             />
@@ -249,6 +252,142 @@ function StepCategories({
         </>
       )}
       <StepNav onBack={onBack} onNext={save} loading={saving} disabled={!primary} />
+    </div>
+  );
+}
+
+/* ───────────── Step 3: Location (GPS obrigatório) ───────────── */
+
+function StepLocation({
+  userId, onBack, onNext,
+}: { userId: string; onBack: () => void; onNext: () => void }) {
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (supabase as any)
+        .from("professional_profiles")
+        .select("latitude, longitude")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (data?.latitude != null && data?.longitude != null) {
+        setCoords({ lat: data.latitude, lng: data.longitude });
+      }
+    })();
+  }, [userId]);
+
+  const capture = () => {
+    if (!("geolocation" in navigator)) {
+      setGeoError("Geolocalização não suportada no navegador.");
+      return;
+    }
+    setGeoError(null);
+    setGeoLoading(true);
+
+    const onSuccess = (pos: GeolocationPosition) => {
+      setCoords({
+        lat: Number(pos.coords.latitude.toFixed(6)),
+        lng: Number(pos.coords.longitude.toFixed(6)),
+      });
+      setGeoLoading(false);
+    };
+
+    const onHighFail = (err: GeolocationPositionError) => {
+      setGeoLoading(false);
+      if (err.code === err.PERMISSION_DENIED) {
+        setGeoError("Permissão negada — libere a localização nas configurações do navegador.");
+      } else if (err.code === err.TIMEOUT) {
+        setGeoError("Tempo esgotado — ative o GPS e tente de novo em local aberto.");
+      } else {
+        setGeoError("Localização indisponível — verifique se o GPS está ativado.");
+      }
+    };
+
+    const onLowFail = (err: GeolocationPositionError) => {
+      if (err.code === err.PERMISSION_DENIED) {
+        setGeoLoading(false);
+        setGeoError("Permissão negada — libere a localização nas configurações do navegador.");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(onSuccess, onHighFail, {
+        enableHighAccuracy: true, timeout: 20_000, maximumAge: 0,
+      });
+    };
+
+    navigator.geolocation.getCurrentPosition(onSuccess, onLowFail, {
+      enableHighAccuracy: false, timeout: 15_000, maximumAge: 60_000,
+    });
+  };
+
+  const save = async () => {
+    if (!coords) { toast.error("Defina sua localização para continuar."); return; }
+    setSaving(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from("professional_profiles")
+      .update({ latitude: coords.lat, longitude: coords.lng })
+      .eq("user_id", userId);
+    setSaving(false);
+    if (error) { toast.error("Erro ao salvar localização."); console.error(error); return; }
+    onNext();
+  };
+
+  return (
+    <div className="space-y-5">
+      <StepHeader icon={MapPin} title="Sua localização" subtitle="Usada para te enviar pedidos dentro do seu raio de atendimento." />
+
+      {coords ? (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-foreground">Localização definida</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={capture}
+            disabled={geoLoading}
+            className="text-xs font-bold text-primary hover:text-primary/80 disabled:opacity-50"
+          >
+            {geoLoading ? <Loader2 size={14} className="animate-spin" /> : "Atualizar"}
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={capture}
+          disabled={geoLoading}
+          className="w-full rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-4 flex items-center gap-3 hover:border-primary hover:bg-primary/10 transition disabled:opacity-50"
+        >
+          {geoLoading ? (
+            <Loader2 size={16} className="animate-spin text-primary shrink-0" />
+          ) : (
+            <MapPin size={16} className="text-primary shrink-0" />
+          )}
+          <div className="text-left">
+            <p className="text-sm font-bold text-primary">
+              {geoLoading ? "Obtendo localização..." : "Definir minha localização"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Obrigatório para receber pedidos próximos a você.
+            </p>
+          </div>
+        </button>
+      )}
+
+      {geoError && (
+        <p className="text-xs text-red-500">{geoError}</p>
+      )}
+
+      <StepNav onBack={onBack} onNext={save} loading={saving} disabled={!coords} />
     </div>
   );
 }
