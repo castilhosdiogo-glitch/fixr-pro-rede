@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCategories } from "@/hooks/useCategories";
 import { isValidCNPJ, formatCNPJ } from "@/schemas/mei-validation";
+import { fetchCnpj, type CnpjInfo } from "@/lib/cnpj";
 import {
   useOnboardingState,
   useSetProOnboardingStep,
@@ -468,6 +469,9 @@ function StepBio({
   const [tipoPessoa, setTipoPessoa] = useState<"pf" | "pj">("pf");
   const [cnpj, setCnpj] = useState("");
   const [saving, setSaving] = useState(false);
+  const [cnpjChecking, setCnpjChecking] = useState(false);
+  const [cnpjInfo, setCnpjInfo] = useState<CnpjInfo | null>(null);
+  const [cnpjApiError, setCnpjApiError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -490,9 +494,36 @@ function StepBio({
   const cnpjDigits = cnpj.replace(/\D/g, "");
   const cnpjValid = tipoPessoa === "pf" || isValidCNPJ(cnpjDigits);
 
+  const checkCnpjReceita = async (digits: string) => {
+    setCnpjInfo(null);
+    setCnpjApiError(null);
+    if (digits.length !== 14 || !isValidCNPJ(digits)) return;
+    setCnpjChecking(true);
+    const result = await fetchCnpj(digits);
+    setCnpjChecking(false);
+    if (result.ok) {
+      setCnpjInfo(result.data);
+      if (!result.data.ativa) setCnpjApiError(`CNPJ com situação "${result.data.situacao}" na Receita. Use um CNPJ ativo.`);
+    } else {
+      setCnpjApiError(result.error);
+    }
+  };
+
+  const handleCnpjChange = (raw: string) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 14);
+    setCnpj(digits.length === 14 ? formatCNPJ(digits) : digits);
+    setCnpjInfo(null);
+    setCnpjApiError(null);
+    if (digits.length === 14) checkCnpjReceita(digits);
+  };
+
   const save = async () => {
     if (bio.trim().length < 20) { toast.error("Escreva pelo menos 20 caracteres na bio."); return; }
-    if (tipoPessoa === "pj" && !isValidCNPJ(cnpjDigits)) { toast.error("CNPJ inválido."); return; }
+    if (tipoPessoa === "pj") {
+      if (!isValidCNPJ(cnpjDigits)) { toast.error("CNPJ inválido."); return; }
+      if (cnpjChecking) { toast.error("Aguarde a validação do CNPJ."); return; }
+      if (!cnpjInfo?.ativa) { toast.error("CNPJ precisa estar ativo na Receita."); return; }
+    }
     setSaving(true);
     const especialidades = esp.split(",").map((s) => s.trim()).filter(Boolean);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -511,7 +542,8 @@ function StepBio({
   };
 
   const count = bio.trim().length;
-  const disabled = count < 20 || !cnpjValid;
+  const cnpjBlocked = tipoPessoa === "pj" && (cnpjChecking || !cnpjInfo?.ativa);
+  const disabled = count < 20 || !cnpjValid || cnpjBlocked;
 
   return (
     <div className="space-y-5">
@@ -565,16 +597,30 @@ function StepBio({
           <input
             type="text"
             value={cnpj}
-            onChange={(e) => {
-              const digits = e.target.value.replace(/\D/g, "").slice(0, 14);
-              setCnpj(digits.length === 14 ? formatCNPJ(digits) : digits);
-            }}
+            onChange={(e) => handleCnpjChange(e.target.value)}
             placeholder="00.000.000/0000-00"
             inputMode="numeric"
             className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm"
           />
           {cnpjDigits.length === 14 && !isValidCNPJ(cnpjDigits) && (
             <p className="text-[11px] text-red-500 mt-1">CNPJ inválido.</p>
+          )}
+          {cnpjChecking && (
+            <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
+              <Loader2 size={11} className="animate-spin" /> Validando na Receita...
+            </p>
+          )}
+          {cnpjInfo?.ativa && (
+            <div className="mt-2 flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-2">
+              <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[11px] font-bold text-foreground">{cnpjInfo.razaoSocial || "CNPJ ativo"}</p>
+                <p className="text-[10px] text-muted-foreground">Situação: {cnpjInfo.situacao}</p>
+              </div>
+            </div>
+          )}
+          {cnpjApiError && (
+            <p className="text-[11px] text-red-500 mt-1">{cnpjApiError}</p>
           )}
         </div>
       )}

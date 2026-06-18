@@ -2,7 +2,7 @@
 // Handles MEI registration and CNPJ validation
 
 import { supabase } from "@/lib/supabase";
-import { formatCNPJ } from "@/schemas/mei-validation";
+import { fetchCnpj } from "@/lib/cnpj";
 
 /**
  * Response from CNPJ validation API
@@ -41,62 +41,21 @@ export async function validateCNPJWithAPI(cnpj: string): Promise<{
   data?: CNPJValidationResponse;
   error?: string;
 }> {
-  try {
-    // Format CNPJ for API call (remove special characters)
-    const cleanCNPJ = cnpj.replace(/\D/g, "");
-
-    if (cleanCNPJ.length !== 14) {
-      return {
-        valid: false,
-        error: "CNPJ deve ter 14 dígitos",
-      };
-    }
-
-    // Call Receita Federal API
-    const response = await fetch(
-      `https://publica.cnpj.ws/cnpj/${cleanCNPJ}`,
-      {
-        method: "GET",
-        headers: {
-          "Accept": "application/json",
-        },
-      }
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return {
-          valid: false,
-          error: "CNPJ não encontrado na base da Receita Federal",
-        };
-      }
-      return {
-        valid: false,
-        error: "Erro ao validar CNPJ. Tente novamente mais tarde.",
-      };
-    }
-
-    const data: CNPJValidationResponse = await response.json();
-
-    // Check if CNPJ is active
-    if (data.status !== "active") {
-      return {
-        valid: false,
-        error: `CNPJ inativo ou fechado (Status: ${data.status})`,
-      };
-    }
-
-    return {
-      valid: true,
-      data,
-    };
-  } catch (error) {
-    console.error("[MEI_SERVICE] CNPJ validation error:", error);
-    return {
-      valid: false,
-      error: "Erro ao validar CNPJ. Verifique sua conexão.",
-    };
+  const result = await fetchCnpj(cnpj);
+  if (!result.ok) {
+    return { valid: false, error: result.error };
   }
+  if (!result.data.ativa) {
+    return { valid: false, error: `CNPJ inativo ou fechado (Situação: ${result.data.situacao})` };
+  }
+  return {
+    valid: true,
+    data: {
+      cnpj: result.data.cnpj,
+      name: result.data.razaoSocial,
+      status: "active",
+    },
+  };
 }
 
 /**
