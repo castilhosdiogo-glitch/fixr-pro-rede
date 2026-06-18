@@ -5,6 +5,8 @@ import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useCategories } from "@/hooks/useCategories";
+import { useCep } from "@/hooks/useCep";
+import { formatCep } from "@/lib/viacep";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { SEO } from "@/components/SEO";
@@ -17,9 +19,11 @@ const EditProfilePage = () => {
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [cep, setCep] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [userType, setUserType] = useState<string | null>(null);
+  const { lookup: lookupCep, loading: cepLoading } = useCep();
   const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
   const [experience, setExperience] = useState("");
@@ -64,6 +68,20 @@ const EditProfilePage = () => {
   }, [data]);
 
   const isProfessional = userType === "professional";
+
+  const handleCepChange = async (raw: string) => {
+    setCep(formatCep(raw));
+    const digits = raw.replace(/\D/g, "");
+    if (digits.length === 8) {
+      const addr = await lookupCep(digits);
+      if (addr) {
+        if (addr.cidade) setCity(addr.cidade);
+        if (addr.uf) setState(addr.uf);
+      } else {
+        toast.error("CEP não encontrado.");
+      }
+    }
+  };
 
   const save = async () => {
     if (!user) return;
@@ -161,6 +179,19 @@ const EditProfilePage = () => {
               placeholder="(11) 99999-9999"
               inputMode="tel"
             />
+          </Field>
+          <Field label="CEP">
+            <input
+              value={cep}
+              onChange={(e) => handleCepChange(e.target.value)}
+              className={inputCls}
+              placeholder="00000-000"
+              inputMode="numeric"
+              maxLength={9}
+            />
+            {cepLoading && (
+              <p className="text-[10px] text-muted-foreground mt-1">Buscando endereço...</p>
+            )}
           </Field>
           <div className="grid grid-cols-[1fr_80px] gap-3">
             <Field label="Cidade">

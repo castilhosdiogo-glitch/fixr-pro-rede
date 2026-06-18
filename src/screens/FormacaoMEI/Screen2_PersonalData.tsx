@@ -9,11 +9,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
-  ActivityIndicator,
-  Alert,
 } from "react-native";
-import { ArrowRight, ArrowLeft, AlertCircle } from "lucide-react-native";
+import { ArrowRight, ArrowLeft, AlertCircle, MapPin } from "lucide-react-native";
 import { MEIFlowState } from "@/hooks/useFormacaoMEI";
+import { fetchCep } from "@/lib/viacep";
 
 interface Screen2PersonalDataProps {
   state: MEIFlowState;
@@ -69,12 +68,24 @@ export function Screen2PersonalData({
   onPrev,
 }: Screen2PersonalDataProps) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [cepLabel, setCepLabel] = useState<string | null>(null);
 
   const handleFieldChange = (fieldKey: string, value: string) => {
     if (["cpf", "cep"].includes(fieldKey)) {
       onUpdateAndFormat(fieldKey as keyof MEIFlowState["personalData"], value);
     } else {
       onUpdateField(fieldKey as keyof MEIFlowState["personalData"], value);
+    }
+
+    if (fieldKey === "cep") {
+      const digits = value.replace(/\D/g, "");
+      if (digits.length === 8) {
+        fetchCep(digits).then((addr) => {
+          setCepLabel(addr ? `${addr.cidade} - ${addr.uf}` : null);
+        });
+      } else {
+        setCepLabel(null);
+      }
     }
   };
 
@@ -140,6 +151,13 @@ export function Screen2PersonalData({
 
               {!error && (
                 <Text style={styles.helpText}>{field.help}</Text>
+              )}
+
+              {field.key === "cep" && cepLabel && (
+                <View style={styles.cepConfirm}>
+                  <MapPin width={14} height={14} color="#0066CC" />
+                  <Text style={styles.cepConfirmText}>{cepLabel}</Text>
+                </View>
               )}
             </View>
           );
@@ -253,6 +271,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999999",
     marginTop: 4,
+  },
+  cepConfirm: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    gap: 4,
+  },
+  cepConfirmText: {
+    fontSize: 12,
+    color: "#0066CC",
+    fontWeight: "600",
   },
   errorContainer: {
     flexDirection: "row",
