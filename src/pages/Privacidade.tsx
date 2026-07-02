@@ -1,13 +1,31 @@
 import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 export default function Privacidade() {
+  const navigate = useNavigate();
+  const goBack = () => (window.history.length > 1 ? navigate(-1) : navigate("/"));
+
   return (
     <>
       <Helmet>
         <title>Política de Privacidade - Fixr</title>
         <meta name="description" content="Saiba como protegemos seus dados no Fixr" />
       </Helmet>
-      <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-50 bg-background border-b border-border px-4 py-4">
+          <div className="flex items-center gap-4 max-w-4xl mx-auto">
+            <button
+              onClick={goBack}
+              aria-label="Voltar"
+              className="w-10 h-10 flex items-center justify-center rounded-2xl bg-primary text-primary-foreground"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <h1 className="font-display font-black text-xs uppercase tracking-[0.2em]">PRIVACIDADE</h1>
+          </div>
+        </header>
+        <div className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto prose prose-invert dark:prose-invert">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-2">Política de Privacidade</h1>
@@ -201,6 +219,7 @@ export default function Privacidade() {
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </>
