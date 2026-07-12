@@ -13,6 +13,8 @@ export interface ActiveService {
   professional_id: string;
   client_name: string;
   client_city: string;
+  started_at: string | null;
+  estimated_duration_minutes: number | null;
 }
 
 export interface CompletedService {
@@ -32,17 +34,19 @@ export function useActiveServices() {
   return useQuery({
     queryKey: ["active-services", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from("service_requests")
         .select(
-          "id, description, status, scheduled_date, created_at, updated_at, client_id, professional_id",
+          "id, description, status, scheduled_date, created_at, updated_at, client_id, professional_id, started_at, estimated_duration_minutes",
         )
         .eq("professional_id", user!.id)
-        .in("status", ["accepted", "scheduled"])
+        .in("status", ["accepted", "scheduled", "in_progress"])
         .order("created_at", { ascending: false });
       if (error) throw error;
 
-      const clientIds = Array.from(new Set((data ?? []).map((r) => r.client_id)));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const clientIds: string[] = Array.from(new Set((data ?? []).map((r: any) => r.client_id as string)));
       const profilesMap = new Map<string, { full_name: string | null; city: string | null }>();
       if (clientIds.length) {
         const { data: profs } = await supabase
@@ -57,7 +61,8 @@ export function useActiveServices() {
         }
       }
 
-      return (data ?? []).map((r) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (data ?? []).map((r: any) => {
         const p = profilesMap.get(r.client_id);
         return {
           id: r.id,
@@ -70,6 +75,9 @@ export function useActiveServices() {
           professional_id: r.professional_id,
           client_name: p?.full_name ?? "Cliente",
           client_city: p?.city ?? "",
+          started_at: (r as { started_at?: string | null }).started_at ?? null,
+          estimated_duration_minutes:
+            (r as { estimated_duration_minutes?: number | null }).estimated_duration_minutes ?? null,
         } satisfies ActiveService;
       });
     },
@@ -78,18 +86,51 @@ export function useActiveServices() {
   });
 }
 
-/** Professional: mark a service_request as completed */
+/** Professional: start a service (estimates duration, kicks off the 33%/66% check-ins) */
+export function useStartService() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async ({
+      serviceRequestId,
+      estimatedDurationMinutes,
+    }: {
+      serviceRequestId: string;
+      estimatedDurationMinutes: number;
+    }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
+        .from("service_requests")
+        .update({ status: "in_progress", estimated_duration_minutes: estimatedDurationMinutes })
+        .eq("id", serviceRequestId)
+        .eq("professional_id", user!.id)
+        .in("status", ["accepted", "scheduled"])
+        .select("id");
+      if (error) throw error;
+      if (!data?.length) throw new Error("Serviço não está mais disponível para iniciar.");
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["active-services", user?.id] });
+      qc.invalidateQueries({ queryKey: ["professionalDashboard", user?.id] });
+    },
+  });
+}
+
+/** Professional: mark a service_request as completed (must be in_progress) */
 export function useMarkServiceCompleted() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (serviceRequestId: string) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("service_requests")
         .update({ status: "completed" })
         .eq("id", serviceRequestId)
-        .eq("professional_id", user!.id);
+        .eq("professional_id", user!.id)
+        .eq("status", "in_progress")
+        .select("id");
       if (error) throw error;
+      if (!data?.length) throw new Error("Inicie o serviço antes de marcar como concluído.");
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["active-services", user?.id] });

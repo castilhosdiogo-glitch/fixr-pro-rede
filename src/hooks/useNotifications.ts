@@ -9,6 +9,9 @@ export type NotificationType =
   | "service_completed"
   | "review_available"
   | "dispatch_received"
+  | "service_checkin_due"
+  | "dispute_opened"
+  | "dispute_resolved"
   | "general";
 
 export interface AppNotification {

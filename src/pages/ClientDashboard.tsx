@@ -1,6 +1,7 @@
 ﻿import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ClipboardList, MessageSquare, Star, Search, Clock, ChevronRight, Calendar } from "lucide-react";
+import { ArrowLeft, ClipboardList, MessageSquare, Star, Search, Clock, ChevronRight, Calendar, ShieldAlert } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -10,6 +11,9 @@ import { useCompletedServicesAwaitingReview } from "@/hooks/useServiceCompletion
 import ReviewRequestCard from "@/components/reputation/ReviewRequestCard";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import PendingReviewsBanner from "@/components/reviews/PendingReviewsBanner";
+import CheckinPendingBanner from "@/components/checkins/CheckinPendingBanner";
+import DisputeFormModal from "@/components/disputes/DisputeFormModal";
+import { useMyDisputes } from "@/hooks/useDisputes";
 
 interface RecentRequest {
   id: string;
@@ -17,7 +21,17 @@ interface RecentRequest {
   status: string;
   scheduled_date: string | null;
   created_at: string;
+  completed_at: string | null;
   professional_id: string;
+}
+
+const DISPUTE_WINDOW_DAYS = 7;
+
+function canDispute(req: RecentRequest, disputedServiceIds: Set<string>): boolean {
+  if (req.status !== "completed" || !req.completed_at) return false;
+  if (disputedServiceIds.has(req.id)) return false;
+  const deadline = new Date(req.completed_at).getTime() + DISPUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  return Date.now() <= deadline;
 }
 
 const statusLabel: Record<string, { text: string; color: string }> = {
@@ -41,7 +55,7 @@ const ClientDashboard = () => {
         supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("client_id", user!.id).eq("status", "pending"),
         supabase.from("service_requests").select("id", { count: "exact", head: true }).eq("client_id", user!.id).eq("status", "completed"),
         supabase.from("reviews").select("id", { count: "exact", head: true }).eq("client_id", user!.id),
-        supabase.from("service_requests").select("id, description, status, scheduled_date, created_at, professional_id").eq("client_id", user!.id).order("created_at", { ascending: false }).limit(5),
+        supabase.from("service_requests").select("id, description, status, scheduled_date, created_at, completed_at, professional_id").eq("client_id", user!.id).order("created_at", { ascending: false }).limit(5),
       ]);
 
       return {
@@ -52,7 +66,8 @@ const ClientDashboard = () => {
           completedRequests: completedRes.count || 0,
           reviewsGiven: reviewsRes.count || 0,
         },
-        recentRequests: (recentRes.data as RecentRequest[]) || [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        recentRequests: ((recentRes.data as any[]) || []) as RecentRequest[],
       };
     },
   });
@@ -61,6 +76,11 @@ const ClientDashboard = () => {
   const stats = data?.stats || { totalRequests: 0, pendingRequests: 0, completedRequests: 0, reviewsGiven: 0 };
   const recentRequests = data?.recentRequests || [];
   const { data: awaitingReview = [] } = useCompletedServicesAwaitingReview();
+  const { data: myDisputes = [] } = useMyDisputes();
+  const [disputingRequest, setDisputingRequest] = useState<RecentRequest | null>(null);
+  const disputedServiceIds = new Set(
+    myDisputes.filter((d) => d.status === "open" || d.status === "under_review").map((d) => d.service_request_id)
+  );
 
   if (loading || isLoading) {
     return (
@@ -118,6 +138,7 @@ const ClientDashboard = () => {
 
       <div className="max-w-lg mx-auto px-4 py-5 space-y-5">
         <PendingReviewsBanner />
+        <CheckinPendingBanner />
         {/* Welcome */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -270,20 +291,37 @@ const ClientDashboard = () => {
             <div className="space-y-3">
               {recentRequests.map((req) => {
                 const st = statusLabel[req.status] || statusLabel.pending;
+                const disputable = canDispute(req, disputedServiceIds);
+                const disputed = disputedServiceIds.has(req.id);
                 return (
                   <div
                     key={req.id}
-                    className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4 border-l-4 border-l-primary hover:bg-secondary/10 transition-colors"
+                    className="rounded-2xl bg-card border border-border p-5 flex flex-col gap-3 border-l-4 border-l-primary hover:bg-secondary/10 transition-colors"
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-black text-foreground uppercase tracking-tight truncate">{req.description}</p>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">
-                        REGISTRO: {new Date(req.created_at).toLocaleDateString("pt-BR")}
-                      </p>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-black text-foreground uppercase tracking-tight truncate">{req.description}</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-1">
+                          REGISTRO: {new Date(req.created_at).toLocaleDateString("pt-BR")}
+                        </p>
+                      </div>
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-2xl border border-current ${st.color}`}>
+                        {st.text}
+                      </span>
                     </div>
-                    <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-2xl border border-current ${st.color}`}>
-                      {st.text}
-                    </span>
+                    {disputable && (
+                      <button
+                        onClick={() => setDisputingRequest(req)}
+                        className="self-start flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 transition-colors"
+                      >
+                        <ShieldAlert size={11} /> Contestar serviço
+                      </button>
+                    )}
+                    {disputed && (
+                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                        <ShieldAlert size={11} /> Contestação em análise
+                      </p>
+                    )}
                   </div>
                 );
               })}
@@ -302,6 +340,14 @@ const ClientDashboard = () => {
       </div>
 
       <BottomNav />
+
+      {disputingRequest && (
+        <DisputeFormModal
+          serviceRequestId={disputingRequest.id}
+          serviceDescription={disputingRequest.description}
+          onClose={() => setDisputingRequest(null)}
+        />
+      )}
     </div>
   );
 };

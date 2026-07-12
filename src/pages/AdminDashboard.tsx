@@ -14,10 +14,12 @@ import {
   Zap,
   ShieldCheck,
   BarChart3,
+  ShieldAlert,
 } from "lucide-react";
 import { MatchingConfigPanel } from "@/components/matching/MatchingConfigPanel";
 import { KycAdminPanel } from "@/components/kyc/KycAdminPanel";
 import { WeeklyReportsSection } from "@/components/admin/WeeklyReportsSection";
+import { DisputesAdminPanel } from "@/components/admin/DisputesAdminPanel";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -260,7 +262,7 @@ const SlotCard = ({ slot }: SlotCardProps) => {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { data: isAdmin, isLoading: checkingRole } = useIsAdmin();
-  const [activeTab, setActiveTab] = useState<"supply" | "matching" | "kyc" | "reports">("supply");
+  const [activeTab, setActiveTab] = useState<"supply" | "matching" | "kyc" | "reports" | "disputes">("supply");
   const [cityFilter, setCityFilter] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
 
@@ -388,6 +390,13 @@ const AdminDashboard = () => {
             <BarChart3 size={13} />
             Relatórios
           </button>
+          <button
+            onClick={() => setActiveTab("disputes")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "disputes" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <ShieldAlert size={13} />
+            Disputas
+          </button>
         </div>
       </header>
 
@@ -400,6 +409,9 @@ const AdminDashboard = () => {
 
         {/* Weekly reports tab */}
         {activeTab === "reports" && <WeeklyReportsSection />}
+
+        {/* Disputes tab */}
+        {activeTab === "disputes" && <DisputesAdminPanel />}
 
         {/* ── Supply control tab ── */}
         {activeTab === "supply" && <>
