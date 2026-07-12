@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { playUrgentAlertTone } from "@/lib/alertSound";
 import type { Json } from "@/integrations/supabase/types";
 
 export type NotificationType =
@@ -10,9 +11,13 @@ export type NotificationType =
   | "review_available"
   | "dispatch_received"
   | "service_checkin_due"
+  | "service_checkin_problem"
   | "dispute_opened"
   | "dispute_resolved"
   | "general";
+
+/** Tipos que tocam sinal sonoro de alerta quando chegam em tempo real. */
+const URGENT_SOUND_TYPES: readonly NotificationType[] = ["service_checkin_problem"];
 
 export interface AppNotification {
   id: string;
@@ -68,8 +73,13 @@ export function useNotificationsRealtime() {
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
+        (payload) => {
           qc.invalidateQueries({ queryKey: ["notifications", user.id] });
+          const incomingType = (payload.new as { type?: NotificationType } | null)?.type;
+          if (incomingType && URGENT_SOUND_TYPES.includes(incomingType)) {
+            playUrgentAlertTone();
+            qc.invalidateQueries({ queryKey: ["urgent-checkin-problems", user.id] });
+          }
         },
       )
       .subscribe();

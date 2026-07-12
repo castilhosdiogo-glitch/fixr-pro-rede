@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
   });
   if (body.resolution !== "deny") {
     await sendNotification(dispute.professional_id, "dispute_resolved", "Disputa resolvida", notifyBody, {
-      url: "/meu-painel", dispute_id: dispute.id,
+      url: "/dashboard", dispute_id: dispute.id,
     });
   }
 

@@ -13,8 +13,10 @@ export interface ServiceCheckin {
   responded_at: string | null;
   response: "ok" | "problem" | null;
   comment: string | null;
+  professional_acknowledged_at: string | null;
   created_at: string;
   service_description?: string;
+  client_name?: string;
 }
 
 /** Cliente: check-ins notificados e ainda não respondidos. */
@@ -93,6 +95,68 @@ export function useSubmitCheckin() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pending-checkins", user?.id] });
+      qc.invalidateQueries({ queryKey: ["service-checkins"] });
+    },
+  });
+}
+
+/** Profissional: reports de problema (ainda não reconhecidos) — pra banner urgente + som. */
+export function useUrgentCheckinProblems() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["urgent-checkin-problems", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
+        .from("service_checkins")
+        .select(`
+          *,
+          service_requests!inner (description)
+        `)
+        .eq("professional_id", user!.id)
+        .eq("response", "problem")
+        .is("professional_acknowledged_at", null)
+        .order("responded_at", { ascending: false });
+
+      if (error) throw error;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rows = (data || []) as any[];
+      const clientIds = Array.from(new Set(rows.map((c) => c.client_id as string)));
+      const namesMap = new Map<string, string>();
+      if (clientIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", clientIds);
+        for (const p of profs ?? []) namesMap.set(p.user_id as string, p.full_name ?? "Cliente");
+      }
+
+      return rows.map((c) => ({
+        ...c,
+        service_description: c.service_requests?.description ?? "Serviço",
+        client_name: namesMap.get(c.client_id) ?? "Cliente",
+      })) as ServiceCheckin[];
+    },
+    staleTime: 10_000,
+  });
+}
+
+/** Profissional: marca um report de problema como lido/reconhecido. */
+export function useAcknowledgeCheckinProblem() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (checkinId: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).rpc("acknowledge_checkin_problem", {
+        p_checkin_id: checkinId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["urgent-checkin-problems", user?.id] });
       qc.invalidateQueries({ queryKey: ["service-checkins"] });
     },
   });

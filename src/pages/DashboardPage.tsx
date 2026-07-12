@@ -18,6 +18,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import { PushToggle } from "@/components/notifications/PushToggle";
 import { DisponibilidadeCard } from "@/components/pro/DisponibilidadeCard";
 import PendingReviewsBanner from "@/components/reviews/PendingReviewsBanner";
+import UrgentProblemBanner from "@/components/checkins/UrgentProblemBanner";
 
 
 interface RecentRequest {
@@ -128,6 +129,7 @@ const DashboardPage = () => {
 
       <div className="max-w-lg mx-auto px-4 py-5 space-y-5">
         <PendingReviewsBanner />
+        <UrgentProblemBanner />
         {/* Profile summary */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}

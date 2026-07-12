@@ -16,9 +16,10 @@ const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string }> = {
   service_completed: { icon: <CheckCheck size={12} />,  color: "text-emerald-500" },
   review_available:  { icon: <Star size={12} />,        color: "text-yellow-500" },
   review_received:   { icon: <ThumbsUp size={12} />,    color: "text-blue-500" },
-  service_checkin_due: { icon: <MessageCircleQuestion size={12} />, color: "text-primary" },
-  dispute_opened:      { icon: <ShieldAlert size={12} />,           color: "text-red-500" },
-  dispute_resolved:    { icon: <ShieldAlert size={12} />,           color: "text-emerald-500" },
+  service_checkin_due:     { icon: <MessageCircleQuestion size={12} />, color: "text-primary" },
+  service_checkin_problem: { icon: <ShieldAlert size={12} />,           color: "text-red-500" },
+  dispute_opened:          { icon: <ShieldAlert size={12} />,           color: "text-red-500" },
+  dispute_resolved:        { icon: <ShieldAlert size={12} />,           color: "text-emerald-500" },
 };
 
 function NotificationItem({ n, onRead }: { n: AppNotification; onRead: (id: string) => void }) {
@@ -53,14 +54,14 @@ function NotificationItem({ n, onRead }: { n: AppNotification; onRead: (id: stri
     </div>
   );
 
-  // If it's a review_available notification, wrap in a link to client dashboard
-  if (n.type === "review_available") {
-    return <Link to="/meu-painel">{inner}</Link>;
+  // Prioriza o destino gravado em data.url (correto por destinatário — cliente
+  // vs profissional podem receber o mesmo tipo de notificação com rotas diferentes).
+  const dataUrl = (n.data as { url?: string } | null)?.url;
+  if (dataUrl) {
+    return <Link to={dataUrl}>{inner}</Link>;
   }
-  if (n.type === "service_accepted") {
-    return <Link to="/meu-painel">{inner}</Link>;
-  }
-  if (n.type === "service_checkin_due" || n.type === "dispute_opened" || n.type === "dispute_resolved") {
+  // Fallback pra tipos antigos que não gravam data.url.
+  if (n.type === "review_available" || n.type === "service_accepted") {
     return <Link to="/meu-painel">{inner}</Link>;
   }
   return inner;
