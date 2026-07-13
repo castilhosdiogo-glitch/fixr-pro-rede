@@ -86,6 +86,27 @@ const AuthPage = () => {
   const update = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  const handleForgotPassword = async () => {
+    if (!form.email.trim()) {
+      toast.error("Digite seu e-mail no campo acima primeiro.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(form.email.trim(), {
+        redirectTo: `${window.location.origin}/redefinir-senha`,
+      });
+      if (error) {
+        toast.error("Não foi possível enviar o e-mail. Tente novamente.");
+        console.error(error);
+        return;
+      }
+      toast.success("E-mail de recuperação enviado! Confira sua caixa de entrada (e o spam).");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async () => {
     if (!form.email.trim()) {
       toast.error("Informe seu e-mail.");
@@ -388,6 +409,20 @@ const AuthPage = () => {
             />
           </div>
         </div>
+
+        {/* Forgot password — login only */}
+        {mode === "login" && (
+          <div className="text-right">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={loading}
+              className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline disabled:opacity-50"
+            >
+              Esqueci minha senha
+            </button>
+          </div>
+        )}
 
         {/* Registration fields */}
         {mode !== "login" && (

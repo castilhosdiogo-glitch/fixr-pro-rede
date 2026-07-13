@@ -23,6 +23,7 @@ const ProfessionalProfile  = lazy(() => import("./pages/ProfessionalProfile"));
 const MessagesPage         = lazy(() => import("./pages/MessagesPage"));
 const ProfilePage          = lazy(() => import("./pages/ProfilePage"));
 const EditProfilePage      = lazy(() => import("./pages/EditProfilePage"));
+const ResetPasswordPage    = lazy(() => import("./pages/ResetPasswordPage"));
 const DashboardPage        = lazy(() => import("./pages/DashboardPage"));
 const ClientDashboard      = lazy(() => import("./pages/ClientDashboard"));
 const AdminDashboard       = lazy(() => import("./pages/AdminDashboard"));
@@ -78,6 +79,7 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/buscar" element={<SearchPage />} />
                     <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
 
                     {/* Legal Pages — Public */}
                     <Route path="/termos-de-uso" element={<TermosDeUso />} />
