@@ -1,6 +1,12 @@
-import { CheckCircle2, MapPin, Calendar, Loader2, Clock } from "lucide-react";
+import { CheckCircle2, MapPin, Calendar, Loader2, Clock, PlayCircle, MessageCircle, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
-import { useMarkServiceCompleted, useScheduleService, type ActiveService } from "@/hooks/useServiceCompletion";
+import {
+  useMarkServiceCompleted,
+  useScheduleService,
+  useStartService,
+  type ActiveService,
+} from "@/hooks/useServiceCompletion";
+import { useServiceCheckins } from "@/hooks/useServiceCheckins";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
@@ -8,14 +14,51 @@ interface ActiveServiceCardProps {
   service: ActiveService;
 }
 
+const DURATION_PRESETS = [
+  { label: "30 min", minutes: 30 },
+  { label: "1h", minutes: 60 },
+  { label: "2h", minutes: 120 },
+  { label: "3h", minutes: 180 },
+  { label: "4h+", minutes: 240 },
+];
+
+function CheckpointDots({ serviceId }: { serviceId: string }) {
+  const { data: checkins = [] } = useServiceCheckins(serviceId);
+  if (!checkins.length) return null;
+
+  return (
+    <div className="flex items-center gap-2">
+      {checkins.map((c) => {
+        const dotClass = !c.responded_at
+          ? "bg-muted-foreground/30"
+          : c.response === "ok"
+          ? "bg-emerald-500"
+          : "bg-red-500";
+        return (
+          <div key={c.id} className="flex items-center gap-1" title={`Checkpoint ${c.checkpoint_pct}%`}>
+            {c.response === "problem" && <AlertTriangle size={9} className="text-red-500" />}
+            <span className={`w-2 h-2 rounded-full ${dotClass}`} />
+          </div>
+        );
+      })}
+      <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/60">
+        Check-ins do cliente
+      </span>
+    </div>
+  );
+}
+
 export default function ActiveServiceCard({ service }: ActiveServiceCardProps) {
   const { mutate: complete, isPending: isCompleting } = useMarkServiceCompleted();
   const { mutate: schedule, isPending: isScheduling } = useScheduleService();
+  const { mutate: start, isPending: isStarting } = useStartService();
   const { toast } = useToast();
   const [confirmed, setConfirmed] = useState(false);
   const [done, setDone] = useState(false);
   const [scheduledDate, setScheduledDate] = useState("");
   const [showScheduler, setShowScheduler] = useState(false);
+  const [showDurationPicker, setShowDurationPicker] = useState(false);
+  const [customMinutes, setCustomMinutes] = useState("");
 
   const handleComplete = () => {
     if (!confirmed) {
@@ -53,6 +96,24 @@ export default function ActiveServiceCard({ service }: ActiveServiceCardProps) {
     );
   };
 
+  const handleStart = (minutes: number) => {
+    start(
+      { serviceRequestId: service.id, estimatedDurationMinutes: minutes },
+      {
+        onSuccess: () => {
+          setShowDurationPicker(false);
+          toast({
+            title: "Serviço iniciado!",
+            description: "O cliente vai receber 2 check-ins rápidos durante a execução.",
+          });
+        },
+        onError: (err: Error) => {
+          toast({ title: "Erro ao iniciar", description: err.message, variant: "destructive" });
+        },
+      }
+    );
+  };
+
   if (done) {
     return (
       <motion.div
@@ -69,11 +130,20 @@ export default function ActiveServiceCard({ service }: ActiveServiceCardProps) {
     );
   }
 
+  const isInProgress = service.status === "in_progress";
+
   // Format scheduled date for display
   const scheduledLabel = service.scheduled_date
     ? new Date(service.scheduled_date).toLocaleString("pt-BR", {
         day: "2-digit",
         month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
+  const startedLabel = service.started_at
+    ? new Date(service.started_at).toLocaleString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit",
       })
@@ -101,7 +171,15 @@ export default function ActiveServiceCard({ service }: ActiveServiceCardProps) {
               </span>
             )}
           </div>
-          {scheduledLabel ? (
+          {isInProgress && startedLabel ? (
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <PlayCircle size={10} className="text-blue-500" />
+              <span className="text-[9px] font-black uppercase tracking-wider text-blue-500">
+                Iniciado às {startedLabel}
+                {service.estimated_duration_minutes ? ` • ~${service.estimated_duration_minutes}min` : ""}
+              </span>
+            </div>
+          ) : scheduledLabel ? (
             <div className="flex items-center gap-1.5 mt-1.5">
               <Clock size={10} className="text-primary" />
               <span className="text-[9px] font-black uppercase tracking-wider text-primary">
@@ -114,10 +192,21 @@ export default function ActiveServiceCard({ service }: ActiveServiceCardProps) {
             </p>
           )}
         </div>
-        <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 flex-shrink-0">
-          {service.status === "accepted" ? "Em andamento" : "Agendado"}
+        <span
+          className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0 border ${
+            isInProgress
+              ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+              : service.status === "scheduled"
+              ? "bg-primary/10 text-primary border-primary/20"
+              : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+          }`}
+        >
+          {isInProgress ? "Em execução" : service.status === "scheduled" ? "Agendado" : "Em andamento"}
         </span>
       </div>
+
+      {/* Check-in evidence trail (only while in progress) */}
+      {isInProgress && <CheckpointDots serviceId={service.id} />}
 
       {/* Schedule section — only for accepted services */}
       {service.status === "accepted" && (
@@ -159,32 +248,100 @@ export default function ActiveServiceCard({ service }: ActiveServiceCardProps) {
         </>
       )}
 
-      {/* Complete button */}
-      <button
-        onClick={handleComplete}
-        disabled={isCompleting}
-        className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-display font-black text-[10px] uppercase tracking-widest transition-all active:scale-[0.98] ${
-          confirmed
-            ? "bg-emerald-500 text-white hover:bg-emerald-600"
-            : "bg-secondary/20 text-foreground hover:bg-emerald-500/10 hover:text-emerald-600 border border-border hover:border-emerald-500/30"
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
-      >
-        {isCompleting ? (
-          <Loader2 size={14} className="animate-spin" />
-        ) : (
-          <CheckCircle2 size={14} />
-        )}
-        {isCompleting
-          ? "Concluindo..."
-          : confirmed
-          ? "Confirmar conclusão"
-          : "Marcar como concluído"}
-      </button>
+      {/* Start service — for accepted/scheduled, before in_progress */}
+      {!isInProgress && (
+        <>
+          {!showDurationPicker ? (
+            <button
+              onClick={() => setShowDurationPicker(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-600 font-display font-black text-[10px] uppercase tracking-widest hover:bg-blue-500/20 transition-all active:scale-[0.98]"
+            >
+              <PlayCircle size={14} /> Iniciar serviço
+            </button>
+          ) : (
+            <div className="space-y-2 rounded-xl bg-secondary/10 border border-border p-3">
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                <MessageCircle size={10} /> Quanto tempo deve durar?
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {DURATION_PRESETS.map((preset) => (
+                  <button
+                    key={preset.minutes}
+                    onClick={() => handleStart(preset.minutes)}
+                    disabled={isStarting}
+                    className="px-3 py-2 rounded-xl bg-background border border-border text-[10px] font-black uppercase tracking-widest text-foreground hover:border-blue-500 hover:text-blue-600 transition-all disabled:opacity-50"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={1440}
+                  placeholder="Custom (min)"
+                  value={customMinutes}
+                  onChange={(e) => setCustomMinutes(e.target.value)}
+                  className="flex-1 bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  onClick={() => {
+                    const mins = parseInt(customMinutes, 10);
+                    if (!mins || mins < 1) {
+                      toast({ title: "Informe uma duração válida.", variant: "destructive" });
+                      return;
+                    }
+                    handleStart(mins);
+                  }}
+                  disabled={isStarting || !customMinutes}
+                  className="px-4 py-2 rounded-xl bg-blue-500 text-white font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {isStarting ? <Loader2 size={12} className="animate-spin" /> : <PlayCircle size={12} />}
+                  Iniciar
+                </button>
+                <button
+                  onClick={() => setShowDurationPicker(false)}
+                  className="px-3 py-2 rounded-xl border border-border text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
-      {confirmed && !isCompleting && (
-        <p className="text-[8px] font-black uppercase tracking-wider text-center text-muted-foreground">
-          Clique novamente para confirmar • O cliente será notificado
-        </p>
+      {/* Complete button — only once in_progress */}
+      {isInProgress && (
+        <>
+          <button
+            onClick={handleComplete}
+            disabled={isCompleting}
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-display font-black text-[10px] uppercase tracking-widest transition-all active:scale-[0.98] ${
+              confirmed
+                ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                : "bg-secondary/20 text-foreground hover:bg-emerald-500/10 hover:text-emerald-600 border border-border hover:border-emerald-500/30"
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {isCompleting ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <CheckCircle2 size={14} />
+            )}
+            {isCompleting
+              ? "Concluindo..."
+              : confirmed
+              ? "Confirmar conclusão"
+              : "Marcar como concluído"}
+          </button>
+
+          {confirmed && !isCompleting && (
+            <p className="text-[8px] font-black uppercase tracking-wider text-center text-muted-foreground">
+              Clique novamente para confirmar • O cliente será notificado
+            </p>
+          )}
+        </>
       )}
     </div>
   );
