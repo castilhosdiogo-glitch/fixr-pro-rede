@@ -107,6 +107,14 @@ Execute também `npm run typecheck` e `npm run build` dentro de `admin/`.
 
 O admin e as Edge Functions não estão contemplados nesse arquivo e precisam de pipelines/deploys próprios. O PWA verifica atualizações do service worker no carregamento, a cada cinco minutos e ao voltar o foco para a página.
 
+## Assistência Codex e sincronização de contexto
+
+- `AGENTS.md` define as instruções operacionais do projeto para o Codex.
+- `.agents/skills/` contém as skills compatíveis, incluindo especialistas com prefixo `agent-` e workflows com prefixo `workflow-`.
+- O inventário convertido contém 79 skills: 48 módulos originais, 20 especialistas e 11 workflows; recursos e scripts auxiliares permanecem carregados sob demanda.
+- `.agent/` permanece preservado como fonte original do Antigravity e não deve ser alterado automaticamente.
+- Toda mudança que afete comportamento, arquitetura, dados, configuração, deploy ou riscos deve atualizar no mesmo trabalho o arquivo real e o documento correspondente em `MD/`.
+- Validações de código e documentação devem acompanhar a mesma atualização do repositório, sem incluir alterações locais não relacionadas.
 ## Observabilidade e operação
 
 - Sentry registra erros, tracing e replay com texto/mídia mascarados.
