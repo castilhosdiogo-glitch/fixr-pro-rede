@@ -1,73 +1,121 @@
-# Welcome to your Lovable project
+# YUD Service Network
 
-## Project info
+YUD Service Network is evolving the original Fixr/YUD Work marketplace into **agent-native infrastructure for human services**.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+The target interaction model is:
 
-## How can I edit this code?
+```text
+Customer / Customer Agent
+          ↕
+   YUD Service Network
+          ↕
+Professional / Professional Agent
+```
 
-There are several ways of editing your application.
+The long-term product is not a proprietary chatbot and not a single marketplace UI. It is the machine-readable, machine-discoverable and machine-actionable network that lets agents discover, verify, negotiate and transact with professionals who perform work in the physical world.
 
-**Use Lovable**
+## Product principles
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **WhatsApp-first, not WhatsApp-dependent** — WhatsApp is the first distribution/interface adapter for Brazil; the core remains channel-agnostic.
+- **BYOA (Bring Your Own Agent)** — first-party YUD agents can bootstrap adoption, while the protocol is designed for future ChatGPT/Claude/Gemini/Grok/Qwen/DeepSeek/local/third-party agents.
+- **Model/provider agnostic** — model choice belongs in the agent/runtime layer, not in the service domain contract.
+- **Voice and low-digital-literacy friendly** — natural language should become structured service state without long forms.
+- **Deterministic where possible** — use structured filters/ranking/state machines for hard constraints; use LLMs where language and ambiguity justify them.
+- **Fail closed for consequential actions** — explicit authorization, idempotency and audit evidence.
+- **No schema, no decision** — agent outputs that mutate service state must resolve into validated contracts.
 
-Changes made via Lovable will be committed automatically to this repo.
+Strategic rule:
 
-**Use your preferred IDE**
+> We want businesses that become more valuable as AI improves, not businesses that are destroyed as AI improves.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Current migration branch
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+`feat/yud-service-network-v1`
 
-Follow these steps:
+This branch preserves useful legacy infrastructure while adding the new agent-native core:
+
+- identity and channel bindings for agents;
+- Service Graph / machine-readable professional capabilities;
+- structured availability;
+- canonical service requests;
+- deterministic matching and persisted candidates;
+- quotes and bounded negotiation authority;
+- canonical service transactions;
+- audit evidence;
+- provider-neutral channel inbox/outbox;
+- WhatsApp Cloud API secure ingress adapter;
+- first-party authenticated Service Network API;
+- atomic quote acceptance;
+- RLS and server-mediated critical writes.
+
+See:
+
+- `docs/yud-service-network/ARCHITECTURE.md`
+- `docs/yud-service-network/AGENT_PROTOCOL.md`
+- `docs/yud-service-network/READINESS.md`
+
+## Legacy infrastructure retained
+
+The repository already contains substantial production-oriented capabilities that should be adapted rather than rewritten blindly, including:
+
+- authentication/profiles;
+- professional profiles and onboarding;
+- geo/radius dispatch;
+- ranking and reputation;
+- KYC/curation;
+- scheduling;
+- payments/commission infrastructure;
+- disputes;
+- professional/admin dashboards;
+- fiscal/MEI tooling.
+
+The existing browse/search Web experience remains useful as a human interface, but it is no longer the architectural center of the product.
+
+## MVP target
+
+```text
+natural-language need
+→ structured ServiceRequest
+→ deterministic discovery/matching
+→ explicit professional candidate
+→ professional quote/availability
+→ bounded acceptance
+→ canonical scheduled transaction
+→ audit evidence
+```
+
+Preferred first channel: WhatsApp.
+
+Not part of the first MVP: bank, card, credit, blockchain/token, custom frontier model, autonomous financial authority or unnecessary infrastructure complexity.
+
+## Technology
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind / shadcn-ui
+- Supabase / PostgreSQL / RLS
+- Supabase Edge Functions
+- Zod
+- Vitest
+
+## Local development
+
+Requires Node.js 20.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm ci
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Validation:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run lint
+npm test
+npm run build
+```
 
-**Use GitHub Codespaces**
+## Production safety
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Code existence is not production certification. Before deploying the Service Network migrations/functions, follow the staging and security gates in `docs/yud-service-network/READINESS.md`.
