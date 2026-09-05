@@ -14,40 +14,50 @@ The goal of this branch is to turn the legacy app-centric marketplace into an ag
 - agent identities and channel bindings;
 - structured service requests;
 - professional availability;
+- persisted request/professional candidate matching;
+- professional demand listing and decline flow;
 - quotes and bounded negotiation authority;
 - canonical service transactions;
 - agent action audit ledger;
 - deterministic professional discovery reusing existing geo/ranking functions;
+- server-only request matching with explicit candidate access;
 - atomic quote acceptance in Postgres;
 - service-capability backfill from legacy professional profiles;
 - channel-neutral inbound event ledger and outbound queue;
 - secure WhatsApp Cloud API inbound webhook adapter with signature verification;
+- governed WhatsApp text outbox sender with explicit worker authentication;
 - first-party authenticated Service Network API;
 - schema-level unit tests;
 - pull-request CI for lint, tests and build.
 
+## Compatibility evidence already collected
+
+Read-only inspection of the connected Supabase project confirmed that the legacy schema contains the tables/columns used by the migration (`professional_profiles`, `profiles`, `broadcast_requests`, `service_requests`) and that `_haversine_km` and `_score_professional` exist with the expected signatures.
+
+This is compatibility evidence only. No Service Network DDL has been applied to the live database.
+
 ## Must pass before staging certification
 
-- apply migrations `044`–`046` against a disposable/staging Supabase database;
-- verify all referenced legacy columns/functions exist with production-compatible types;
+- apply migrations `044`–`047` against a disposable/staging Supabase database;
 - run RLS abuse tests for client, professional and unrelated authenticated users;
+- verify professionals cannot quote requests unless persisted as candidates;
 - run concurrent quote-acceptance test to prove only one transaction can win;
 - regenerate Supabase TypeScript database types after migrations;
 - run `npm run lint`, `npm test` and `npm run build` in CI;
 - deploy `yud-agent-network` to staging;
-- exercise create → discover → quote → accept end to end;
+- exercise create → auto-match → list professional match → quote → accept end to end;
 - verify audit evidence and idempotent replay.
 
 ## Must pass before WhatsApp pilot
 
 - configure Meta WhatsApp Cloud API application and phone number;
-- configure `WHATSAPP_VERIFY_TOKEN` and `WHATSAPP_APP_SECRET` as secrets;
+- configure `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_GRAPH_API_VERSION` and `YUD_CHANNEL_WORKER_TOKEN` as secrets;
 - deploy and verify `yud-whatsapp-webhook`;
-- implement governed outbound WhatsApp sender for `yud_channel_outbox`;
+- deploy and verify `yud-whatsapp-outbox`;
 - implement event processor/orchestrator that converts channel events into structured YUD operations;
 - implement or connect voice transcription for WhatsApp audio;
 - define onboarding behavior for unbound phone numbers;
-- test duplicate webhook delivery and provider retry behavior;
+- test duplicate webhook delivery, outbox idempotency and provider retry behavior;
 - add privacy/retention policy for raw provider payloads and media references.
 
 ## Must pass before external BYOA
@@ -84,6 +94,7 @@ natural-language need
 → normalized channel event
 → structured ServiceRequest
 → deterministic discovery/matching
+→ persisted professional candidate
 → professional receives demand
 → professional returns quote/availability
 → bounded acceptance
