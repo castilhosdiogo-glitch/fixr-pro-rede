@@ -24,6 +24,13 @@ const DiscoverSchema = z.object({
   limit: z.number().int().min(1).max(50).default(10),
 });
 
+const PriceReferenceSchema = z.object({
+  action: z.literal("get_price_reference"),
+  category_id: z.string().min(1).max(120),
+  city: z.string().min(2).max(120).nullable().optional(),
+  state: z.string().min(2).max(40).nullable().optional(),
+});
+
 const CreateRequestSchema = z.object({
   action: z.literal("create_request"),
   requester_agent_id: z.string().uuid().nullable().optional(),
@@ -88,6 +95,7 @@ const AcceptQuoteSchema = z.object({
 
 const BodySchema = z.discriminatedUnion("action", [
   DiscoverSchema,
+  PriceReferenceSchema,
   CreateRequestSchema,
   MatchRequestSchema,
   ListMatchesSchema,
@@ -202,6 +210,17 @@ Deno.serve(async (req) => {
 
       if (error) return handleError(error, "YUD professional discovery");
       return successResponse({ professionals: data ?? [] });
+    }
+
+    if (body.action === "get_price_reference") {
+      const { data, error } = await userDb.rpc("yud_get_price_reference", {
+        p_category_id: body.category_id,
+        p_city: body.city ?? null,
+        p_state: body.state ?? null,
+      });
+
+      if (error) return handleError(error, "YUD regional price reference");
+      return successResponse({ reference: Array.isArray(data) ? data[0] ?? null : data ?? null });
     }
 
     if (body.action === "create_request") {
