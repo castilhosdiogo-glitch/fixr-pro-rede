@@ -45,6 +45,22 @@ const CreateRequestSchema = z.object({
   idempotency_key: z.string().min(8).max(255),
 });
 
+const MatchRequestSchema = z.object({
+  action: z.literal("match_request"),
+  request_id: z.string().uuid(),
+  limit: z.number().int().min(1).max(50).default(10),
+});
+
+const ListMatchesSchema = z.object({
+  action: z.literal("list_matches"),
+  limit: z.number().int().min(1).max(50).default(20),
+});
+
+const DeclineMatchSchema = z.object({
+  action: z.literal("decline_match"),
+  candidate_id: z.string().uuid(),
+});
+
 const SubmitQuoteSchema = z.object({
   action: z.literal("submit_quote"),
   request_id: z.string().uuid(),
@@ -73,6 +89,9 @@ const AcceptQuoteSchema = z.object({
 const BodySchema = z.discriminatedUnion("action", [
   DiscoverSchema,
   CreateRequestSchema,
+  MatchRequestSchema,
+  ListMatchesSchema,
+  DeclineMatchSchema,
   SubmitQuoteSchema,
   GetRequestSchema,
   AcceptQuoteSchema,
@@ -166,6 +185,12 @@ Deno.serve(async (req) => {
     const user = authData.user;
     if (authError || !user) return errorResponse("UNAUTHORIZED", "Invalid session", 401);
 
+    // Service-role use is confined to operations that require server-mediated
+    // state changes after the human session has already been authenticated.
+    const adminDb = createClient(url, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
     if (body.action === "discover") {
       const { data, error } = await userDb.rpc("yud_discover_professionals", {
         p_category_id: body.category_id,
@@ -215,7 +240,10 @@ Deno.serve(async (req) => {
         idempotency_key: body.idempotency_key,
       };
 
-      const { data, error } = await userDb
+      let requestRecord: Record<string, unknown> | null = null;
+      let idempotentReplay = false;
+
+      const { data: created, error } = await userDb
         .from("agent_service_requests")
         .insert(payload)
         .select("*")
@@ -229,11 +257,152 @@ Deno.serve(async (req) => {
           .single();
 
         if (existingError) return handleError(existingError, "YUD request idempotency lookup");
-        return successResponse({ request: existing, idempotent_replay: true });
+        requestRecord = existing as Record<string, unknown>;
+        idempotentReplay = true;
+      } else if (error) {
+        return handleError(error, "YUD request creation");
+      } else {
+        requestRecord = created as Record<string, unknown>;
       }
 
-      if (error) return handleError(error, "YUD request creation");
-      return successResponse({ request: data, idempotent_replay: false }, 201);
+      let matching: unknown = null;
+      const requestId = typeof requestRecord?.id === "string" ? requestRecord.id : null;
+      const requestStatus = typeof requestRecord?.status === "string" ? requestRecord.status : null;
+      const matchable = ["draft", "discovery", "matching", "negotiating", "proposed"];
+
+      if (requestId && requestStatus && matchable.includes(requestStatus)) {
+        const { data: matchData, error: matchError } = await adminDb.rpc("yud_match_request", {
+          p_request_id: requestId,
+          p_limit: 10,
+        });
+
+        if (matchError) {
+          console.error("YUD auto-match deferred", matchError.code, matchError.message);
+          matching = { deferred: true };
+        } else {
+          matching = matchData;
+        }
+      }
+
+      return successResponse(
+        {
+          request: requestRecord,
+          matching,
+          idempotent_replay: idempotentReplay,
+        },
+        idempotentReplay ? 200 : 201,
+      );
+    }
+
+    if (body.action === "match_request") {
+      const { data: ownedRequest, error: ownedRequestError } = await userDb
+        .from("agent_service_requests")
+        .select("id")
+        .eq("id", body.request_id)
+        .eq("client_id", user.id)
+        .single();
+
+      if (ownedRequestError || !ownedRequest) {
+        return errorResponse("FORBIDDEN", "Only the request owner may trigger matching", 403);
+      }
+
+      const { data, error } = await adminDb.rpc("yud_match_request", {
+        p_request_id: body.request_id,
+        p_limit: body.limit,
+      });
+
+      if (error) return handleError(error, "YUD request matching");
+      return successResponse({ matching: data });
+    }
+
+    if (body.action === "list_matches") {
+      const { data: pro, error: proError } = await userDb
+        .from("professional_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (proError || !pro) {
+        return errorResponse("FORBIDDEN", "Professional profile required", 403);
+      }
+
+      const { data, error } = await userDb
+        .from("agent_request_candidates")
+        .select(`
+          id,
+          request_id,
+          rank,
+          match_score,
+          status,
+          match_reasons,
+          created_at,
+          request:agent_service_requests!inner(
+            id,
+            category_id,
+            description,
+            city,
+            state,
+            urgency,
+            desired_start,
+            desired_end,
+            budget_min_cents,
+            budget_max_cents,
+            status
+          )
+        `)
+        .eq("professional_id", user.id)
+        .in("status", ["pending", "notified", "viewed"])
+        .order("created_at", { ascending: false })
+        .limit(body.limit);
+
+      if (error) return handleError(error, "YUD professional match listing");
+
+      const candidateIds = (data ?? [])
+        .filter((candidate) => ["pending", "notified"].includes(candidate.status))
+        .map((candidate) => candidate.id);
+
+      if (candidateIds.length > 0) {
+        await adminDb
+          .from("agent_request_candidates")
+          .update({
+            status: "viewed",
+            viewed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .in("id", candidateIds)
+          .eq("professional_id", user.id);
+      }
+
+      return successResponse({ matches: data ?? [] });
+    }
+
+    if (body.action === "decline_match") {
+      const { data: candidate, error: candidateError } = await userDb
+        .from("agent_request_candidates")
+        .select("id, professional_id, status")
+        .eq("id", body.candidate_id)
+        .eq("professional_id", user.id)
+        .single();
+
+      if (candidateError || !candidate) {
+        return errorResponse("NOT_FOUND", "Match not found", 404);
+      }
+
+      if (["responded", "expired", "declined"].includes(candidate.status)) {
+        return successResponse({ candidate, idempotent_replay: true });
+      }
+
+      const now = new Date().toISOString();
+      const { data, error } = await adminDb
+        .from("agent_request_candidates")
+        .update({ status: "declined", responded_at: now, updated_at: now })
+        .eq("id", body.candidate_id)
+        .eq("professional_id", user.id)
+        .select("*")
+        .single();
+
+      if (error) return handleError(error, "YUD match decline");
+      return successResponse({ candidate: data, idempotent_replay: false });
     }
 
     if (body.action === "submit_quote") {
@@ -263,6 +432,20 @@ Deno.serve(async (req) => {
         }
       }
 
+      const { data: candidate, error: candidateError } = await userDb
+        .from("agent_request_candidates")
+        .select("id, status")
+        .eq("request_id", body.request_id)
+        .eq("professional_id", user.id)
+        .single();
+
+      if (candidateError || !candidate || ["declined", "expired"].includes(candidate.status)) {
+        return errorResponse("FORBIDDEN", "Professional is not an active candidate for this request", 403);
+      }
+
+      let quoteRecord: Record<string, unknown> | null = null;
+      let idempotentReplay = false;
+
       const { data, error } = await userDb
         .from("agent_service_quotes")
         .insert({
@@ -290,11 +473,31 @@ Deno.serve(async (req) => {
           .single();
 
         if (existingError) return handleError(existingError, "YUD quote idempotency lookup");
-        return successResponse({ quote: existing, idempotent_replay: true });
+        quoteRecord = existing as Record<string, unknown>;
+        idempotentReplay = true;
+      } else if (error) {
+        return handleError(error, "YUD quote submission");
+      } else {
+        quoteRecord = data as Record<string, unknown>;
       }
 
-      if (error) return handleError(error, "YUD quote submission");
-      return successResponse({ quote: data, idempotent_replay: false }, 201);
+      const now = new Date().toISOString();
+      await adminDb
+        .from("agent_request_candidates")
+        .update({ status: "responded", responded_at: now, updated_at: now })
+        .eq("id", candidate.id)
+        .eq("professional_id", user.id);
+
+      await adminDb
+        .from("agent_service_requests")
+        .update({ status: "proposed", updated_at: now })
+        .eq("id", body.request_id)
+        .in("status", ["discovery", "matching", "negotiating"]);
+
+      return successResponse(
+        { quote: quoteRecord, idempotent_replay: idempotentReplay },
+        idempotentReplay ? 200 : 201,
+      );
     }
 
     if (body.action === "get_request") {
@@ -331,10 +534,6 @@ Deno.serve(async (req) => {
     if (ownedRequestError || !ownedRequest) {
       return errorResponse("FORBIDDEN", "Only the request owner may accept a quote", 403);
     }
-
-    const adminDb = createClient(url, serviceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
 
     const { data, error } = await adminDb.rpc("yud_accept_quote", {
       p_request_id: body.request_id,
