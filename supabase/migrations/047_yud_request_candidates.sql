@@ -46,16 +46,10 @@ CREATE POLICY "candidate professional reads own"
   ON public.agent_request_candidates FOR SELECT
   USING (professional_id = auth.uid());
 
--- Matching writes are intentionally server-mediated. Professionals may update
--- only their own response state, and only to states they control.
+-- Matching and response-state writes remain server-mediated. Direct UPDATE
+-- from authenticated professionals is deliberately not granted because RLS
+-- cannot safely restrict arbitrary column changes by itself.
 DROP POLICY IF EXISTS "candidate professional updates own response" ON public.agent_request_candidates;
-CREATE POLICY "candidate professional updates own response"
-  ON public.agent_request_candidates FOR UPDATE
-  USING (professional_id = auth.uid())
-  WITH CHECK (
-    professional_id = auth.uid()
-    AND status IN ('viewed', 'responded', 'declined')
-  );
 
 -- Professionals can read a service request only after the matching layer has
 -- explicitly selected them as a candidate.
