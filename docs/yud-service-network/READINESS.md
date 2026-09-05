@@ -23,10 +23,12 @@ The goal of this branch is to turn the legacy app-centric marketplace into an ag
 - server-only request matching with explicit candidate access;
 - atomic quote acceptance in Postgres;
 - service-capability backfill from legacy professional profiles;
+- regional service price-reference layer with city/state/national fallback;
+- RLS hardening so canonical request/quote/channel state mutations remain server-mediated;
 - channel-neutral inbound event ledger and outbound queue;
 - secure WhatsApp Cloud API inbound webhook adapter with signature verification;
 - governed WhatsApp text outbox sender with explicit worker authentication;
-- first-party authenticated Service Network API;
+- first-party authenticated Service Network API, including regional price lookup;
 - schema-level unit tests;
 - pull-request CI for lint, tests and build.
 
@@ -36,16 +38,23 @@ Read-only inspection of the connected Supabase project confirmed that the legacy
 
 This is compatibility evidence only. No Service Network DDL has been applied to the live database.
 
+## CI evidence
+
+GitHub Actions has successfully completed the Node 20 validation pipeline on the branch after the Service Network core changes: dependency install, lint, unit tests and production build all passed. Database/Edge Function staging evidence is still required separately.
+
 ## Must pass before staging certification
 
-- apply migrations `044`–`047` against a disposable/staging Supabase database;
+- apply migrations `044`–`049` against a disposable/staging Supabase database;
 - run RLS abuse tests for client, professional and unrelated authenticated users;
 - verify professionals cannot quote requests unless persisted as candidates;
+- verify clients cannot directly mutate canonical request state and professionals cannot directly mutate canonical quote state;
+- verify channel bindings cannot be forged by an authenticated browser session;
 - run concurrent quote-acceptance test to prove only one transaction can win;
+- validate city/state/national regional price-reference fallback and empty-reference behavior;
 - regenerate Supabase TypeScript database types after migrations;
 - run `npm run lint`, `npm test` and `npm run build` in CI;
 - deploy `yud-agent-network` to staging;
-- exercise create → auto-match → list professional match → quote → accept end to end;
+- exercise create → auto-match → list professional match → price reference → quote → accept end to end;
 - verify audit evidence and idempotent replay.
 
 ## Must pass before WhatsApp pilot
@@ -95,6 +104,7 @@ natural-language need
 → structured ServiceRequest
 → deterministic discovery/matching
 → persisted professional candidate
+→ regional price guidance when available
 → professional receives demand
 → professional returns quote/availability
 → bounded acceptance
