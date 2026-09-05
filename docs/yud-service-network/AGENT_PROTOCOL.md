@@ -14,9 +14,7 @@ Authentication today: authenticated YUD human session (Supabase JWT). External B
 
 ### `discover`
 
-Deterministic discovery over existing YUD supply/matching infrastructure.
-
-Input concept:
+Stateless deterministic preview over existing YUD supply/matching infrastructure.
 
 ```json
 {
@@ -29,11 +27,11 @@ Input concept:
 }
 ```
 
-Output: ranked professional candidates. Hard filtering and scoring should remain deterministic where practical.
+This is useful for preview/search. It does not by itself grant a professional access to a customer request.
 
 ### `create_request`
 
-Creates the canonical machine-readable demand record.
+Creates the canonical machine-readable demand record and immediately attempts server-side matching.
 
 ```json
 {
@@ -54,13 +52,55 @@ Creates the canonical machine-readable demand record.
 
 The natural-language message is not the transaction state. It must be converted into this structured contract.
 
+Matching persists explicit `agent_request_candidates`. If automatic matching is temporarily unavailable, request creation remains durable and matching can be retried explicitly.
+
+### `match_request`
+
+Customer-owned retry/refresh of deterministic matching.
+
+```json
+{
+  "action": "match_request",
+  "request_id": "uuid",
+  "limit": 10
+}
+```
+
+The Edge Function verifies human ownership, then invokes the server-only `yud_match_request` RPC. Only persisted candidates gain professional read/quote access to the request.
+
+### `list_matches`
+
+Professional-only demand inbox.
+
+```json
+{
+  "action": "list_matches",
+  "limit": 20
+}
+```
+
+Returns only requests for which the authenticated professional has a persisted candidate row. Pending/notified matches are marked viewed by the server; professionals do not receive direct arbitrary UPDATE permission on candidate records.
+
+### `decline_match`
+
+Professional-only controlled decline.
+
+```json
+{
+  "action": "decline_match",
+  "candidate_id": "uuid"
+}
+```
+
+The Edge Function verifies ownership and performs the status mutation server-side.
+
 ### `get_request`
 
-Reads an owned request and visible quotes.
+Reads a request and visible quotes. RLS permits the customer owner and explicitly matched professionals, with quote visibility restricted to transaction parties.
 
 ### `submit_quote`
 
-Professional-only first-party operation.
+Professional-only first-party operation. A professional must be an active persisted candidate for the request.
 
 ```json
 {
@@ -74,9 +114,23 @@ Professional-only first-party operation.
 }
 ```
 
+Submitting a quote marks the matching candidate responded and advances a still-matchable request toward `proposed`.
+
 ### `accept_quote`
 
 Consequential operation. Requires an authenticated human owner today. Acceptance is executed atomically in Postgres through `yud_accept_quote`, which creates the canonical transaction, closes competing quotes, advances request state and writes audit evidence in one database transaction.
+
+## Matching security invariant
+
+The YUD core distinguishes:
+
+```text
+DISCOVERY RESULT
+      ≠
+AUTHORIZED PROFESSIONAL CANDIDATE
+```
+
+A professional cannot create a quote merely because a request UUID exists. The server must persist that professional as an `agent_request_candidates` row first. This prevents the request/quote layer from degenerating into an implicitly public marketplace.
 
 ## Channel contract
 
@@ -100,7 +154,7 @@ The first adapter is WhatsApp Cloud API (`yud-whatsapp-webhook`). It validates M
 
 Voice/audio is initially stored as a media reference. Transcription belongs in the processing/orchestration layer, not the webhook.
 
-Outbound responses use `yud_channel_outbox`; the provider sender is a separate adapter so that business logic does not depend on WhatsApp.
+Outbound responses use `yud_channel_outbox`. `yud-whatsapp-outbox` is the first governed provider sender and supports queued text delivery. Provider-specific sending remains outside service-domain logic.
 
 ## BYOA target
 
