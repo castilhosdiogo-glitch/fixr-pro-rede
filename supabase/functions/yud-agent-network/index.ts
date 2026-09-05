@@ -86,6 +86,17 @@ function bearerToken(req: Request): string | null {
   return match?.[1] ?? null;
 }
 
+function normalizeZodFieldErrors(
+  fieldErrors: Record<string, string[] | undefined>,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(fieldErrors).map(([field, errors]) => [
+      field,
+      errors?.[0] ?? "Invalid value",
+    ]),
+  );
+}
+
 function validateRanges(body: z.infer<typeof BodySchema>): string | null {
   if (body.action === "create_request") {
     if (
@@ -128,7 +139,9 @@ Deno.serve(async (req) => {
     const raw = await req.json().catch(() => null);
     const parsed = BodySchema.safeParse(raw);
     if (!parsed.success) {
-      return validationErrorResponse(parsed.error.flatten().fieldErrors);
+      return validationErrorResponse(
+        normalizeZodFieldErrors(parsed.error.flatten().fieldErrors),
+      );
     }
 
     const body = parsed.data;
