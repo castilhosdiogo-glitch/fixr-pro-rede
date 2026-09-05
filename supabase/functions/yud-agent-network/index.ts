@@ -318,112 +318,42 @@ Deno.serve(async (req) => {
       return successResponse({ request: requestData, quotes: quotes ?? [] });
     }
 
-    // accept_quote is consequential and therefore server-mediated after
-    // explicit human authentication and ownership checks.
+    // accept_quote is consequential. Keep the human session as the authority,
+    // but perform state transition, quote closure, transaction creation and
+    // audit evidence atomically inside Postgres.
+    const { data: ownedRequest, error: ownedRequestError } = await userDb
+      .from("agent_service_requests")
+      .select("id")
+      .eq("id", body.request_id)
+      .eq("client_id", user.id)
+      .single();
+
+    if (ownedRequestError || !ownedRequest) {
+      return errorResponse("FORBIDDEN", "Only the request owner may accept a quote", 403);
+    }
+
     const adminDb = createClient(url, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const { data: requestData, error: requestError } = await adminDb
-      .from("agent_service_requests")
-      .select("id, client_id, status")
-      .eq("id", body.request_id)
-      .single();
-
-    if (requestError || !requestData || requestData.client_id !== user.id) {
-      return errorResponse("FORBIDDEN", "Only the request owner may accept a quote", 403);
-    }
-
-    const { data: quote, error: quoteError } = await adminDb
-      .from("agent_service_quotes")
-      .select("*")
-      .eq("id", body.quote_id)
-      .eq("request_id", body.request_id)
-      .single();
-
-    if (quoteError || !quote) return errorResponse("NOT_FOUND", "Quote not found", 404);
-    if (!["submitted", "countered", "accepted"].includes(quote.status)) {
-      return errorResponse("CONFLICT", "Quote cannot be accepted in its current state", 409);
-    }
-    if (quote.valid_until && Date.parse(quote.valid_until) < Date.now()) {
-      return errorResponse("CONFLICT", "Quote has expired", 409);
-    }
-
-    const { data: existingTransaction } = await adminDb
-      .from("agent_service_transactions")
-      .select("*")
-      .eq("request_id", body.request_id)
-      .maybeSingle();
-
-    if (existingTransaction) {
-      return successResponse({
-        transaction: existingTransaction,
-        idempotent_replay: true,
-      });
-    }
-
-    const { data: transaction, error: transactionError } = await adminDb
-      .from("agent_service_transactions")
-      .insert({
-        request_id: body.request_id,
-        accepted_quote_id: quote.id,
-        client_id: user.id,
-        professional_id: quote.professional_id,
-        agreed_amount_cents: quote.amount_cents,
-        currency: quote.currency,
-        scheduled_start: quote.proposed_start,
-        scheduled_end: quote.proposed_end,
-        status: quote.proposed_start ? "scheduled" : "accepted",
-        metadata: { acceptance_idempotency_key: body.idempotency_key },
-      })
-      .select("*")
-      .single();
-
-    if (transactionError) return handleError(transactionError, "YUD transaction acceptance");
-
-    await adminDb
-      .from("agent_service_quotes")
-      .update({ status: "rejected", updated_at: new Date().toISOString() })
-      .eq("request_id", body.request_id)
-      .neq("id", body.quote_id)
-      .in("status", ["submitted", "countered"]);
-
-    await adminDb
-      .from("agent_service_quotes")
-      .update({ status: "accepted", updated_at: new Date().toISOString() })
-      .eq("id", body.quote_id);
-
-    await adminDb
-      .from("agent_service_requests")
-      .update({
-        status: quote.proposed_start ? "scheduled" : "accepted",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", body.request_id);
-
-    await adminDb.from("agent_action_audit").insert({
-      actor_user_id: user.id,
-      action: "accept_quote",
-      resource_type: "agent_service_request",
-      resource_id: body.request_id,
-      input_hash: null,
-      decision: {
-        quote_id: body.quote_id,
-        transaction_id: transaction.id,
-        amount_cents: quote.amount_cents,
-      },
-      authorization_context: {
-        authenticated_human: true,
-        request_owner: true,
-        idempotency_key: body.idempotency_key,
-      },
-      success: true,
+    const { data, error } = await adminDb.rpc("yud_accept_quote", {
+      p_request_id: body.request_id,
+      p_quote_id: body.quote_id,
+      p_actor_user_id: user.id,
+      p_idempotency_key: body.idempotency_key,
     });
 
-    return successResponse({
-      transaction,
-      idempotent_replay: false,
-    }, 201);
+    if (error) return handleError(error, "YUD atomic quote acceptance");
+
+    const result = data as {
+      transaction?: unknown;
+      idempotent_replay?: boolean;
+    } | null;
+
+    return successResponse(
+      result ?? { transaction: null, idempotent_replay: false },
+      result?.idempotent_replay ? 200 : 201,
+    );
   } catch (err) {
     return handleError(err, "YUD Agent Network");
   }
