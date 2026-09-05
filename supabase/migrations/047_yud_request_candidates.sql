@@ -36,7 +36,8 @@ CREATE POLICY "candidate client reads"
     EXISTS (
       SELECT 1
       FROM public.agent_service_requests r
-      WHERE r.id = request_id AND r.client_id = auth.uid()
+      WHERE r.id = agent_request_candidates.request_id
+        AND r.client_id = auth.uid()
     )
   );
 
@@ -65,7 +66,8 @@ CREATE POLICY "matched professional reads request"
     EXISTS (
       SELECT 1
       FROM public.agent_request_candidates c
-      WHERE c.request_id = id AND c.professional_id = auth.uid()
+      WHERE c.request_id = agent_service_requests.id
+        AND c.professional_id = auth.uid()
     )
   );
 
@@ -79,7 +81,7 @@ CREATE POLICY "professional creates quotes"
     AND EXISTS (
       SELECT 1
       FROM public.agent_request_candidates c
-      WHERE c.request_id = request_id
+      WHERE c.request_id = agent_service_quotes.request_id
         AND c.professional_id = auth.uid()
         AND c.status NOT IN ('declined', 'expired')
     )
